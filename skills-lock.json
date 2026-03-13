@@ -1,0 +1,25 @@
+{
+  "version": 1,
+  "skills": {
+    "axios": {
+      "source": "slanycukr/riot-api-project",
+      "sourceType": "github",
+      "computedHash": "fd2d6fd0a684c74e2fb21c91f456804b08a8216d2277e944a7ae0da5c11b8392"
+    },
+    "laravel-specialist": {
+      "source": "jeffallan/claude-skills",
+      "sourceType": "github",
+      "computedHash": "3fb2841e7b0e05d64484970fdbb03063327d904c270b2e46b9217b18863132ca"
+    },
+    "react-expert": {
+      "source": "jeffallan/claude-skills",
+      "sourceType": "github",
+      "computedHash": "455a19a29228e1a098cb4735c6f35e881fa7d69fa20822b5d8a588c0182f6361"
+    },
+    "shadcn-ui": {
+      "source": "bobmatnyc/claude-mpm-skills",
+      "sourceType": "github",
+      "computedHash": "84e0a2707a4cc03661cf5eaf0b793daa0692d2eb5a6159de0a824bf6b2ad801c"
+    }
+  }
+}

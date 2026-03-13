@@ -1,0 +1,146 @@
+<?php
+
+use App\Http\Controllers\ContactController;
+use App\Http\Controllers\AuthController;
+use App\Http\Controllers\PermissionController;
+use App\Http\Controllers\RoleController;
+use App\Http\Controllers\UserController;
+use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\TagController;
+use App\Http\Controllers\PostController;
+use App\Http\Controllers\ProductController;
+use App\Http\Controllers\ProductCategoryController;
+use App\Http\Controllers\ProductTagController;
+use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ActivityLogController;
+use App\Http\Controllers\AutopostController;
+use App\Http\Controllers\SystemSettingsController;
+use App\Http\Controllers\ImageSettingsController;
+use App\Http\Controllers\Api\Admin\ChatbotController;
+use App\Http\Controllers\Api\Admin\KnowledgeController;
+use App\Http\Resources\UserResource;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
+
+Route::post('/login', [AuthController::class, 'login']);
+
+Route::get('/public/articles', [PostController::class, 'publicIndex']);
+Route::get('/public/articles/{slug}', [PostController::class, 'publicShow']);
+Route::get('/public/categories', [CategoryController::class, 'publicIndex']);
+Route::get('/public/tags', [TagController::class, 'publicIndex']);
+Route::get('/public/products', [ProductController::class, 'publicIndex']);
+Route::get('/public/products/{slug}', [ProductController::class, 'publicShow']);
+Route::get('/public/product-categories', [ProductCategoryController::class, 'publicIndex']);
+Route::get('/public/product-tags', [ProductTagController::class, 'publicIndex']);
+Route::get('/public/business-info', [SystemSettingsController::class, 'publicInfo']);
+Route::post('/public/contact', [ContactController::class, 'store']);
+
+// Public Widget API
+Route::match(['get', 'options'], '/v1/widget/{token}/config', [\App\Http\Controllers\Api\Public\PublicChatbotController::class, 'config'])->middleware('widget');
+Route::match(['get', 'options'], '/v1/widget/{token}/history', [\App\Http\Controllers\Api\Public\PublicChatbotController::class, 'history'])->middleware('widget');
+Route::match(['post', 'options'], '/v1/widget/{token}/chat', [\App\Http\Controllers\Api\Public\PublicChatbotController::class, 'chat'])->middleware('widget');
+
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/dashboard', [AuthController::class, 'dashboard']);
+    Route::get('/user', function (Request $request) {
+        return new UserResource($request->user()->load(['roles.permissions', 'media']));
+    });
+
+    Route::put('/profile', [ProfileController::class, 'update']);
+    Route::post('/profile/avatar', [ProfileController::class, 'uploadAvatar']);
+    Route::get('/activity-logs', [ActivityLogController::class, 'index']);
+
+    Route::apiResource('users', UserController::class)->middleware('permission:users.view');
+    Route::post('/users/{user}/avatar', [UserController::class, 'uploadAvatar']);
+    Route::post('/users/bulk-delete', [UserController::class, 'bulkDelete'])->middleware('permission:delete users');
+    Route::apiResource('roles', RoleController::class)->middleware('permission:roles.view');
+    Route::post('/roles/bulk-delete', [RoleController::class, 'bulkDelete'])->middleware('permission:delete roles');
+    Route::apiResource('permissions', PermissionController::class)->middleware('permission:permissions.view');
+
+    Route::get('/categories', [CategoryController::class, 'index'])->middleware('permission:view blog');
+    Route::get('/categories/{category}', [CategoryController::class, 'show'])->middleware('permission:view blog');
+    Route::post('/categories', [CategoryController::class, 'store'])->middleware('permission:manage categories');
+    Route::put('/categories/{category}', [CategoryController::class, 'update'])->middleware('permission:manage categories');
+    Route::delete('/categories/{category}', [CategoryController::class, 'destroy'])->middleware('permission:manage categories');
+    Route::post('/categories/bulk-delete', [CategoryController::class, 'bulkDelete'])->middleware('permission:manage categories');
+
+    Route::get('/tags', [TagController::class, 'index'])->middleware('permission:view blog');
+    Route::get('/tags/{tag}', [TagController::class, 'show'])->middleware('permission:view blog');
+    Route::post('/tags', [TagController::class, 'store'])->middleware('permission:manage tags');
+    Route::put('/tags/{tag}', [TagController::class, 'update'])->middleware('permission:manage tags');
+    Route::delete('/tags/{tag}', [TagController::class, 'destroy'])->middleware('permission:manage tags');
+    Route::post('/tags/bulk-delete', [TagController::class, 'bulkDelete'])->middleware('permission:manage tags');
+
+    Route::get('/articles', [PostController::class, 'index'])->middleware('permission:view blog');
+    Route::get('/articles/{post}', [PostController::class, 'show'])->middleware('permission:view blog');
+    Route::post('/articles', [PostController::class, 'store'])->middleware('permission:manage articles');
+    Route::put('/articles/{post}', [PostController::class, 'update'])->middleware('permission:manage articles');
+    Route::patch('/articles/{post}', [PostController::class, 'quickUpdate'])->middleware('permission:manage articles');
+    Route::delete('/articles/{post}', [PostController::class, 'destroy'])->middleware('permission:manage articles');
+    Route::post('/articles/bulk-delete', [PostController::class, 'bulkDelete'])->middleware('permission:delete articles');
+    Route::delete('/articles/{post}/gallery/{media}', [PostController::class, 'deleteGalleryImage'])->middleware('permission:manage articles');
+
+    Route::get('/products', [ProductController::class, 'index'])->middleware('permission:view products');
+    Route::get('/products/{product}', [ProductController::class, 'show'])->middleware('permission:view products');
+    Route::post('/products', [ProductController::class, 'store'])->middleware('permission:manage products');
+    Route::put('/products/{product}', [ProductController::class, 'update'])->middleware('permission:manage products');
+    Route::patch('/products/{product}/quick-update', [ProductController::class, 'quickUpdate'])->middleware('permission:manage products');
+    Route::post('/products/{product}/regenerate-qr', [ProductController::class, 'regenerateQr'])->middleware('permission:manage products');
+    Route::patch('/products/{product}/qr-url', [ProductController::class, 'updateQrUrl'])->middleware('permission:manage products');
+    Route::delete('/products/{product}', [ProductController::class, 'destroy'])->middleware('permission:manage products');
+    Route::delete('/products/{product}/gallery/{media}', [ProductController::class, 'deleteGalleryImage'])->middleware('permission:manage products');
+    Route::post('/products/bulk-delete', [ProductController::class, 'bulkDelete'])->middleware('permission:delete products');
+
+    Route::get('/product-categories', [ProductCategoryController::class, 'index'])->middleware('permission:view product categories');
+    Route::get('/product-categories/{product_category}', [ProductCategoryController::class, 'show'])->middleware('permission:view product categories');
+    Route::post('/product-categories', [ProductCategoryController::class, 'store'])->middleware('permission:manage product categories');
+    Route::put('/product-categories/{product_category}', [ProductCategoryController::class, 'update'])->middleware('permission:manage product categories');
+    Route::delete('/product-categories/{product_category}', [ProductCategoryController::class, 'destroy'])->middleware('permission:manage product categories');
+
+    Route::get('/product-tags', [ProductTagController::class, 'index'])->middleware('permission:view product tags');
+    Route::get('/product-tags/{product_tag}', [ProductTagController::class, 'show'])->middleware('permission:view product tags');
+    Route::post('/product-tags', [ProductTagController::class, 'store'])->middleware('permission:manage product tags');
+    Route::put('/product-tags/{product_tag}', [ProductTagController::class, 'update'])->middleware('permission:manage product tags');
+    Route::delete('/product-tags/{product_tag}', [ProductTagController::class, 'destroy'])->middleware('permission:manage product tags');
+
+    Route::get('/autopost/settings', [AutopostController::class, 'getSettings']);
+    Route::put('/autopost/settings', [AutopostController::class, 'updateSettings']);
+    Route::post('/autopost/generate', [AutopostController::class, 'generate']);
+    Route::post('/autopost/store', [AutopostController::class, 'store']);
+
+    Route::get('/system-settings', [SystemSettingsController::class, 'index']);
+    Route::get('/system-settings/{key}', [SystemSettingsController::class, 'show']);
+    Route::put('/system-settings/{key}', [SystemSettingsController::class, 'update']);
+
+    Route::get('/image-settings', [ImageSettingsController::class, 'index']);
+    Route::get('/image-settings/{section}', [ImageSettingsController::class, 'show']);
+    Route::post('/image-settings', [ImageSettingsController::class, 'store']);
+    Route::put('/image-settings/{imageSetting}', [ImageSettingsController::class, 'update']);
+    Route::delete('/image-settings/{imageSetting}', [ImageSettingsController::class, 'destroy']);
+
+    // Customers
+    Route::post('admin/customers/bulk-delete', [\App\Http\Controllers\Api\Admin\CustomerController::class, 'bulkDelete'])->middleware('permission:manage customers');
+    Route::apiResource('admin/customers', \App\Http\Controllers\Api\Admin\CustomerController::class)->middleware('permission:manage customers');
+
+    Route::apiResource('admin/chatbots', ChatbotController::class)->middleware('permission:manage chatbots');
+    Route::post('admin/chatbots/bulk-delete', [ChatbotController::class, 'bulkDelete'])->middleware('permission:manage chatbots');
+    Route::post('admin/chatbots/{chatbot}/test', [ChatbotController::class, 'test'])->middleware('permission:manage chatbots');
+    
+    // Chatbot Notes
+    Route::apiResource('admin/chatbot-notes', \App\Http\Controllers\Api\Admin\ChatbotNoteController::class)->middleware('permission:manage chatbots');
+
+    // Chatbot Knowledge (RAG)
+    Route::get('admin/chatbots/{chatbot}/knowledge', [KnowledgeController::class, 'index'])->middleware('permission:manage chatbots');
+    Route::post('admin/chatbots/{chatbot}/knowledge', [KnowledgeController::class, 'store'])->middleware('permission:manage chatbots');
+    Route::delete('admin/chatbots/{chatbot}/knowledge/{knowledge}', [KnowledgeController::class, 'destroy'])->middleware('permission:manage chatbots');
+
+    // Chatbot Interactions
+    Route::get('admin/chatbots/{chatbot}/interactions', [\App\Http\Controllers\Api\Admin\ChatInteractionController::class, 'index'])->middleware('permission:manage chatbots');
+    Route::get('admin/chatbot-sessions/{session}', [\App\Http\Controllers\Api\Admin\ChatInteractionController::class, 'show'])->middleware('permission:manage chatbots');
+    Route::delete('admin/chatbot-sessions/{session}', [\App\Http\Controllers\Api\Admin\ChatInteractionController::class, 'destroy'])->middleware('permission:manage chatbots');
+
+    // Contact Messages
+    Route::apiResource('contact-messages', ContactController::class)->middleware('permission:view blog');
+    Route::post('contact-messages/bulk-delete', [ContactController::class, 'bulkDelete'])->middleware('permission:view blog');
+    Route::patch('contact-messages/{contact_message}/mark-read', [ContactController::class, 'markAsRead'])->middleware('permission:view blog');
+});

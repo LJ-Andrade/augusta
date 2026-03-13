@@ -1,0 +1,12 @@
+{
+    "Welcome": "Bienvenido",
+    "Login": "Iniciar sesión",
+    "Register": "Registrarse",
+    "Logout": "Cerrar sesión",
+    "Email": "Correo electrónico",
+    "Password": "Contraseña",
+    "Confirm Password": "Confirmar contraseña",
+    "Name": "Nombre",
+    "Profile": "Perfil",
+    "Settings": "Ajustes"
+}
