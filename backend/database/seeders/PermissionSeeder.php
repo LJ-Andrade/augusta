@@ -37,7 +37,6 @@ class PermissionSeeder extends Seeder
             'manage product categories',
             'view product tags',
             'manage product tags',
-            'manage chatbots',
             'manage customers',
             'view activity logs',
         ];

@@ -6,8 +6,6 @@ use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Gate;
 use App\Models\Permission;
 use App\Models\User;
-use App\Services\LLM\LLMProviderInterface;
-use App\Services\LLM\GroqService;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -16,7 +14,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        $this->app->bind(LLMProviderInterface::class, GroqService::class);
+        //
     }
 
     /**

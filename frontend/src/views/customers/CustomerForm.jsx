@@ -134,9 +134,9 @@ export default function CustomerForm() {
 					<h1 className="text-3xl font-bold tracking-tight">
 						{isEdit ? t('customers.edit') : t('customers.create')}
 					</h1>
-					<p className="text-muted-foreground">
-						{isEdit ? 'Modifica la información del cliente.' : 'Configura un nuevo cliente para el sistema de chatbots.'}
-					</p>
+				<p className="text-muted-foreground">
+					{isEdit ? 'Modifica la información del cliente.' : 'Configura un nuevo cliente en el sistema.'}
+				</p>
 				</div>
 			</div>
 

@@ -190,7 +190,6 @@ export default function CustomersList() {
                 <TableHead>{t('customers.name')}</TableHead>
                 <TableHead>{t('customers.email')}</TableHead>
                 <TableHead>{t('customers.official_domain')}</TableHead>
-                <TableHead className="text-center w-[80px]">Bots</TableHead>
                 <TableHead>{t('customers.is_active')}</TableHead>
                 <TableHead className="text-right w-[150px]">{t('common.actions')}</TableHead>
               </TableRow>
@@ -198,12 +197,12 @@ export default function CustomersList() {
             <TableBody className={loading ? "opacity-50 pointer-events-none" : ""}>
               {loading && customers.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={8} className="text-center">Cargando...</TableCell>
+                  <TableCell colSpan={7} className="text-center">Cargando...</TableCell>
                 </TableRow>
               )}
               {!loading && customers.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
+                  <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
                     No se encontraron clientes.
                   </TableCell>
                 </TableRow>
@@ -248,11 +247,6 @@ export default function CustomersList() {
                     ) : (
                       <span className="text-xs text-muted-foreground italic">No configurado</span>
                     )}
-                  </TableCell>
-                  <TableCell className="text-center">
-                    <Badge variant="outline">
-                      {customer.chatbots_count || 0}
-                    </Badge>
                   </TableCell>
                   <TableCell>
                     {customer.is_active ? (

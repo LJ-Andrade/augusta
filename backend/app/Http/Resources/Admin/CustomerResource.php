@@ -22,7 +22,6 @@ class CustomerResource extends JsonResource
             'official_domain' => $this->official_domain,
             'is_active' => $this->is_active,
             'logo_url' => $this->getFirstMediaUrl('logo'),
-            'chatbots_count' => $this->whenCounted('chatbots'),
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];

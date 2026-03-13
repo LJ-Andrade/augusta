@@ -17,7 +17,6 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
         $middleware->alias([
             'permission' => \App\Http\Middleware\CheckPermission::class,
-            'widget' => \App\Http\Middleware\CheckWidgetDomain::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

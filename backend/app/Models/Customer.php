@@ -23,11 +23,6 @@ class Customer extends Model implements HasMedia
         'is_active' => 'boolean',
     ];
 
-    public function chatbots()
-    {
-        return $this->hasMany(Chatbot::class);
-    }
-
     /**
      * Register media collections for the customer (logo).
      */

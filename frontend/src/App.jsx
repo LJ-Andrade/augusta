@@ -32,14 +32,6 @@ import PermissionsList from './views/permissions/PermissionsList';
 import PermissionForm from './views/permissions/PermissionForm';
 import Profile from './views/Profile';
 import ActivityLogsList from './views/activity-logs/ActivityLogsList';
-import ChatbotsList from './views/chatbots/ChatbotsList';
-import ChatbotForm from './views/chatbots/ChatbotForm';
-import ChatbotTest from './views/chatbots/ChatbotTest';
-import ChatbotKnowledge from './views/chatbots/ChatbotKnowledge';
-import ChatbotWiki from './views/chatbots/ChatbotWiki';
-import ChatbotNotes from './views/chatbots/ChatbotNotes';
-import ChatbotInteractions from './views/chatbots/ChatbotInteractions';
-import ChatbotSessionDetail from './views/chatbots/ChatbotSessionDetail';
 import CustomersList from './views/customers/CustomersList';
 import CustomerForm from './views/customers/CustomerForm';
 import ContactMessagesList from './views/contact-messages/ContactMessagesList';
@@ -276,60 +268,6 @@ function App() {
         <Route path="/contact-messages" element={
           <ProtectedRoute permission="view blog">
             <ContactMessagesList />
-          </ProtectedRoute>
-        } />
-
-        <Route path="/chatbots/interactions/:id" element={
-          <ProtectedRoute permission="manage chatbots">
-            <ChatbotInteractions />
-          </ProtectedRoute>
-        } />
-
-        <Route path="/chatbots/sessions/:sessionId" element={
-          <ProtectedRoute permission="manage chatbots">
-            <ChatbotSessionDetail />
-          </ProtectedRoute>
-        } />
-
-        <Route path="/chatbots" element={
-          <ProtectedRoute permission="manage chatbots">
-            <ChatbotsList />
-          </ProtectedRoute>
-        } />
-
-        <Route path="/chatbots/create" element={
-          <ProtectedRoute permission="manage chatbots">
-            <ChatbotForm />
-          </ProtectedRoute>
-        } />
-
-        <Route path="/chatbots/edit/:id" element={
-          <ProtectedRoute permission="manage chatbots">
-            <ChatbotForm />
-          </ProtectedRoute>
-        } />
-
-        <Route path="/chatbots/test/:id" element={
-          <ProtectedRoute permission="manage chatbots">
-            <ChatbotTest />
-          </ProtectedRoute>
-        } />
-
-        <Route path="/chatbots/knowledge/:id" element={
-          <ProtectedRoute permission="manage chatbots">
-            <ChatbotKnowledge />
-          </ProtectedRoute>
-        } />
-
-        <Route path="/chatbots/documentation" element={
-          <ProtectedRoute permission="manage chatbots">
-            <ChatbotWiki />
-          </ProtectedRoute>
-        } />
-
-        <Route path="/chatbots/notes" element={
-          <ProtectedRoute permission="manage chatbots">
-            <ChatbotNotes />
           </ProtectedRoute>
         } />
 

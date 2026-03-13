@@ -17,7 +17,6 @@ import {
 	Folder,
 	Image,
 	Phone,
-	Bot,
 	Building2,
 	MessageSquare,
 } from "lucide-react"
@@ -146,12 +145,6 @@ const items = [
 				icon: Settings,
 			},
 		],
-	},
-	{
-		title: "sidebar.chatbots",
-		url: "/chatbots",
-		icon: Bot,
-		permission: "manage chatbots",
 	},
 	{
 		title: "sidebar.customers",

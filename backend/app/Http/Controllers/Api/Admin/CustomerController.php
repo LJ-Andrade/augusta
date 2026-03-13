@@ -13,7 +13,7 @@ class CustomerController extends Controller
 {
     public function index(Request $request): AnonymousResourceCollection
     {
-        $query = Customer::query()->withCount('chatbots');
+        $query = Customer::query();
 
         if ($request->filled('search')) {
             $search = $request->input('search');
@@ -47,7 +47,7 @@ class CustomerController extends Controller
 
     public function show(Customer $customer): CustomerResource
     {
-        return new CustomerResource($customer->loadCount('chatbots'));
+        return new CustomerResource($customer);
     }
 
     public function update(CustomerRequest $request, Customer $customer): CustomerResource
