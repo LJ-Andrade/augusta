@@ -389,7 +389,7 @@
 		"id": "ID",
 		"name": "Nombre",
 		"name_placeholder": "Ej: Rojo",
-		"hex_color": "Color (Hexadecimal)",
+		"hex_color": "Color",
 		"created_at": "Creado el",
 		"delete_success": "Color eliminado correctamente",
 		"delete_error": "Error al eliminar el color",
