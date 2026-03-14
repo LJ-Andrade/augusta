@@ -380,6 +380,25 @@
 		"update_success": "Tag updated successfully",
 		"create_success": "Tag created successfully"
 	},
+	"colors": {
+		"title": "Colors",
+		"create": "Create Color",
+		"edit": "Edit Color",
+		"editing": "Editing color",
+		"search_placeholder": "Search colors...",
+		"id": "ID",
+		"name": "Name",
+		"name_placeholder": "E.g.: Red",
+		"hex_color": "Color (Hexadecimal)",
+		"created_at": "Created At",
+		"delete_success": "Color deleted successfully",
+		"delete_error": "Error deleting color",
+		"create_success": "Color created successfully",
+		"create_error": "Error creating color",
+		"update_success": "Color updated successfully",
+		"update_error": "Error updating color",
+		"invalid_hex": "Invalid color format (use #RRGGBB)"
+	},
 	"autopost": {
 		"title": "AutoBlog - Article Generator",
 		"description": "Automatically generate articles using AI.",

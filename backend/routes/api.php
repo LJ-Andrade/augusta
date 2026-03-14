@@ -11,6 +11,7 @@ use App\Http\Controllers\PostController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProductCategoryController;
 use App\Http\Controllers\ProductTagController;
+use App\Http\Controllers\ColorController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ActivityLogController;
 use App\Http\Controllers\AutopostController;
@@ -97,6 +98,13 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/product-tags/{product_tag}', [ProductTagController::class, 'update'])->middleware('permission:manage product tags');
     Route::delete('/product-tags/{product_tag}', [ProductTagController::class, 'destroy'])->middleware('permission:manage product tags');
     Route::post('/product-tags/bulk-delete', [ProductTagController::class, 'bulkDelete'])->middleware('permission:manage product tags');
+
+    Route::get('/colors', [ColorController::class, 'index'])->middleware('permission:view colors');
+    Route::get('/colors/{color}', [ColorController::class, 'show'])->middleware('permission:view colors');
+    Route::post('/colors', [ColorController::class, 'store'])->middleware('permission:manage colors');
+    Route::put('/colors/{color}', [ColorController::class, 'update'])->middleware('permission:manage colors');
+    Route::delete('/colors/{color}', [ColorController::class, 'destroy'])->middleware('permission:manage colors');
+    Route::post('/colors/bulk-delete', [ColorController::class, 'bulkDelete'])->middleware('permission:manage colors');
 
     Route::get('/autopost/settings', [AutopostController::class, 'getSettings']);
     Route::put('/autopost/settings', [AutopostController::class, 'updateSettings']);

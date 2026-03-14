@@ -379,6 +379,25 @@
 		"update_success": "Etiqueta actualizada correctamente",
 		"create_success": "Etiqueta creada correctamente"
 	},
+	"colors": {
+		"title": "Colores",
+		"create": "Crear Color",
+		"edit": "Editar Color",
+		"editing": "Editando color",
+		"search_placeholder": "Buscar colores...",
+		"id": "ID",
+		"name": "Nombre",
+		"name_placeholder": "Ej: Rojo",
+		"hex_color": "Color (Hexadecimal)",
+		"created_at": "Creado el",
+		"delete_success": "Color eliminado correctamente",
+		"delete_error": "Error al eliminar el color",
+		"create_success": "Color creado correctamente",
+		"create_error": "Error al crear el color",
+		"update_success": "Color actualizado correctamente",
+		"update_error": "Error al actualizar el color",
+		"invalid_hex": "Formato de color inválido (use #RRGGBB)"
+	},
 	"autopost": {
 		"title": "AutoBlog - Generador de Artículos",
 		"description": "Genera artículos automáticamente usando IA.",

@@ -17,6 +17,8 @@ import ProductCategoriesList from './views/product-categories/CategoriesList';
 import ProductCategoryForm from './views/product-categories/CategoryForm';
 import ProductTagsList from './views/product-tags/TagsList';
 import ProductTagForm from './views/product-tags/TagForm';
+import ColorsList from './views/colors/ColorsList';
+import ColorForm from './views/colors/ColorForm';
 import AutopostGenerator from './views/autopost/AutopostGenerator';
 import AutopostSettings from './views/autopost/AutopostSettings';
 import ProductsShow from './views/products/ProductsShow';
@@ -280,6 +282,24 @@ function App() {
         <Route path="/autopost-settings" element={
           <ProtectedRoute permission="manage articles">
             <AutopostSettings />
+          </ProtectedRoute>
+        } />
+
+        <Route path="/colors" element={
+          <ProtectedRoute permission="view colors">
+            <ColorsList />
+          </ProtectedRoute>
+        } />
+
+        <Route path="/colors/create" element={
+          <ProtectedRoute permission="manage colors">
+            <ColorForm />
+          </ProtectedRoute>
+        } />
+
+        <Route path="/colors/edit/:id" element={
+          <ProtectedRoute permission="manage colors">
+            <ColorForm />
           </ProtectedRoute>
         } />
 
