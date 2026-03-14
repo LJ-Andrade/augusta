@@ -357,7 +357,8 @@
 		"create_button": "Create Category",
 		"update_success": "Category updated successfully",
 		"create_success": "Category created successfully",
-		"no_parent": "No parent"
+		"no_parent": "No parent",
+		"name_placeholder": "Category name..."
 	},
 	"product_tags": {
 		"title": "Product Tags",

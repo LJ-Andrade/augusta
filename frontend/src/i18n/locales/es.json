@@ -356,7 +356,8 @@
 		"create_button": "Crear Categoría",
 		"update_success": "Categoría actualizada correctamente",
 		"create_success": "Categoría creada correctamente",
-		"no_parent": "Sin padre"
+		"no_parent": "Sin padre",
+		"name_placeholder": "Nombre de la categoría..."
 	},
 	"product_tags": {
 		"title": "Etiquetas de Productos",
