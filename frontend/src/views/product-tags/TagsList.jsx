@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
 	Plus,
@@ -41,6 +42,10 @@ import {
 import Can from "@/components/can";
 import { useTranslation } from "react-i18next";
 import { ConfirmationDialog } from "@/components/confirmation-dialog";
+import { PageHeader } from "@/components/page-header";
+import { BulkActionsBar } from "@/components/bulk-actions-bar";
+import { useBulkSelect } from "@/hooks/use-bulk-select";
+import { format } from "date-fns";
 
 export default function TagsList() {
 	const { t } = useTranslation();
@@ -56,6 +61,20 @@ export default function TagsList() {
 	const navigate = useNavigate();
 	const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 	const [tagToDelete, setTagToDelete] = useState(null);
+
+	// Advanced filter states
+	const [filterId, setFilterId] = useState("");
+	const [filterName, setFilterName] = useState("");
+
+	// Bulk selection
+	const {
+		selectedItems,
+		isAllSelected,
+		isIndeterminate,
+		handleSelectItem,
+		handleSelectAll,
+		clearSelection,
+	} = useBulkSelect(tags.map(t => t.id));
 
 	useEffect(() => {
 		const handler = setTimeout(() => {
@@ -73,7 +92,7 @@ export default function TagsList() {
 
 	useEffect(() => {
 		getTags();
-	}, [page, debouncedSearch, sortBy, sortDir]);
+	}, [page, debouncedSearch, sortBy, sortDir, filterId, filterName]);
 
 	const getTags = () => {
 		setLoading(true);
@@ -84,6 +103,8 @@ export default function TagsList() {
 					search: debouncedSearch,
 					sort_by: sortBy,
 					sort_dir: sortDir,
+					filter_id: filterId || undefined,
+					filter_name: filterName || undefined,
 				},
 			})
 			.then(({ data }) => {
@@ -107,7 +128,22 @@ export default function TagsList() {
 
 	const handleClearFilters = () => {
 		setSearch("");
+		setFilterId("");
+		setFilterName("");
 		setPage(1);
+	};
+
+	const handleBulkDelete = async () => {
+		try {
+			await axiosClient.post("/product-tags/bulk-delete", {
+				ids: selectedItems,
+			});
+			toast.success(`${selectedItems.length} etiquetas eliminadas`);
+			clearSelection();
+			getTags();
+		} catch (error) {
+			toast.error("Error al eliminar etiquetas");
+		}
 	};
 
 	const renderSortIcon = (column) => {
@@ -166,8 +202,15 @@ export default function TagsList() {
 
 	return (
 		<div className="space-y-6">
-			<div className="flex justify-between items-center">
-				<h1 className="text-3xl font-bold tracking-tight">{t('product_tags.title')}</h1>
+			<PageHeader
+				title="Etiquetas"
+				breadcrumbs={[
+					{ label: "Productos", href: "/products" },
+					{ label: "Etiquetas" },
+				]}
+			/>
+
+			<div className="flex justify-end items-center">
 				<Can permission="manage product tags">
 					<Button asChild>
 						<Link to="/product-tags/create">
@@ -208,12 +251,20 @@ export default function TagsList() {
 						</div>
 
 						<CollapsibleContent className="space-y-4">
-							<div className="flex justify-end">
-								<Button
-									variant="ghost"
-									size="sm"
-									onClick={handleClearFilters}
-								>
+							<div className="flex gap-2">
+								<Input
+									placeholder="Filtrar por ID..."
+									value={filterId}
+									onChange={(e) => setFilterId(e.target.value)}
+									className="w-32"
+								/>
+								<Input
+									placeholder="Filtrar por nombre..."
+									value={filterName}
+									onChange={(e) => setFilterName(e.target.value)}
+									className="w-48"
+								/>
+								<Button variant="ghost" size="sm" onClick={handleClearFilters}>
 									<X className="mr-2 h-4 w-4" />
 									{t('products.clear_filters')}
 								</Button>
@@ -224,6 +275,15 @@ export default function TagsList() {
 					<Table>
 						<TableHeader>
 							<TableRow>
+								<TableHead className="w-12">
+									<Checkbox
+										checked={isAllSelected}
+										ref={(el) => {
+											if (el) el.indeterminate = isIndeterminate;
+										}}
+										onCheckedChange={handleSelectAll}
+									/>
+								</TableHead>
 								<TableHead
 									className="cursor-pointer select-none w-[60px]"
 									onClick={() => handleSort("id")}
@@ -248,29 +308,37 @@ export default function TagsList() {
 										{t('product_tags.slug')} {renderSortIcon("slug")}
 									</div>
 								</TableHead>
+								<TableHead>Creado</TableHead>
 								<TableHead className="text-right w-[120px]">{t('common.actions')}</TableHead>
 							</TableRow>
 						</TableHeader>
 						<TableBody className={loading ? "opacity-50 pointer-events-none" : ""}>
 							{loading && tags.length === 0 && (
 								<TableRow>
-									<TableCell colSpan={4} className="text-center">
+									<TableCell colSpan={6} className="text-center">
 										{t('common.loading')}
 									</TableCell>
 								</TableRow>
 							)}
 							{!loading && tags.length === 0 && (
 								<TableRow>
-									<TableCell colSpan={4} className="text-center py-8 text-muted-foreground">
+									<TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
 										{t('common.no_data')}
 									</TableCell>
 								</TableRow>
 							)}
 							{tags.map((tag) => (
 								<TableRow key={tag.id}>
+									<TableCell>
+										<Checkbox
+											checked={selectedItems.includes(tag.id)}
+											onCheckedChange={() => handleSelectItem(tag.id)}
+										/>
+									</TableCell>
 									<TableCell className="w-[60px]">{tag.id}</TableCell>
 									<TableCell className="font-medium">{tag.name}</TableCell>
 									<TableCell>{tag.slug}</TableCell>
+									<TableCell>{format(new Date(tag.created_at), "dd/MM/yyyy")}</TableCell>
 									<TableCell className="text-right w-[120px]">
 										<div className="flex items-center justify-end gap-1">
 											<DropdownMenu>
@@ -331,6 +399,14 @@ export default function TagsList() {
 								<ChevronRight className="h-4 w-4 ml-2" />
 							</Button>
 						</div>
+					)}
+
+					{selectedItems.length > 0 && (
+						<BulkActionsBar
+							selectedCount={selectedItems.length}
+							onDelete={handleBulkDelete}
+							onClear={clearSelection}
+						/>
 					)}
 
 					<ConfirmationDialog

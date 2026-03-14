@@ -45,6 +45,7 @@ import { useTranslation } from "react-i18next";
 import { useBulkSelect } from "@/hooks/use-bulk-select";
 import { BulkActionsBar } from "@/components/bulk-actions-bar";
 import { ConfirmationDialog } from "@/components/confirmation-dialog";
+import { PageHeader } from "@/components/page-header";
 
 export default function CategoriesList() {
 	const { t } = useTranslation();
@@ -211,22 +212,25 @@ export default function CategoriesList() {
 
 	return (
 		<div className="space-y-6">
-			<div className="flex justify-between items-center">
-				<h1 className="text-3xl font-bold tracking-tight">{t('categories.title')}</h1>
-				<Can permission="manage categories">
-					<Button asChild>
-						<Link to="/categories/create">
-							<Plus className="mr-2 h-4 w-4" /> {t('categories.create')}
-						</Link>
-					</Button>
-				</Can>
-			</div>
+			<PageHeader
+				title={t('categories.title')}
+				breadcrumbs={[
+					{ label: "Blog" },
+					{ label: t('categories.title') }
+				]}
+				actions={
+					<Can permission="manage categories">
+						<Button asChild>
+							<Link to="/categories/create">
+								<Plus className="mr-2 h-4 w-4" /> {t('categories.create')}
+							</Link>
+						</Button>
+					</Can>
+				}
+			/>
 
 			<Card>
-				<CardHeader>
-					<CardTitle>{t('categories.manage')}</CardTitle>
-				</CardHeader>
-				<CardContent>
+				<CardContent className="pt-6">
 					<Collapsible
 						open={isFiltersOpen}
 						onOpenChange={setIsFiltersOpen}

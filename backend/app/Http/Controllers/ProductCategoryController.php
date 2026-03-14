@@ -12,7 +12,7 @@ class ProductCategoryController extends Controller
 {
     public function publicIndex(Request $request)
     {
-        $query = ProductCategory::query()->with('parent');
+        $query = ProductCategory::query();
 
         if ($request->filled('search')) {
             $query->where('name', 'like', "%{$request->input('search')}%");
@@ -23,20 +23,19 @@ class ProductCategoryController extends Controller
 
     public function index(Request $request)
     {
-        $query = ProductCategory::query()->with('parent');
+        $query = ProductCategory::query();
 
         if ($request->filled('search')) {
             $search = $request->input('search');
             $query->where('name', 'like', "%{$search}%");
         }
 
-        if ($request->filled('parent')) {
-            $parentId = $request->input('parent');
-            if ($parentId) {
-                $query->where('parent_id', $parentId);
-            } else {
-                $query->whereNull('parent_id');
-            }
+        if ($request->filled('filter_id')) {
+            $query->where('id', $request->input('filter_id'));
+        }
+
+        if ($request->filled('filter_name')) {
+            $query->where('name', 'like', "%{$request->input('filter_name')}%");
         }
 
         $sortBy = $request->input('sort_by', 'id');
@@ -58,7 +57,6 @@ class ProductCategoryController extends Controller
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
             'slug' => 'nullable|string|max:255|unique:product_categories,slug',
-            'parent_id' => 'nullable|exists:product_categories,id',
         ]);
 
         if ($validator->fails()) {
@@ -90,7 +88,6 @@ class ProductCategoryController extends Controller
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
             'slug' => 'nullable|string|max:255|unique:product_categories,slug,' . $product_category->id,
-            'parent_id' => 'nullable|exists:product_categories,id',
         ]);
 
         if ($validator->fails()) {
@@ -117,5 +114,17 @@ class ProductCategoryController extends Controller
         $product_category->delete();
 
         return response()->noContent();
+    }
+
+    public function bulkDelete(Request $request)
+    {
+        $request->validate([
+            'ids' => 'required|array',
+            'ids.*' => 'integer|exists:product_categories,id'
+        ]);
+
+        ProductCategory::whereIn('id', $request->ids)->delete();
+
+        return response()->json(['message' => 'Categorías de producto eliminadas correctamente']);
     }
 }

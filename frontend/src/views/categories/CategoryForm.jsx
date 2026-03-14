@@ -18,6 +18,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { PageHeader } from "@/components/page-header";
 
 export default function CategoryForm() {
   const { t } = useTranslation();
@@ -82,10 +83,19 @@ export default function CategoryForm() {
   };
 
   return (
-    <div className="max-w-2xl mx-auto">
+    <div className="space-y-6">
+      <PageHeader
+        title={id ? t('categories.edit_title', { name: form.getValues("name") || '' }) : t('categories.create_title')}
+        breadcrumbs={[
+          { label: "Blog" },
+          { label: t('categories.title'), href: "/categories" },
+          { label: id ? t('categories.edit') : t('categories.create') }
+        ]}
+      />
+      <div className="max-w-2xl">
       <Card>
         <CardHeader>
-          <CardTitle>{id ? t('categories.edit_title', { name: form.getValues("name") }) : t('categories.create_title')}</CardTitle>
+          <CardTitle className="text-2xl">{id ? t('categories.edit') : t('categories.create')}</CardTitle>
         </CardHeader>
         <CardContent>
           {fetching ? (
@@ -128,5 +138,6 @@ export default function CategoryForm() {
         </CardContent>
       </Card>
     </div>
+  </div>
   );
 }

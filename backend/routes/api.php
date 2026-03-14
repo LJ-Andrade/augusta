@@ -84,6 +84,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/products/{product}/gallery/{media}', [ProductController::class, 'deleteGalleryImage'])->middleware('permission:manage products');
     Route::post('/products/bulk-delete', [ProductController::class, 'bulkDelete'])->middleware('permission:delete products');
 
+    Route::post('/product-categories/bulk-delete', [ProductCategoryController::class, 'bulkDelete'])->middleware('permission:manage product categories');
     Route::get('/product-categories', [ProductCategoryController::class, 'index'])->middleware('permission:view product categories');
     Route::get('/product-categories/{product_category}', [ProductCategoryController::class, 'show'])->middleware('permission:view product categories');
     Route::post('/product-categories', [ProductCategoryController::class, 'store'])->middleware('permission:manage product categories');
@@ -95,6 +96,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/product-tags', [ProductTagController::class, 'store'])->middleware('permission:manage product tags');
     Route::put('/product-tags/{product_tag}', [ProductTagController::class, 'update'])->middleware('permission:manage product tags');
     Route::delete('/product-tags/{product_tag}', [ProductTagController::class, 'destroy'])->middleware('permission:manage product tags');
+    Route::post('/product-tags/bulk-delete', [ProductTagController::class, 'bulkDelete'])->middleware('permission:manage product tags');
 
     Route::get('/autopost/settings', [AutopostController::class, 'getSettings']);
     Route::put('/autopost/settings', [AutopostController::class, 'updateSettings']);

@@ -215,7 +215,11 @@
 		"update_button": "Update Tag",
 		"create_button": "Create Tag",
 		"update_success": "Tag updated successfully",
-		"create_success": "Tag created successfully"
+		"create_success": "Tag created successfully",
+		"filter_by_id": "Filter by ID",
+		"filter_by_name": "Filter by name",
+		"bulk_delete_success": "{{count}} tags deleted successfully",
+		"bulk_delete_error": "Error deleting tags"
 	},
 	"articles": {
 		"title": "Articles",

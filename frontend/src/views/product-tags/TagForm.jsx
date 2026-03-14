@@ -18,6 +18,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2, Save, X } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { PageHeader } from "@/components/page-header";
 
 export default function TagForm() {
   const { t } = useTranslation();
@@ -25,6 +26,7 @@ export default function TagForm() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(false);
+  const [tagName, setTagName] = useState("");
 
   const formSchema = z.object({
     name: z.string().min(1, t('validation.name_min')),
@@ -49,6 +51,7 @@ export default function TagForm() {
             name: data.data.name,
             slug: data.data.slug || "",
           });
+          setTagName(data.data.name);
           setFetching(false);
         })
         .catch(() => {
@@ -68,7 +71,8 @@ export default function TagForm() {
     });
 
     if (id) {
-      axiosClient.put(`product-tags/${id}`, formData)
+      formData.append("_method", "PUT");
+      axiosClient.post(`product-tags/${id}`, formData)
         .then(() => {
           toast.success(t('product_tags.update_success'));
           navigate("/product-tags");
@@ -112,10 +116,27 @@ export default function TagForm() {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold tracking-tight">
-          {id ? t('product_tags.edit_title', { name: '' }) : t('product_tags.create_title')}
-        </h1>
+      {id ? (
+        <PageHeader
+          title={`Editar: ${tagName}`}
+          breadcrumbs={[
+            { label: "Productos", href: "/products" },
+            { label: "Etiquetas", href: "/product-tags" },
+            { label: "Editar" },
+          ]}
+        />
+      ) : (
+        <PageHeader
+          title="Crear Etiqueta"
+          breadcrumbs={[
+            { label: "Productos", href: "/products" },
+            { label: "Etiquetas", href: "/product-tags" },
+            { label: "Crear" },
+          ]}
+        />
+      )}
+
+      <div className="flex justify-end items-center">
         <Button variant="outline" onClick={() => navigate("/product-tags")}>
           <X className="mr-2 h-4 w-4" />
           {t('common.cancel')}

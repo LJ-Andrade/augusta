@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { formatDate } from "@/lib/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
 	Plus,
 	Edit,
@@ -41,7 +42,10 @@ import {
 } from "@/components/ui/dropdown-menu";
 import Can from "@/components/can";
 import { useTranslation } from "react-i18next";
+import { useBulkSelect } from "@/hooks/use-bulk-select";
+import { BulkActionsBar } from "@/components/bulk-actions-bar";
 import { ConfirmationDialog } from "@/components/confirmation-dialog";
+import { PageHeader } from "@/components/page-header";
 
 export default function CategoriesList() {
 	const { t } = useTranslation();
@@ -51,30 +55,51 @@ export default function CategoriesList() {
 	const [page, setPage] = useState(1);
 	const [search, setSearch] = useState("");
 	const [debouncedSearch, setDebouncedSearch] = useState("");
+	const [filterId, setFilterId] = useState("");
+	const [debouncedFilterId, setDebouncedFilterId] = useState("");
+	const [filterName, setFilterName] = useState("");
+	const [debouncedFilterName, setDebouncedFilterName] = useState("");
 	const [isFiltersOpen, setIsFiltersOpen] = useState(false);
 	const [sortBy, setSortBy] = useState("id");
 	const [sortDir, setSortDir] = useState("desc");
 	const navigate = useNavigate();
+	const [isDeleting, setIsDeleting] = useState(false);
 	const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 	const [categoryToDelete, setCategoryToDelete] = useState(null);
+
+	const {
+		selectedIds,
+		selectedCount,
+		isAllSelected,
+		toggleSelect,
+		toggleSelectAll,
+		clearSelection,
+		isSelected,
+	} = useBulkSelect(categories);
 
 	useEffect(() => {
 		const handler = setTimeout(() => {
 			setDebouncedSearch(search);
+			setDebouncedFilterId(filterId);
+			setDebouncedFilterName(filterName);
 		}, 500);
 
 		return () => {
 			clearTimeout(handler);
 		};
-	}, [search]);
+	}, [search, filterId, filterName]);
 
 	useEffect(() => {
 		setPage(1);
-	}, [debouncedSearch]);
+	}, [debouncedSearch, debouncedFilterId, debouncedFilterName]);
 
 	useEffect(() => {
 		getCategories();
-	}, [page, debouncedSearch, sortBy, sortDir]);
+	}, [page, debouncedSearch, debouncedFilterId, debouncedFilterName, sortBy, sortDir]);
+
+	useEffect(() => {
+		clearSelection();
+	}, [page, debouncedSearch, debouncedFilterId, debouncedFilterName, sortBy, sortDir]);
 
 	const getCategories = () => {
 		setLoading(true);
@@ -83,12 +108,14 @@ export default function CategoriesList() {
 				params: {
 					page,
 					search: debouncedSearch,
+					filter_id: debouncedFilterId,
+					filter_name: debouncedFilterName,
 					sort_by: sortBy,
 					sort_dir: sortDir,
 				},
 			})
 			.then(({ data }) => {
-				setCategories(data.data || []);
+				setCategories(Array.isArray(data) ? data : data.data);
 				setMeta(data.meta || {});
 				setLoading(false);
 			})
@@ -108,6 +135,8 @@ export default function CategoriesList() {
 
 	const handleClearFilters = () => {
 		setSearch("");
+		setFilterId("");
+		setFilterName("");
 		setPage(1);
 	};
 
@@ -143,6 +172,22 @@ export default function CategoriesList() {
 			});
 	};
 
+	const handleBulkDelete = () => {
+		setIsDeleting(true);
+		axiosClient.post('product-categories/bulk-delete', { ids: selectedIds })
+			.then(() => {
+				toast.success(t('common.bulk_delete_success'));
+				clearSelection();
+				getCategories();
+			})
+			.catch(() => {
+				toast.error(t('common.bulk_delete_error'));
+			})
+			.finally(() => {
+				setIsDeleting(false);
+			});
+	};
+
 	const renderPagination = () => {
 		const pages = [];
 		if (!meta.last_page) return null;
@@ -167,22 +212,25 @@ export default function CategoriesList() {
 
 	return (
 		<div className="space-y-6">
-			<div className="flex justify-between items-center">
-				<h1 className="text-3xl font-bold tracking-tight">{t('product_categories.title')}</h1>
-				<Can permission="manage product categories">
-					<Button asChild>
-						<Link to="/product-categories/create">
-							<Plus className="mr-2 h-4 w-4" /> {t('product_categories.create')}
-						</Link>
-					</Button>
-				</Can>
-			</div>
+			<PageHeader
+				title={t('product_categories.title')}
+				breadcrumbs={[
+					{ label: "PRODUCTOS" },
+					{ label: "Categorías" }
+				]}
+				actions={
+					<Can permission="manage product categories">
+						<Button asChild>
+							<Link to="/product-categories/create">
+								<Plus className="mr-2 h-4 w-4" /> {t('product_categories.create')}
+							</Link>
+						</Button>
+					</Can>
+				}
+			/>
 
 			<Card>
-				<CardHeader>
-					<CardTitle>{t('product_categories.manage')}</CardTitle>
-				</CardHeader>
-				<CardContent>
+				<CardContent className="pt-6">
 					<Collapsible
 						open={isFiltersOpen}
 						onOpenChange={setIsFiltersOpen}
@@ -209,6 +257,26 @@ export default function CategoriesList() {
 						</div>
 
 						<CollapsibleContent className="space-y-4">
+							<div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 border rounded-lg bg-muted/50">
+								<div className="space-y-2">
+									<label htmlFor="filterId" className="text-sm font-medium">{t('categories.id')}</label>
+									<Input
+										id="filterId"
+										placeholder={t('categories.id')}
+										value={filterId}
+										onChange={(e) => setFilterId(e.target.value)}
+									/>
+								</div>
+								<div className="space-y-2">
+									<label htmlFor="filterName" className="text-sm font-medium">{t('categories.name')}</label>
+									<Input
+										id="filterName"
+										placeholder={t('categories.name')}
+										value={filterName}
+										onChange={(e) => setFilterName(e.target.value)}
+									/>
+								</div>
+							</div>
 							<div className="flex justify-end">
 								<Button
 									variant="ghost"
@@ -225,6 +293,12 @@ export default function CategoriesList() {
 					<Table>
 						<TableHeader>
 							<TableRow>
+								<TableHead className="w-10">
+									<Checkbox
+										checked={isAllSelected}
+										onCheckedChange={toggleSelectAll}
+									/>
+								</TableHead>
 								<TableHead
 									className="cursor-pointer select-none w-[60px]"
 									onClick={() => handleSort("id")}
@@ -241,7 +315,6 @@ export default function CategoriesList() {
 										{t('product_categories.name')} {renderSortIcon("name")}
 									</div>
 								</TableHead>
-								<TableHead>{t('product_categories.parent')}</TableHead>
 								<TableHead
 									className="cursor-pointer select-none text-right w-[130px]"
 									onClick={() => handleSort("created_at")}
@@ -270,9 +343,14 @@ export default function CategoriesList() {
 							)}
 							{categories.map((category) => (
 								<TableRow key={category.id} className="h-10">
+									<TableCell className="py-2">
+										<Checkbox
+											checked={isSelected(category.id)}
+											onCheckedChange={() => toggleSelect(category.id)}
+										/>
+									</TableCell>
 									<TableCell className="py-2 w-[60px]">{category.id}</TableCell>
 									<TableCell className="font-medium py-2">{category.name}</TableCell>
-									<TableCell className="py-2">{category.parent?.name || '-'}</TableCell>
 									<TableCell className="py-2 text-right w-[130px]">{formatDate(category.created_at)}</TableCell>
 									<TableCell className="text-right py-2 w-[120px]">
 										<div className="flex items-center justify-end gap-1">
@@ -346,6 +424,12 @@ export default function CategoriesList() {
 						onConfirm={handleConfirmDelete}
 					/>
 				</CardContent>
+				<BulkActionsBar
+					selectedCount={selectedCount}
+					onDelete={handleBulkDelete}
+					onClear={clearSelection}
+					isDeleting={isDeleting}
+				/>
 			</Card>
 		</div>
 	);

@@ -216,7 +216,11 @@
 		"update_button": "Actualizar Etiqueta",
 		"create_button": "Crear Etiqueta",
 		"update_success": "Etiqueta actualizada correctamente",
-		"create_success": "Etiqueta creada correctamente"
+		"create_success": "Etiqueta creada correctamente",
+		"filter_by_id": "Filtrar por ID",
+		"filter_by_name": "Filtrar por nombre",
+		"bulk_delete_success": "{{count}} etiquetas eliminadas exitosamente",
+		"bulk_delete_error": "Error al eliminar etiquetas"
 	},
 	"articles": {
 		"title": "Artículos",
@@ -333,8 +337,8 @@
 		"image_deleted": "Imagen eliminada correctamente"
 	},
 	"product_categories": {
-		"title": "Categorías de Productos",
-		"manage": "Gestionar Categorías de Productos",
+		"title": "Categorías",
+		"manage": "Gestionar Categorías",
 		"create": "Crear Categoría",
 		"edit": "Editar Categoría",
 		"search_placeholder": "Buscar categorías...",

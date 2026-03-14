@@ -7,6 +7,7 @@ use App\Http\Resources\ProductTagResource;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\DB;
 
 class ProductTagController extends Controller
 {
@@ -28,6 +29,15 @@ class ProductTagController extends Controller
         if ($request->filled('search')) {
             $search = $request->input('search');
             $query->where('name', 'like', "%{$search}%");
+        }
+
+        // Advanced filters
+        if ($request->filled('filter_id')) {
+            $query->where('id', $request->filter_id);
+        }
+
+        if ($request->filled('filter_name')) {
+            $query->where('name', 'like', '%' . $request->filter_name . '%');
         }
 
         $sortBy = $request->input('sort_by', 'id');
@@ -106,5 +116,34 @@ class ProductTagController extends Controller
         $product_tag->delete();
 
         return response()->noContent();
+    }
+
+    /**
+     * Remove multiple tags from storage.
+     */
+    public function bulkDelete(Request $request)
+    {
+        $validated = $request->validate([
+            'ids' => 'required|array',
+            'ids.*' => 'integer|exists:product_tags,id',
+        ]);
+
+        $ids = $validated['ids'];
+        $count = 0;
+
+        DB::transaction(function () use ($ids, &$count) {
+            foreach ($ids as $id) {
+                $tag = ProductTag::find($id);
+                if ($tag) {
+                    $tag->delete();
+                    $count++;
+                }
+            }
+        });
+
+        return response()->json([
+            'message' => $count . ' tags deleted successfully',
+            'deleted_count' => $count,
+        ]);
     }
 }

@@ -18,6 +18,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2, Save, X } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { PageHeader } from "@/components/page-header";
 
 export default function CategoryForm() {
   const { t } = useTranslation();
@@ -25,12 +26,10 @@ export default function CategoryForm() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(false);
-  const [categories, setCategories] = useState([]);
 
   const formSchema = z.object({
     name: z.string().min(1, t('validation.name_min')),
     slug: z.string().nullable(),
-    parent_id: z.string().nullable(),
   });
 
   const form = useForm({
@@ -38,15 +37,10 @@ export default function CategoryForm() {
     defaultValues: {
       name: "",
       slug: "",
-      parent_id: "",
     },
   });
 
   useEffect(() => {
-    axiosClient.get("product-categories?all=1").then(({ data }) => {
-      setCategories(data.data || []);
-    });
-
     if (id) {
       setFetching(true);
       axiosClient
@@ -55,7 +49,6 @@ export default function CategoryForm() {
           form.reset({
             name: data.data.name,
             slug: data.data.slug || "",
-            parent_id: data.data.parent_id?.toString() || "",
           });
           setFetching(false);
         })
@@ -70,13 +63,14 @@ export default function CategoryForm() {
     
     const formData = new FormData();
     Object.keys(values).forEach((key) => {
-      if (values[key]) {
-        formData.append(key, values[key]);
+      if (values[key] !== null && values[key] !== undefined) {
+          formData.append(key, values[key]);
       }
     });
 
     if (id) {
-      axiosClient.put(`product-categories/${id}`, formData)
+      formData.append('_method', 'PUT');
+      axiosClient.post(`product-categories/${id}`, formData)
         .then(() => {
           toast.success(t('product_categories.update_success'));
           navigate("/product-categories");
@@ -120,36 +114,35 @@ export default function CategoryForm() {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold tracking-tight">
-          {id ? t('product_categories.edit_title', { name: '' }) : t('product_categories.create_title')}
-        </h1>
-        <Button variant="outline" onClick={() => navigate("/product-categories")}>
-          <X className="mr-2 h-4 w-4" />
-          {t('common.cancel')}
-        </Button>
-      </div>
-
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)}>
-        <Card>
-          <CardHeader>
-            <CardTitle>{id ? t('product_categories.edit') : t('product_categories.create')}</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <FormField
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>{t('product_categories.name')}</FormLabel>
-                  <FormControl>
-                    <Input {...field} placeholder={t('product_categories.name_placeholder')} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+      <PageHeader
+        title={id ? t('product_categories.edit_title', { name: '' }) : t('product_categories.create_title')}
+        breadcrumbs={[
+          { label: "PRODUCTOS" },
+          { label: "Categoría", href: "/product-categories" },
+          { label: id ? t('common.edit') : t('common.create') }
+        ]}
+      />
+      <div className="max-w-2xl">
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)}>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-6">
+              <CardTitle className="text-2xl">{id ? t('product_categories.edit_title', { name: '' }) : t('product_categories.create_title')}</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <FormField
+                control={form.control}
+                name="name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t('product_categories.name', 'Nombre')}</FormLabel>
+                    <FormControl>
+                      <Input {...field} placeholder={t('product_categories.name_placeholder', 'Ej: Remeras')} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
             <FormField
               control={form.control}
@@ -165,42 +158,20 @@ export default function CategoryForm() {
               )}
             />
 
-            <FormField
-              control={form.control}
-              name="parent_id"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>{t('product_categories.parent')}</FormLabel>
-                  <FormControl>
-                    <select
-                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background"
-                      {...field}
-                      value={field.value || ''}
-                    >
-                      <option value="">{t('product_categories.no_parent')}</option>
-                      {categories
-                        .filter(cat => cat.id !== parseInt(id))
-                        .map((cat) => (
-                          <option key={cat.id} value={cat.id}>
-                            {cat.name}
-                          </option>
-                        ))}
-                    </select>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <Button type="submit" disabled={loading}>
-              {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              <Save className="mr-2 h-4 w-4" />
-              {id ? t('product_categories.update_button') : t('product_categories.create_button')}
-            </Button>
+            <div className="flex justify-end space-x-2 pt-4">
+              <Button type="button" variant="outline" onClick={() => navigate("/product-categories")}>
+                {t('common.cancel')}
+              </Button>
+              <Button type="submit" disabled={loading}>
+                {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                {id ? t('product_categories.update_button') : t('product_categories.create_button')}
+              </Button>
+            </div>
           </CardContent>
         </Card>
       </form>
     </Form>
-  </div>
+    </div>
+    </div>
   );
 }

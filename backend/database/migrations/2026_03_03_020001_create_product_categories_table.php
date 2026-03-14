@@ -12,10 +12,7 @@ return new class extends Migration
             $table->id();
             $table->string('name', 255);
             $table->string('slug', 255)->unique();
-            $table->unsignedBigInteger('parent_id')->nullable();
             $table->timestamps();
-
-            $table->foreign('parent_id')->references('id')->on('product_categories')->onDelete('set null');
         });
     }
 

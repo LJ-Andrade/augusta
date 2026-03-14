@@ -10,23 +10,38 @@ return new class extends Migration
     {
         Schema::create('products', function (Blueprint $table) {
             $table->id();
+            $table->unsignedBigInteger('category_id')->nullable();
+            $table->string('code', 100)->unique();
             $table->string('name', 255);
             $table->string('slug', 255)->unique();
             $table->text('description')->nullable();
-            $table->decimal('cost_price', 10, 2);
-            $table->decimal('sale_price', 10, 2);
-            $table->enum('status', ['draft', 'published', 'archived'])->default('draft');
+            $table->string('fabric')->nullable();
+            
+            // Core Pricing (for UI fallback, real ranges come from Variants)
+            $table->decimal('reseller_price', 10, 2)->default(0);
+            $table->decimal('price', 10, 2)->default(0);
+            $table->decimal('cost', 10, 2)->nullable();
+            $table->decimal('discount', 10, 2)->default(0);
+            $table->decimal('offer_price', 10, 2)->nullable();
+
+            // Images and Config
+            $table->string('thumb')->nullable();
+            $table->json('gallery')->nullable();
             $table->boolean('featured')->default(false);
             $table->integer('order')->default(0);
+            
+            // Status and SEO
+            $table->boolean('active')->default(true);
+            $table->string('meta_title')->nullable();
+            $table->text('meta_description')->nullable();
+
             $table->unsignedBigInteger('user_id');
-            $table->unsignedBigInteger('category_id')->nullable();
-            $table->unsignedBigInteger('subcategory_id')->nullable();
             $table->text('qr_url')->nullable();
             $table->timestamps();
 
-            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
+            // Relations
             $table->foreign('category_id')->references('id')->on('product_categories')->onDelete('set null');
-            $table->foreign('subcategory_id')->references('id')->on('product_categories')->onDelete('set null');
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
         });
     }
 

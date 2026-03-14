@@ -13,9 +13,6 @@ class ProductCategoryResource extends JsonResource
             'id' => $this->id,
             'name' => $this->name,
             'slug' => $this->slug,
-            'parent_id' => $this->parent_id,
-            'parent' => new ProductCategoryResource($this->whenLoaded('parent')),
-            'children' => ProductCategoryResource::collection($this->whenLoaded('children')),
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];

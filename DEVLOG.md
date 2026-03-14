@@ -1,4 +1,54 @@
-# Registro de Desarrollo
+# Development Log
+
+## [2026-03-13] - Mejora de Sección Etiquetas de Producto
+
+### Estado: EN PROGRESO
+
+### Tareas
+
+#### Fase 1: Backend (Laravel)
+- [ ] **Tarea 1.1**: Agregar método `bulkDelete()` en ProductTagController
+- [ ] **Tarea 1.2**: Agregar filtros avanzados (filter_id, filter_name) en método index()
+- [ ] **Tarea 1.3**: Agregar ruta POST `/api/product-tags/bulk-delete` en api.php
+
+#### Fase 2: Frontend - TagsList.jsx
+- [ ] **Tarea 2.1**: Importar y usar PageHeader con breadcrumbs
+- [ ] **Tarea 2.2**: Importar useBulkSelect hook y implementar estado de selección
+- [ ] **Tarea 2.3**: Agregar checkboxes en filas de tabla y header
+- [ ] **Tarea 2.4**: Importar y usar BulkActionsBar
+- [ ] **Tarea 2.5**: Implementar filtros avanzados (ID, Nombre) con inputs
+- [ ] **Tarea 2.6**: Agregar columna created_at a la tabla
+- [ ] **Tarea 2.7**: Actualizar query params al hacer fetch
+- [ ] **Tarea 2.8**: Implementar handler para bulk delete
+
+#### Fase 3: Frontend - TagForm.jsx
+- [ ] **Tarea 3.1**: Importar y usar PageHeader con breadcrumbs
+- [ ] **Tarea 3.2**: Cambiar método HTTP de PUT a POST con _method=PUT
+
+#### Fase 4: Internacionalización
+- [ ] **Tarea 4.1**: Verificar/agregar claves de traducción en es.json
+- [ ] **Tarea 4.2**: Verificar/agregar claves de traducción en en.json
+
+#### Fase 5: Testing y Verificación
+- [ ] **Tarea 5.1**: Probar endpoint bulk-delete en backend
+- [ ] **Tarea 5.2**: Probar filtros avanzados
+- [ ] **Tarea 5.3**: Probar selección masiva y bulk delete en frontend
+- [ ] **Tarea 5.4**: Verificar responsive en móvil
+- [ ] **Tarea 5.5**: Verificar breadcrumbs y navegación
+
+### Archivos a Modificar
+1. `backend/app/Http/Controllers/ProductTagController.php`
+2. `backend/routes/api.php`
+3. `frontend/src/views/product-tags/TagsList.jsx`
+4. `frontend/src/views/product-tags/TagForm.jsx`
+5. `frontend/src/i18n/locales/es.json`
+6. `frontend/src/i18n/locales/en.json`
+
+### Notas
+- Prioridad: Alta (bulk delete), Media (filtros, UI), Baja (consistencia HTTP)
+- Basado en SPECS.md en `.agent_storage/SPECS.md`
+
+---
 
 ## [2026-03-11] - Fix: ChatbotForm UI Improvements and Auto-save
 
@@ -467,5 +517,6 @@
 - [x] 4. Crear `web/components/ui/FloatingWhatsApp.tsx` e integrarlo en el `RootLayout`.
 - [x] 5. Mejorar metadatos en `layout.tsx` usando la información del backend.
 
--   [ x ]   F i x   h a r d c o d e d   b a s e U R L   i n   f r o n t e n d / s r c / l i b / a x i o s - p u b l i c . j s   t o   u s e   V I T E _ A P I _ U R L   f a l l b a c k  
- 
+- [x] Fix hardcoded baseURL in frontend/src/lib/axios-public.js to use VITE_API_URL fallback
+
+---
