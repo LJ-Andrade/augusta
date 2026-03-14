@@ -12,7 +12,7 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Loader2, Save, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { PageHeader } from '@/components/page-header';
@@ -72,7 +72,13 @@ export default function CategoryForm() {
         <Form {...form}>
           <form onSubmit={onSubmit}>
             <Card>
-              <CardHeader />
+              <CardHeader>
+                <CardTitle>
+                  {id
+                    ? t('product_categories.edit_title', { name: entityName })
+                    : t('product_categories.create_title')}
+                </CardTitle>
+              </CardHeader>
               <CardContent className="space-y-4">
                 <FormField
                   control={form.control}

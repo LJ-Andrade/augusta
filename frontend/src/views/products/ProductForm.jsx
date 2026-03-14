@@ -257,7 +257,13 @@ export default function ProductForm() {
 
 					{/* Row 1: Name, Slug, Prices, Description, Category + Tags */}
 					<Card>
-						<CardHeader />
+						<CardHeader>
+							<CardTitle>
+								{id
+									? `${t('products.editing') || 'Editando producto'} "${productName}"`
+									: t('products.create_title')}
+							</CardTitle>
+						</CardHeader>
 						<CardContent className="space-y-4">
 							<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 								<FormField
