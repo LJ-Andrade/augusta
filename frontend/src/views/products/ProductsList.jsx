@@ -49,6 +49,7 @@ import { useTranslation } from "react-i18next";
 import { useBulkSelect } from "@/hooks/use-bulk-select";
 import { BulkActionsBar } from "@/components/bulk-actions-bar";
 import { ConfirmationDialog } from "@/components/confirmation-dialog";
+import { PageHeader } from "@/components/page-header";
 
 export default function ProductsList() {
 	const { t } = useTranslation();
@@ -259,20 +260,22 @@ export default function ProductsList() {
 
 	return (
 		<div className="space-y-6">
-			<div className="flex justify-between items-center">
-				<h1 className="text-3xl font-bold tracking-tight">{t('products.title')}</h1>
-				<Can permission="create products">
-					<Button asChild>
-						<Link to="/products/create">
-							<Plus className="mr-2 h-4 w-4" /> {t('products.create')}
-						</Link>
-					</Button>
-				</Can>
-			</div>
+			<PageHeader
+				title={t('products.title')}
+				breadcrumbs={[
+					{ label: t('products.title') },
+				]}
+			/>
 
 			<Card>
-				<CardHeader>
-					<CardTitle>{t('products.manage')}</CardTitle>
+				<CardHeader className="flex flex-row items-center justify-start gap-2">
+					<Can permission="create products">
+						<Button asChild>
+							<Link to="/products/create">
+								<Plus className="mr-2 h-4 w-4" /> {t('products.create')}
+							</Link>
+						</Button>
+					</Can>
 				</CardHeader>
 				<CardContent>
 					<Collapsible

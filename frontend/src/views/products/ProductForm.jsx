@@ -23,6 +23,7 @@ import { ImageUpload } from "@/components/ui/image-upload";
 import { RichTextEditor } from "@/components/ui/rich-text-editor";
 import { ImageGallery } from "@/components/ui/image-gallery";
 import { MultiSelect } from "@/components/ui/multi-select";
+import { PageHeader } from "@/components/page-header";
 
 export default function ProductForm() {
 	const { t } = useTranslation();
@@ -38,6 +39,7 @@ export default function ProductForm() {
 	const [gallery, setGallery] = useState([]);
 	const [documentUrl, setDocumentUrl] = useState(null);
 	const [pendingDocument, setPendingDocument] = useState(null);
+	const [productName, setProductName] = useState("");
 
 	const formSchema = z.object({
 		name: z.string().min(3, t('products.validation.name_min')),
@@ -112,6 +114,7 @@ export default function ProductForm() {
 					setCoverUrl(data.data.cover_url);
 					setGallery(data.data.gallery || []);
 					setDocumentUrl(data.data.document_url);
+					setProductName(data.data.name);
 					setFetching(false);
 				})
 				.catch(() => {
@@ -231,20 +234,30 @@ export default function ProductForm() {
 
 	return (
 		<div className="space-y-6">
-			<div className="flex justify-between items-center">
-				<h1 className="text-3xl font-bold tracking-tight">
-					{id ? t('products.edit_title', { name: '' }) : t('products.create_title')}
-				</h1>
-			</div>
+			{id ? (
+				<PageHeader
+					title={`Editando producto "${productName}"`}
+					breadcrumbs={[
+						{ label: t('products.title'), href: "/products" },
+						{ label: t('common.edit') },
+					]}
+				/>
+			) : (
+				<PageHeader
+					title={t('products.create_title')}
+					breadcrumbs={[
+						{ label: t('products.title'), href: "/products" },
+						{ label: t('common.create') },
+					]}
+				/>
+			)}
 
 			<Form {...form}>
 				<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
 
 					{/* Row 1: Name, Slug, Prices, Description, Category + Tags */}
 					<Card>
-						<CardHeader>
-							<CardTitle>{t('products.name')}</CardTitle>
-						</CardHeader>
+						<CardHeader />
 						<CardContent className="space-y-4">
 							<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 								<FormField

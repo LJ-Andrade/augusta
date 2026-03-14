@@ -68,13 +68,14 @@ export default function TagsList() {
 
 	// Bulk selection
 	const {
-		selectedItems,
+		selectedIds,
 		isAllSelected,
-		isIndeterminate,
-		handleSelectItem,
-		handleSelectAll,
+		toggleSelect,
+		toggleSelectAll,
 		clearSelection,
 	} = useBulkSelect(tags.map(t => t.id));
+
+	const isIndeterminate = selectedIds.length > 0 && selectedIds.length < tags.length;
 
 	useEffect(() => {
 		const handler = setTimeout(() => {
@@ -136,9 +137,9 @@ export default function TagsList() {
 	const handleBulkDelete = async () => {
 		try {
 			await axiosClient.post("/product-tags/bulk-delete", {
-				ids: selectedItems,
+				ids: selectedIds,
 			});
-			toast.success(`${selectedItems.length} etiquetas eliminadas`);
+			toast.success(`${selectedIds.length} etiquetas eliminadas`);
 			clearSelection();
 			getTags();
 		} catch (error) {
@@ -210,19 +211,15 @@ export default function TagsList() {
 				]}
 			/>
 
-			<div className="flex justify-end items-center">
-				<Can permission="manage product tags">
-					<Button asChild>
-						<Link to="/product-tags/create">
-							<Plus className="mr-2 h-4 w-4" /> {t('product_tags.create')}
-						</Link>
-					</Button>
-				</Can>
-			</div>
-
 			<Card>
-				<CardHeader>
-					<CardTitle>{t('product_tags.manage')}</CardTitle>
+				<CardHeader className="flex flex-row items-center justify-start gap-2">
+					<Can permission="manage product tags">
+						<Button asChild>
+							<Link to="/product-tags/create">
+								<Plus className="mr-2 h-4 w-4" /> {t('product_tags.create')}
+							</Link>
+						</Button>
+					</Can>
 				</CardHeader>
 				<CardContent>
 					<Collapsible
@@ -281,7 +278,7 @@ export default function TagsList() {
 										ref={(el) => {
 											if (el) el.indeterminate = isIndeterminate;
 										}}
-										onCheckedChange={handleSelectAll}
+										onCheckedChange={toggleSelectAll}
 									/>
 								</TableHead>
 								<TableHead
@@ -331,8 +328,8 @@ export default function TagsList() {
 								<TableRow key={tag.id}>
 									<TableCell>
 										<Checkbox
-											checked={selectedItems.includes(tag.id)}
-											onCheckedChange={() => handleSelectItem(tag.id)}
+											checked={selectedIds.includes(tag.id)}
+											onCheckedChange={() => toggleSelect(tag.id)}
 										/>
 									</TableCell>
 									<TableCell className="w-[60px]">{tag.id}</TableCell>
@@ -401,9 +398,9 @@ export default function TagsList() {
 						</div>
 					)}
 
-					{selectedItems.length > 0 && (
+					{selectedIds.length > 0 && (
 						<BulkActionsBar
-							selectedCount={selectedItems.length}
+							selectedCount={selectedIds.length}
 							onDelete={handleBulkDelete}
 							onClear={clearSelection}
 						/>
