@@ -90,7 +90,7 @@ All CRUD modules must follow a consistent layout to ensure uniform user experien
 ┌─────────────────────────────────────────────────┐
 │ Card (max-w-2xl for single-column forms)       │
 │ ├── CardHeader                                  │
-│ │   └── (empty or minimal)                     │
+│ │   └── CardTitle (SAME as PageHeader title)   │
 │ └── CardContent                                 │
 │     ├── Form Fields                            │
 │     └── Action Buttons (RIGHT aligned)         │
@@ -98,6 +98,17 @@ All CRUD modules must follow a consistent layout to ensure uniform user experien
 │         └── Save (primary)                     │
 └─────────────────────────────────────────────────┘
 ```
+
+### ⚠️ IMPORTANT: Title in Both Places
+
+**The title MUST appear in BOTH locations:**
+1. **PageHeader** - For breadcrumbs context
+2. **CardHeader > CardTitle** - For visual clarity in the form card
+
+Both should show the EXACT same text:
+- Create mode: `"Crear [Módulo]"` (e.g., "Crear Etiqueta")
+- Edit mode: `"Editando [módulo] \"[nombre]\""` (e.g., "Editando etiqueta \"Electrónica\"")
+
 
 ### Key Requirements
 
@@ -108,7 +119,8 @@ All CRUD modules must follow a consistent layout to ensure uniform user experien
 
 - **Card**:
   - Use `max-w-2xl` class to limit width for single-column forms
-  - `CardHeader` should be empty or minimal (no title needed)
+  - **CardHeader MUST contain CardTitle** (same text as PageHeader title)
+  - This provides visual consistency and clarity for the user
   
 - **Form Layout**:
   - Fields organized logically in sections if needed
@@ -144,7 +156,13 @@ All CRUD modules must follow a consistent layout to ensure uniform user experien
 )}
 
 <Card className="max-w-2xl">
-  <CardHeader />
+  <CardHeader>
+    <CardTitle>
+      {id
+        ? `${t('product_tags.editing') || 'Editando etiqueta'} "${entityName}"`
+        : t('product_tags.create_title')}
+    </CardTitle>
+  </CardHeader>
   <CardContent className="space-y-4">
     {/* Form fields */}
     
@@ -375,7 +393,7 @@ Before submitting a new CRUD module, verify:
 - [ ] PageHeader with dynamic title (shows name in edit mode)
 - [ ] Breadcrumbs: Parent > Module > Action
 - [ ] Card with `max-w-2xl` class
-- [ ] Empty CardHeader
+- [ ] **CardHeader with CardTitle (same text as PageHeader)** ⚠️
 - [ ] Form fields properly organized
 - [ ] Validation with Zod schema
 - [ ] Action buttons at bottom, RIGHT aligned
@@ -407,5 +425,16 @@ Use these as templates when creating new modules.
 ## Last Updated
 
 Date: 2026-03-14
-Version: 1.0
+Version: 1.1
 Author: Development Team
+
+### Changes in v1.1:
+- Added explicit requirement for CardTitle in form views (must match PageHeader title)
+- Updated all examples to show CardTitle usage
+- Updated checklist to require CardHeader with CardTitle
+
+### Changes in v1.0:
+- Initial CRUD standards documentation
+- Defined List View and Form View patterns
+- Created useCrudList and useCrudForm hooks
+- Created CrudTable and CrudPagination components
