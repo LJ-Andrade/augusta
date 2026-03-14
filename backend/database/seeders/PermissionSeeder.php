@@ -39,6 +39,7 @@ class PermissionSeeder extends Seeder
             'manage product tags',
             'manage customers',
             'view activity logs',
+            'system.manage',
         ];
 
         foreach ($permissions as $permission) {

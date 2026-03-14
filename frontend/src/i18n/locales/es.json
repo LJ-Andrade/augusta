@@ -20,11 +20,11 @@
 		"content": "Contenido",
 		"articles": "Artículos",
 		"categories": "Categorías",
-		"activity_logs": "Registros de Actividad",
+		"activity_logs": "Actividad",
 		"profile": "Perfil",
 		"settings": "Configuración",
 		"main_menu": "Menú Principal",
-		"admin_session": "Sesión de Admin",
+		"role": "Rol",
 		"tags": "Etiquetas",
 		"autopost": "AutoBlog",
 		"autopost_settings": "Configuración AutoBlog",
@@ -44,7 +44,10 @@
 		"general": "Generales",
 		"business_info": "Info de negocio",
 		"customers": "Clientes",
-		"contact_messages": "Mensajes de Contacto"
+		"contact_messages": "Mensajes de Contacto",
+		"system": "Sistema",
+		"theme": "Tema",
+		"system_features": "Funcionalidades"
 	},
 	"common": {
 		"create": "Crear",
@@ -437,6 +440,8 @@
 		"site_url_description": "URL base del catálogo público de productos (ej: https://mitienda.com)",
 		"mail_to_address": "Email de destino (Contacto)",
 		"mail_to_address_description": "Email donde se recibirán los mensajes del formulario de contacto",
+		"business_name": "Nombre del Negocio",
+		"business_name_description": "Nombre que se mostrará en el sidebar del administrador",
 		"save_success": "Configuración guardada correctamente",
 		"business_info": {
 			"title": "Información de Negocio",
@@ -505,5 +510,19 @@
 		"delete_error": "Error al eliminar el cliente",
 		"save_success": "Cliente guardado correctamente",
 		"search_placeholder": "Buscar cliente..."
+	},
+	"system_features": {
+		"title": "Funcionalidades del Sistema",
+		"subtitle": "Configura las funcionalidades avanzadas del sistema",
+		"language_settings": "Configuración de Idioma",
+		"language_description": "Controla cómo se maneja el idioma en toda la aplicación",
+		"enable_language_toggle": "Habilitar cambio de idioma",
+		"enable_language_toggle_desc": "Permite a los usuarios cambiar el idioma desde el menú",
+		"language_default_mode": "Modo de idioma por defecto",
+		"language_default_mode_desc": "Define cómo se selecciona el idioma cuando el cambio está deshabilitado",
+		"select_language_mode": "Seleccionar modo de idioma",
+		"mode_auto": "Auto-detectar",
+		"mode_spanish": "Español",
+		"mode_english": "Inglés"
 	}
 }

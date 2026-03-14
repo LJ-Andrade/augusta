@@ -109,15 +109,6 @@ export default function AutopostSettings() {
 
 	return (
 		<div className="space-y-6">
-			<div>
-				<h1 className="text-3xl font-bold">{t('autopost.settings_title') || "Configuración de AutoBlog"}</h1>
-				<p className="text-muted-foreground mt-2">
-					{t('autopost.settings_description') || "Configura la API de Gemini y el pre-prompt para generar artículos automáticamente."}
-				</p>
-			</div>
-
-			<Separator />
-
 			<Card className="max-w-2xl">
 				<CardHeader>
 					<CardTitle className="flex items-center gap-2">

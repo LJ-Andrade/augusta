@@ -138,8 +138,8 @@ export default function Profile() {
   return (
     <div className="max-w-3xl mx-auto py-6 px-4">
       <Card className="border-none shadow-lg bg-card/50 backdrop-blur">
-        <CardHeader className="pb-4">
-          <CardTitle className="text-2xl font-bold flex items-center gap-2">
+        <CardHeader className="pb-4 text-center">
+          <CardTitle className="text-2xl font-bold flex items-center justify-center gap-2">
             <User className="h-6 w-6 text-primary" />
             {t('profile.title') || "My Profile"}
           </CardTitle>

@@ -17,12 +17,9 @@ export default function BlogSettings() {
 		<div className="space-y-6">
 			<div>
 				<h1 className="text-3xl font-bold">{t('sidebar.blog_settings') || "Configuración del Blog"}</h1>
-				<p className="text-muted-foreground mt-2">
-					{t('blog_settings.description') || "Administra la configuración de tu blog."}
-				</p>
 			</div>
 
-			<Separator />
+			<Separator className="mt-6" />
 
 			<div className="border-b border-border">
 				<nav className="flex gap-1 -mb-px">

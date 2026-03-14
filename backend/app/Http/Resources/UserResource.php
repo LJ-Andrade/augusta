@@ -4,6 +4,7 @@ namespace App\Http\Resources;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Support\Facades\Storage;
 
 class UserResource extends JsonResource
 {
@@ -14,11 +15,16 @@ class UserResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
+        $avatarPath = 'users/' . $this->id . '/avatar.jpg';
+        $avatarUrl = Storage::disk('public')->exists($avatarPath) 
+            ? asset('storage/' . $avatarPath)
+            : null;
+
         return [
             'id' => $this->id,
             'name' => $this->name,
             'email' => $this->email,
-            'avatar_url' => $this->getFirstMediaUrl('avatar'),
+            'avatar_url' => $avatarUrl,
             'roles' => RoleResource::collection($this->whenLoaded('roles')),
             'permissions' => $this->whenLoaded('roles', function () {
                 return $this->roles->flatMap(function ($role) {

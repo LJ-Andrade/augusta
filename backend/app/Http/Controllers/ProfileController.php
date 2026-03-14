@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Resources\UserResource;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 
 class ProfileController extends Controller
@@ -56,7 +57,22 @@ class ProfileController extends Controller
         ]);
 
         $user = $request->user();
-        $user->addMediaFromRequest('avatar')->toMediaCollection('avatar');
+        
+        // Eliminar avatar anterior del storage
+        $oldPath = 'users/' . $user->id . '/avatar.jpg';
+        if (Storage::disk('public')->exists($oldPath)) {
+            Storage::disk('public')->delete($oldPath);
+        }
+        
+        // Eliminar de media library
+        $user->clearMediaCollection('avatar');
+        
+        // Crear directorio y guardar avatar
+        $directory = 'users/' . $user->id;
+        Storage::disk('public')->makeDirectory($directory);
+        
+        $path = $directory . '/avatar.jpg';
+        $request->file('avatar')->storeAs($directory, 'avatar.jpg', 'public');
 
         return new UserResource($user->load(['roles.permissions', 'media']));
     }

@@ -28,6 +28,7 @@ class DatabaseSeeder extends Seeder
 
         $permissions = Permission::all();
         $superAdmin = Role::firstOrCreate(['name' => 'Super Admin']);
+		$admin = Role::firstOrCreate(['name' => 'Admin']);
         $superAdmin->permissions()->sync($permissions);
 
         // $admin = User::firstOrCreate(
@@ -57,6 +58,16 @@ class DatabaseSeeder extends Seeder
             ]
         );
         $violeta->roles()->sync($superAdmin);
+
+
+		$geo = User::firstOrCreate(
+            ['email' => 'geo@gmail.com'],
+            [
+                'name' => 'Geo Georgie',
+                'password' => bcrypt('12121212'),
+            ]
+        );
+        $geo->roles()->sync($admin);
 
         // $roles = Role::where('name', '!=', 'Super Admin')->get();
         // User::factory(10)->create()->each(function ($user) use ($roles) {

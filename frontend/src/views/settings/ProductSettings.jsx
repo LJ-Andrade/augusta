@@ -15,12 +15,9 @@ export default function ProductSettings() {
 		<div className="space-y-6">
 			<div>
 				<h1 className="text-3xl font-bold">{t('sidebar.products_settings') || "Configuración de Productos"}</h1>
-				<p className="text-muted-foreground mt-2">
-					{t('product_settings.description') || "Administra la configuración de tus productos."}
-				</p>
 			</div>
 
-			<Separator />
+			<Separator className="mt-6" />
 
 			<div className="border-b border-border">
 				<nav className="flex gap-1 -mb-px">

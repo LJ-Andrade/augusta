@@ -27,6 +27,7 @@ import BusinessInfoSettings from './views/settings/BusinessInfoSettings';
 import ImageSettings from './views/settings/ImageSettings';
 import BlogSettings from './views/settings/BlogSettings';
 import ProductSettings from './views/settings/ProductSettings';
+import SystemConfigurations from './views/settings/SystemConfigurations';
 import RolesList from './views/roles/RolesList';
 
 import RoleForm from './views/roles/RoleForm';
@@ -38,11 +39,12 @@ import CustomersList from './views/customers/CustomersList';
 import CustomerForm from './views/customers/CustomerForm';
 import ContactMessagesList from './views/contact-messages/ContactMessagesList';
 import DashboardLayout from './components/dashboard-layout';
-import { hasPermission } from './components/can';
+import { hasPermission, isSuperAdmin } from './components/can';
 
-const ProtectedRoute = ({ children, permission }) => {
+const ProtectedRoute = ({ children, permission, superAdminOnly }) => {
   const isAuthenticated = !!localStorage.getItem('ACCESS_TOKEN');
   if (!isAuthenticated) return <Navigate to="/login" />;
+  if (superAdminOnly && !isSuperAdmin()) return <Navigate to="/dashboard" />;
   if (permission && !hasPermission(permission)) return <Navigate to="/dashboard" />;
   return (
     <DashboardLayout>
@@ -330,6 +332,12 @@ function App() {
         <Route path="/product-settings" element={
           <ProtectedRoute permission="view products">
             <ProductSettings />
+          </ProtectedRoute>
+        } />
+
+        <Route path="/system-configurations" element={
+          <ProtectedRoute superAdminOnly={true}>
+            <SystemConfigurations />
           </ProtectedRoute>
         } />
 

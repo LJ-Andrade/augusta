@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react'
+import React, { useState, useCallback, useRef } from 'react'
 import Cropper from 'react-easy-crop'
 import {
   Dialog,
@@ -58,19 +58,32 @@ export function AvatarUpload({ value, onChange, disabled }) {
   const [croppedAreaPixels, setCroppedAreaPixels] = useState(null)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [isUploading, setIsUploading] = useState(false)
+  const fileInputRef = useRef(null)
 
   const onCropComplete = useCallback((reachedArea, reachedAreaPixels) => {
     setCroppedAreaPixels(reachedAreaPixels)
   }, [])
+
+  const resetCropper = () => {
+    setCrop({ x: 0, y: 0 })
+    setZoom(1)
+    setCroppedAreaPixels(null)
+  }
 
   const onFileChange = (e) => {
     if (e.target.files && e.target.files.length > 0) {
       const reader = new FileReader()
       reader.addEventListener('load', () => {
         setImage(reader.result)
+        resetCropper()
         setIsDialogOpen(true)
       })
       reader.readAsDataURL(e.target.files[0])
+      
+      // Limpiar el input para permitir seleccionar el mismo archivo nuevamente
+      if (fileInputRef.current) {
+        fileInputRef.current.value = ''
+      }
     }
   }
 
@@ -89,6 +102,7 @@ export function AvatarUpload({ value, onChange, disabled }) {
       
       setIsDialogOpen(false)
       setImage(null)
+      resetCropper()
     } catch (e) {
       console.error(e)
     } finally {
@@ -111,6 +125,7 @@ export function AvatarUpload({ value, onChange, disabled }) {
         >
           <Camera className="h-8 w-8 text-white" />
           <input
+            ref={fileInputRef}
             id="avatar-input"
             type="file"
             accept="image/*"
@@ -158,6 +173,7 @@ export function AvatarUpload({ value, onChange, disabled }) {
               onClick={() => {
                 setIsDialogOpen(false)
                 setImage(null)
+                resetCropper()
               }}
               disabled={isUploading}
             >

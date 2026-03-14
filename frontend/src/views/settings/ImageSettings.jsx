@@ -172,20 +172,6 @@ export default function ImageSettings() {
 
 	return (
 		<div className="space-y-6">
-			<div>
-				<h1 className="text-3xl font-bold">
-					{currentSection === 'products' 
-						? (t('image_settings.title_products') || "Configuración de Imágenes de Productos")
-						: (t('image_settings.title_blog') || "Configuración de Imágenes del Blog")
-					}
-				</h1>
-				<p className="text-muted-foreground mt-2">
-					{t('image_settings.description') || "Configura los parámetros de validación para las imágenes."}
-				</p>
-			</div>
-
-			<Separator />
-
 			<div className="border-b border-border">
 				<nav className="flex gap-1 -mb-px">
 					{SECTION_TYPES.map((section) => (

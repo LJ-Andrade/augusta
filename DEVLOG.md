@@ -1,5 +1,50 @@
 # Development Log
 
+## [2026-03-14] - UI/UX Improvements: Sidebar, Profile, System Features
+
+### Estado: COMPLETADO ✅
+
+### Resumen de Cambios
+
+#### 1. Sidebar Reorganization
+- **Dropdown de usuario** en navbar con avatar, nombre y email
+- **Menú "Sistema"**: Activity Logs, Tema
+- **Menú "Configuración"** unificado: Generales, Info de negocio, Funcionalidades (solo Super Admin)
+- **Footer del sidebar**: "Rol" + nombre del rol actual (Super Admin, Admin, etc.)
+- **Subtítulo** debajo de VADMIN3 con nombre del negocio
+- **Submenús** funcionan en modo colapsado (dropdown flotante)
+
+#### 2. Profile System
+- **Avatar** guardado en `storage/users/{id}/avatar.jpg`
+- **Cropper** funciona al cargar múltiples imágenes
+- **Título y subtítulo** centrados
+- **Perfil** movido al dropdown de usuario (eliminado del sidebar)
+
+#### 3. System Features Module (Super Admin Only)
+- **Nueva página** `/system-configurations` exclusiva para Super Admins
+- **Control de idioma**: Toggle on/off para cambio de idioma
+- **Modo de idioma**: Auto-detectar / Español / Inglés
+- **Permiso** `system.manage` agregado al seeder
+
+#### 4. Settings Pages Cleanup
+- **BlogSettings & ProductSettings**: Eliminados subtítulos descriptivos
+- **ImageSettings & AutopostSettings**: Estructura limpia (Tabs → Cards)
+
+#### 5. Additional Improvements
+- **Icono de notificaciones** en navbar (placeholder para futuro)
+- **Dropdown del usuario** con fondo más claro en dark theme
+- **Traducciones** actualizadas (es/en)
+
+### Archivos Modificados
+- Frontend: App.jsx, app-sidebar.jsx, can.jsx, dashboard-layout.jsx, language-toggle.jsx, avatar-upload.jsx, i18n/config.js, main.jsx, Profile.jsx, SettingsList.jsx, BlogSettings.jsx, ProductSettings.jsx, ImageSettings.jsx, AutopostSettings.jsx
+- Backend: ProfileController.php, UserResource.php, PermissionSeeder.php, BusinessSettingsSeeder.php
+- Nuevo: SystemConfigurations.jsx
+
+### Commits
+- Pending: checkpoint commit for UI/UX improvements
+
+---
+
 ## [2026-03-13] - Mejora de Sección Etiquetas de Producto
 
 ### Estado: EN PROGRESO

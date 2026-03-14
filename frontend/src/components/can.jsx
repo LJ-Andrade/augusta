@@ -10,6 +10,11 @@ export const hasPermission = (permission) => {
   return isSuperAdmin || hasPerm;
 };
 
+export const isSuperAdmin = () => {
+  const userRoles = JSON.parse(localStorage.getItem('USER_ROLES') || '[]');
+  return userRoles.includes('Super Admin');
+};
+
 const Can = ({ permission, children }) => {
   if (hasPermission(permission)) {
     return children;

@@ -24,7 +24,7 @@
 		"profile": "Profile",
 		"settings": "Settings",
 		"main_menu": "Main Menu",
-		"admin_session": "Admin Session",
+		"role": "Role",
 		"tags": "Tags",
 		"autopost": "AutoBlog",
 		"autopost_settings": "AutoBlog Settings",
@@ -43,7 +43,11 @@
 		"configurations": "Configurations",
 		"general": "General",
 		"business_info": "Business Info",
-		"customers": "Customers"
+		"customers": "Customers",
+		"contact_messages": "Contact Messages",
+		"system": "System",
+		"theme": "Theme",
+		"system_features": "Features"
 	},
 	"common": {
 		"create": "Create",
@@ -436,6 +440,10 @@
 		"system": "System Configuration",
 		"site_url": "Site URL",
 		"site_url_description": "Base URL of the public product catalog (e.g.: https://mystore.com)",
+		"mail_to_address": "Destination Email (Contact)",
+		"mail_to_address_description": "Email where contact form messages will be received",
+		"business_name": "Business Name",
+		"business_name_description": "Name displayed in the admin sidebar",
 		"save_success": "Settings saved successfully",
 		"business_info": {
 			"title": "Business Information",
@@ -504,5 +512,19 @@
 		"delete_error": "Error deleting the customer",
 		"save_success": "Customer saved successfully",
 		"search_placeholder": "Search customer..."
+	},
+	"system_features": {
+		"title": "System Features",
+		"subtitle": "Configure advanced system features",
+		"language_settings": "Language Settings",
+		"language_description": "Control how language is handled across the application",
+		"enable_language_toggle": "Enable language toggle",
+		"enable_language_toggle_desc": "Allow users to change language from the menu",
+		"language_default_mode": "Default language mode",
+		"language_default_mode_desc": "Define how language is selected when toggle is disabled",
+		"select_language_mode": "Select language mode",
+		"mode_auto": "Auto-detect",
+		"mode_spanish": "Spanish",
+		"mode_english": "English"
 	}
 }

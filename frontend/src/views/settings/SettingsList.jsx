@@ -86,28 +86,50 @@ export default function SettingsList() {
 						</p>
 					</div>
 
-					<div className="grid gap-2">
-						<Label htmlFor="mail_to_address">{t('settings.mail_to_address')}</Label>
-						<div className="flex gap-2">
-							<Input
-								id="mail_to_address"
-								type="email"
-								value={settings.mail_to_address?.value || ''}
-								onChange={(e) => updateSetting('mail_to_address', 'value', e.target.value)}
-								placeholder="destino@empresa.com"
-							/>
-							<Button
-								onClick={() => handleSave('mail_to_address')}
-								disabled={saving}
-							>
-								{t('common.save')}
-							</Button>
-						</div>
-						<p className="text-sm text-muted-foreground">
-							{t('settings.mail_to_address_description')}
-						</p>
+				<div className="grid gap-2">
+					<Label htmlFor="mail_to_address">{t('settings.mail_to_address')}</Label>
+					<div className="flex gap-2">
+						<Input
+							id="mail_to_address"
+							type="email"
+							value={settings.mail_to_address?.value || ''}
+							onChange={(e) => updateSetting('mail_to_address', 'value', e.target.value)}
+							placeholder="destino@empresa.com"
+						/>
+						<Button
+							onClick={() => handleSave('mail_to_address')}
+							disabled={saving}
+						>
+							{t('common.save')}
+						</Button>
 					</div>
-				</CardContent>
+					<p className="text-sm text-muted-foreground">
+						{t('settings.mail_to_address_description')}
+					</p>
+				</div>
+
+				<div className="grid gap-2">
+					<Label htmlFor="business_name">{t('settings.business_name')}</Label>
+					<div className="flex gap-2">
+						<Input
+							id="business_name"
+							type="text"
+							value={settings.business_name?.value || ''}
+							onChange={(e) => updateSetting('business_name', 'value', e.target.value)}
+							placeholder="Nombre de tu negocio"
+						/>
+						<Button
+							onClick={() => handleSave('business_name')}
+							disabled={saving}
+						>
+							{t('common.save')}
+						</Button>
+					</div>
+					<p className="text-sm text-muted-foreground">
+						{t('settings.business_name_description')}
+					</p>
+				</div>
+			</CardContent>
 			</Card>
 		</div>
 	);

@@ -8,7 +8,6 @@ import {
 	ShieldCheck,
 	UserCircle,
 	History,
-	User,
 	Tags,
 	Layers,
 	Sparkles,
@@ -20,6 +19,9 @@ import {
 	Building2,
 	MessageSquare,
 	Palette,
+	Monitor,
+	Sun,
+	Moon,
 } from "lucide-react"
 
 
@@ -50,8 +52,11 @@ import {
 	DropdownMenuItem,
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { hasPermission } from "@/components/can"
+import { hasPermission, isSuperAdmin } from "@/components/can"
 import { useTranslation } from "react-i18next"
+import { useTheme } from "@/components/theme-provider"
+import { useState, useEffect } from "react"
+import axiosClient from "@/lib/axios"
 
 const items = [
 	{
@@ -166,15 +171,22 @@ const items = [
 		permission: "view blog",
 	},
 	{
-		title: "sidebar.activity_logs",
-		url: "/activity-logs",
-		icon: History,
-		permission: "view activity logs",
-	},
-	{
-		title: "sidebar.profile",
-		url: "/profile",
-		icon: User,
+		title: "sidebar.system",
+		icon: Monitor,
+		children: [
+			{
+				title: "sidebar.activity_logs",
+				url: "/activity-logs",
+				icon: History,
+				permission: "view activity logs",
+			},
+			{
+				title: "sidebar.theme",
+				url: "#theme",
+				icon: Sun,
+				isThemeToggle: true,
+			},
+		],
 	},
 	{
 		title: "sidebar.configurations",
@@ -190,14 +202,43 @@ const items = [
 				url: "/business-info",
 				icon: Phone,
 			},
+			{
+				title: "sidebar.system_features",
+				url: "/system-configurations",
+				icon: Settings,
+				superAdminOnly: true,
+			},
 		],
 	},
 ]
+
+const getUserRole = () => {
+	const userRoles = JSON.parse(localStorage.getItem('USER_ROLES') || '[]');
+	if (userRoles.includes('Super Admin')) return 'Super Admin';
+	if (userRoles.includes('Admin')) return 'Admin';
+	if (userRoles.length > 0) return userRoles[0];
+	return 'User';
+};
 
 export function AppSidebar() {
 	const { t } = useTranslation();
 	const location = useLocation();
 	const { state } = useSidebar();
+	const { theme, setTheme } = useTheme();
+	const [businessName, setBusinessName] = useState('');
+
+	useEffect(() => {
+		// Fetch business name from settings
+		axiosClient.get('/system-settings/business_name')
+			.then(({ data }) => {
+				if (data.data?.value) {
+					setBusinessName(data.data.value);
+				}
+			})
+			.catch(() => {
+				// Silently fail if setting doesn't exist
+			});
+	}, []);
 
 	const isActive = (url) => location.pathname === url;
 	const isGroupActive = (item) => {
@@ -208,12 +249,22 @@ export function AppSidebar() {
 
 	const filteredItems = items.map(item => {
 		if (item.children) {
-			return item;
+			// Filter children based on permissions or superAdminOnly
+			const filteredChildren = item.children.filter(child => {
+				if (child.superAdminOnly) {
+					return isSuperAdmin();
+				}
+				return !child.permission || hasPermission(child.permission);
+			});
+			return { ...item, children: filteredChildren };
 		}
 		return item;
 	}).filter(item => {
 		if (item.children) {
 			return item.children.length > 0;
+		}
+		if (item.superAdminOnly) {
+			return isSuperAdmin();
 		}
 		return !item.permission || hasPermission(item.permission);
 	});
@@ -221,10 +272,17 @@ export function AppSidebar() {
 	return (
 		<Sidebar collapsible="icon">
 			<SidebarHeader className="p-4 mb-2 group-data-[collapsible=icon]:px-2">
-				<div className="flex items-center gap-3 font-bold text-2xl tracking-tight group-data-[collapsible=icon]:justify-center">
-					<span className="bg-linear-to-r from-cyan-400 via-teal-400 to-blue-500 bg-clip-text text-transparent whitespace-nowrap">
-						{state === "collapsed" ? "V" : "VADMIN3"}
-					</span>
+				<div className="flex flex-col items-center">
+					<div className="flex items-center gap-3 font-bold text-2xl tracking-tight group-data-[collapsible=icon]:justify-center">
+						<span className="bg-linear-to-r from-cyan-400 via-teal-400 to-blue-500 bg-clip-text text-transparent whitespace-nowrap">
+							{state === "collapsed" ? "V" : "VADMIN3"}
+						</span>
+					</div>
+					{businessName && state !== "collapsed" && (
+						<span className="text-xs font-thin text-muted-foreground truncate max-w-[180px] mt-1">
+							{businessName}
+						</span>
+					)}
 				</div>
 			</SidebarHeader>
 			<SidebarContent>
@@ -236,48 +294,117 @@ export function AppSidebar() {
 							return (
 								<SidebarMenuItem key={item.title}>
 									{item.children ? (
-										<Collapsible className="group/collapsible" defaultOpen={active}>
-											<CollapsibleTrigger asChild>
-												<SidebarMenuButton
-													tooltip={t(item.title)}
-													isActive={active}
-													className={`group h-10 transition-all duration-200 group-data-[collapsible=icon]:justify-center ${active ? "bg-linear-to-r from-primary/20 to-transparent" : "hover:bg-primary/5"}`}
-												>
-													{item.icon && (
-														<div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10 mr-1 group-data-[collapsible=icon]:mr-0 transition-colors duration-200 group-hover/collapsible:bg-primary/20">
-															<item.icon className="h-4 w-4 text-primary" />
-														</div>
-													)}
-													<span className="font-medium text-sm transition-colors duration-200 group-data-[collapsible=icon]:hidden">{t(item.title)}</span>
-													<ChevronRight className="ml-auto h-3.5 w-3.5 opacity-40 transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90 group-data-[collapsible=icon]:hidden" />
-												</SidebarMenuButton>
-											</CollapsibleTrigger>
-											<CollapsibleContent>
-												<SidebarMenuSub className="ml-9 border-l-0 py-1 gap-1">
-													{item.children.map((subItem) => {
-														const subActive = isActive(subItem.url);
-														return (
-															<SidebarMenuSubItem key={subItem.title}>
-																<SidebarMenuSubButton
-																	asChild
-																	isActive={subActive}
-																	className={`h-9 px-3 transition-all duration-200 ${subActive ? "bg-linear-to-r from-primary/20 to-transparent font-medium" : "hover:bg-primary/5"}`}
-																>
-																	<Link to={subItem.url} className="w-full flex items-center gap-2">
+										state === "collapsed" ? (
+											<DropdownMenu>
+												<DropdownMenuTrigger asChild>
+													<SidebarMenuButton
+														tooltip={t(item.title)}
+														isActive={active}
+														className={`group h-10 transition-all duration-200 group-data-[collapsible=icon]:justify-center ${active ? "bg-linear-to-r from-primary/20 to-transparent" : "hover:bg-primary/5"}`}
+													>
+														{item.icon && (
+															<div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10 mr-1 group-data-[collapsible=icon]:mr-0 transition-colors duration-200 group-hover:bg-primary/20">
+																<item.icon className="h-4 w-4 text-primary" />
+															</div>
+														)}
+														<span className="font-medium text-sm transition-colors duration-200 group-data-[collapsible=icon]:hidden">{t(item.title)}</span>
+													</SidebarMenuButton>
+												</DropdownMenuTrigger>
+												<DropdownMenuContent side="right" align="start" className="min-w-48">
+													{item.children
+														.filter(subItem => !subItem.permission || hasPermission(subItem.permission))
+														.map((subItem) => {
+															if (subItem.isThemeToggle) {
+																const ThemeIcon = theme === 'dark' ? Sun : Moon;
+																return (
+																	<DropdownMenuItem
+																		key={subItem.title}
+																		onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+																		className="flex items-center gap-2 cursor-pointer"
+																	>
+																		<div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary/10">
+																			<ThemeIcon className="h-3.5 w-3.5 text-primary" />
+																		</div>
+																		<span className="text-sm">{t(subItem.title)}</span>
+																	</DropdownMenuItem>
+																);
+															}
+															return (
+																<DropdownMenuItem key={subItem.title} asChild>
+																	<Link to={subItem.url} className="flex items-center gap-2 cursor-pointer">
 																		{subItem.icon && (
 																			<div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary/10">
 																				<subItem.icon className="h-3.5 w-3.5 text-primary" />
 																			</div>
 																		)}
-																		<span className="text-sm opacity-80">{t(subItem.title)}</span>
+																		<span className="text-sm">{t(subItem.title)}</span>
 																	</Link>
-																</SidebarMenuSubButton>
-															</SidebarMenuSubItem>
-														);
-													})}
-												</SidebarMenuSub>
-											</CollapsibleContent>
-										</Collapsible>
+																</DropdownMenuItem>
+															);
+														})}
+												</DropdownMenuContent>
+											</DropdownMenu>
+										) : (
+											<Collapsible className="group/collapsible" defaultOpen={active}>
+												<CollapsibleTrigger asChild>
+													<SidebarMenuButton
+														tooltip={t(item.title)}
+														isActive={active}
+														className={`group h-10 transition-all duration-200 group-data-[collapsible=icon]:justify-center ${active ? "bg-linear-to-r from-primary/20 to-transparent" : "hover:bg-primary/5"}`}
+													>
+														{item.icon && (
+															<div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10 mr-1 group-data-[collapsible=icon]:mr-0 transition-colors duration-200 group-hover/collapsible:bg-primary/20">
+																<item.icon className="h-4 w-4 text-primary" />
+															</div>
+														)}
+														<span className="font-medium text-sm transition-colors duration-200 group-data-[collapsible=icon]:hidden">{t(item.title)}</span>
+														<ChevronRight className="ml-auto h-3.5 w-3.5 opacity-40 transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90 group-data-[collapsible=icon]:hidden" />
+													</SidebarMenuButton>
+												</CollapsibleTrigger>
+												<CollapsibleContent>
+													<SidebarMenuSub className="ml-5 border-l-0 py-1 gap-1">
+														{item.children.map((subItem) => {
+															const subActive = isActive(subItem.url);
+															if (subItem.isThemeToggle) {
+																const ThemeIcon = theme === 'dark' ? Sun : Moon;
+																return (
+																	<SidebarMenuSubItem key={subItem.title}>
+																		<SidebarMenuSubButton
+																			isActive={false}
+																			onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+																			className="h-9 px-3 transition-all duration-200 hover:bg-primary/5 cursor-pointer w-full flex items-center gap-2"
+																		>
+																			<div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary/10">
+																				<ThemeIcon className="h-3.5 w-3.5 text-primary" />
+																			</div>
+																			<span className="text-sm opacity-80">{t(subItem.title)}</span>
+																		</SidebarMenuSubButton>
+																	</SidebarMenuSubItem>
+																);
+															}
+															return (
+																<SidebarMenuSubItem key={subItem.title}>
+																	<SidebarMenuSubButton
+																		asChild
+																		isActive={subActive}
+																		className={`h-9 px-3 transition-all duration-200 ${subActive ? "bg-linear-to-r from-primary/20 to-transparent font-medium" : "hover:bg-primary/5"}`}
+																	>
+																		<Link to={subItem.url} className="w-full flex items-center gap-2">
+																			{subItem.icon && (
+																				<div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary/10">
+																					<subItem.icon className="h-3.5 w-3.5 text-primary" />
+																				</div>
+																			)}
+																			<span className="text-sm opacity-80">{t(subItem.title)}</span>
+																		</Link>
+																	</SidebarMenuSubButton>
+																</SidebarMenuSubItem>
+															);
+														})}
+													</SidebarMenuSub>
+												</CollapsibleContent>
+											</Collapsible>
+										)
 									) : (
 										<SidebarMenuButton
 											asChild
@@ -307,8 +434,8 @@ export function AppSidebar() {
 						<UserCircle className="h-5 w-5 text-primary" />
 					</div>
 					<div className="flex flex-col group-data-[collapsible=icon]:hidden overflow-hidden text-left">
-						<span className="text-sm font-semibold truncate text-primary">Admin Session</span>
-						<span className="text-[10px] uppercase tracking-wider text-muted-foreground truncate">{t('sidebar.admin_session')}</span>
+						<span className="text-sm font-semibold truncate text-primary">{t('sidebar.role')}</span>
+						<span className="text-[10px] tracking-wider text-muted-foreground truncate">{getUserRole()}</span>
 					</div>
 				</div>
 			</SidebarFooter>

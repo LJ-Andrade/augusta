@@ -1,5 +1,9 @@
 <?php
 
+$prodOrigins = [
+	'https://augustamoi.com/api'
+];
+
 return [
 
     /*
@@ -14,12 +18,28 @@ return [
     | To learn more: https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS
     |
     */
+	
 
     'paths' => ['api/*', 'sanctum/csrf-cookie'],
 
     'allowed_methods' => ['*'],
 
-    'allowed_origins' => ['http://localhost:5173', 'http://localhost:3000', 'http://127.0.0.1:3000', 'http://192.168.1.36:3000', 'https://vadmin.studiovimana.com.ar', 'https://studiovimana.com.ar'],
+	'allowed_origins' => env('APP_ENV') === 'production' 
+        ? $prodOrigins 
+        : ['*'], 
+
+    'allowed_origins_patterns' => env('APP_ENV') === 'local' 
+        ? ['#^https?://(localhost|127\.0\.0\.1|192\.168\.\d+\.\d+):\d+$#'] 
+        : [],
+
+    // 'allowed_origins' => [
+	// 	'http://augusta.test/api', 
+	// 	'http://localhost:5177',
+	// 	'http://localhost:5173', 
+	// 	'http://localhost:3000', 
+	// 	'http://127.0.0.1:3000', 
+	// 	'http://192.168.1.36:3000', 
+	// 	'https://vadmin.studiovimana.com.ar', 'https://studiovimana.com.ar'],
 
     'allowed_origins_patterns' => [],
 

@@ -21,6 +21,7 @@ class BusinessSettingsSeeder extends Seeder
             ['key' => 'business_youtube', 'value' => '', 'description' => 'URL de YouTube'],
             ['key' => 'business_tiktok', 'value' => '', 'description' => 'URL de TikTok'],
             ['key' => 'mail_to_address', 'value' => '', 'description' => 'Email destino para formulario de contacto'],
+            ['key' => 'business_name', 'value' => '', 'description' => 'Nombre del negocio mostrado en el sidebar'],
         ];
 
         foreach ($settings as $setting) {
