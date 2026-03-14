@@ -111,12 +111,16 @@ Implementación de un nuevo CRUD completo como prueba de las abstracciones.
 5. `814a277` - feat(colors): implement complete CRUD for colors module
 6. `92cc983` - feat(colors): add colors menu item to sidebar
 7. `625c089` - i18n(colors): simplify hex_color translation label
+8. `480d6d5` - docs: update DEVLOG with CRUD abstractions and colors module
+9. `5c1c4e6` - refactor(colors): rename Colors to ProductColors for consistency
+10. `0853712` - checkpoint: rename colors migration to product_colors
 
 ### Push a Remoto
 ✅ Todos los cambios han sido pusheados a `origin/main`
 
 ### Pendiente
-- Ejecutar migración: `php artisan migrate` (la tabla colors no existe aún)
+- Ejecutar migración: `php artisan migrate` (la tabla product_colors no existe aún)
+- Nota: Se renombró de "colors" a "product_colors" para mantener consistencia
 
 ---
 
