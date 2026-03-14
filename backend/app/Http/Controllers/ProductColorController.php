@@ -2,17 +2,17 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Color;
-use App\Http\Resources\ColorResource;
+use App\Models\ProductColor;
+use App\Http\Resources\ProductColorResource;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
 
-class ColorController extends Controller
+class ProductColorController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Color::query();
+        $query = ProductColor::query();
 
         if ($request->filled('search')) {
             $search = $request->input('search');
@@ -36,10 +36,10 @@ class ColorController extends Controller
         }
 
         if ($request->boolean('all')) {
-            return ColorResource::collection($query->get());
+            return ProductColorResource::collection($query->get());
         }
 
-        return ColorResource::collection($query->paginate(10));
+        return ProductColorResource::collection($query->paginate(10));
     }
 
     public function store(Request $request)
@@ -53,17 +53,17 @@ class ColorController extends Controller
             return response()->json(['errors' => $validator->errors()], 422);
         }
 
-        $color = Color::create($validator->validated());
+        $color = ProductColor::create($validator->validated());
 
-        return new ColorResource($color);
+        return new ProductColorResource($color);
     }
 
-    public function show(Color $color)
+    public function show(ProductColor $productColor)
     {
-        return new ColorResource($color);
+        return new ProductColorResource($productColor);
     }
 
-    public function update(Request $request, Color $color)
+    public function update(Request $request, ProductColor $productColor)
     {
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
@@ -74,14 +74,14 @@ class ColorController extends Controller
             return response()->json(['errors' => $validator->errors()], 422);
         }
 
-        $color->update($validator->validated());
+        $productColor->update($validator->validated());
 
-        return new ColorResource($color);
+        return new ProductColorResource($productColor);
     }
 
-    public function destroy(Color $color)
+    public function destroy(ProductColor $productColor)
     {
-        $color->delete();
+        $productColor->delete();
         return response()->json(['message' => 'Color deleted successfully']);
     }
 
@@ -89,7 +89,7 @@ class ColorController extends Controller
     {
         $validated = $request->validate([
             'ids' => 'required|array',
-            'ids.*' => 'integer|exists:colors,id',
+            'ids.*' => 'integer|exists:product_colors,id',
         ]);
 
         $ids = $validated['ids'];
@@ -97,7 +97,7 @@ class ColorController extends Controller
 
         DB::transaction(function () use ($ids, &$count) {
             foreach ($ids as $id) {
-                $color = Color::find($id);
+                $color = ProductColor::find($id);
                 if ($color) {
                     $color->delete();
                     $count++;

@@ -17,8 +17,8 @@ import ProductCategoriesList from './views/product-categories/CategoriesList';
 import ProductCategoryForm from './views/product-categories/CategoryForm';
 import ProductTagsList from './views/product-tags/TagsList';
 import ProductTagForm from './views/product-tags/TagForm';
-import ColorsList from './views/colors/ColorsList';
-import ColorForm from './views/colors/ColorForm';
+import ProductColorsList from './views/product-colors/ProductColorsList';
+import ProductColorForm from './views/product-colors/ProductColorForm';
 import AutopostGenerator from './views/autopost/AutopostGenerator';
 import AutopostSettings from './views/autopost/AutopostSettings';
 import ProductsShow from './views/products/ProductsShow';
@@ -285,21 +285,21 @@ function App() {
           </ProtectedRoute>
         } />
 
-        <Route path="/colors" element={
-          <ProtectedRoute permission="view colors">
-            <ColorsList />
+        <Route path="/product-colors" element={
+          <ProtectedRoute permission="view product colors">
+            <ProductColorsList />
           </ProtectedRoute>
         } />
 
-        <Route path="/colors/create" element={
-          <ProtectedRoute permission="manage colors">
-            <ColorForm />
+        <Route path="/product-colors/create" element={
+          <ProtectedRoute permission="manage product colors">
+            <ProductColorForm />
           </ProtectedRoute>
         } />
 
-        <Route path="/colors/edit/:id" element={
-          <ProtectedRoute permission="manage colors">
-            <ColorForm />
+        <Route path="/product-colors/edit/:id" element={
+          <ProtectedRoute permission="manage product colors">
+            <ProductColorForm />
           </ProtectedRoute>
         } />
 

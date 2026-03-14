@@ -40,7 +40,7 @@ const ColorPreview = ({ hexColor }) => (
   </div>
 );
 
-export default function ColorsList() {
+export default function ProductColorsList() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
@@ -68,21 +68,21 @@ export default function ColorsList() {
     toggleSelectAll,
     clearSelection,
   } = useCrudList({
-    endpoint: 'colors',
+    endpoint: 'product-colors',
     filterKeys: ['search', 'filter_id', 'filter_name'],
     defaultSort: { column: 'id', direction: 'desc' },
   });
 
   const columns = [
-    { key: 'id', label: t('colors.id') || 'ID', sortable: true, width: 'w-[60px]' },
-    { key: 'name', label: t('colors.name') || 'Nombre', sortable: true },
+    { key: 'id', label: t('product_colors.id') || 'ID', sortable: true, width: 'w-[60px]' },
+    { key: 'name', label: t('product_colors.name') || 'Nombre', sortable: true },
     { 
       key: 'hex_color', 
-      label: t('colors.hex_color') || 'Color', 
+      label: t('product_colors.hex_color') || 'Color', 
       sortable: false,
       render: (value) => <ColorPreview hexColor={value} />
     },
-    { key: 'created_at', label: t('colors.created_at') || 'Creado', sortable: true, align: 'right', width: 'w-[130px]', format: 'date' },
+    { key: 'created_at', label: t('product_colors.created_at') || 'Creado', sortable: true, align: 'right', width: 'w-[130px]', format: 'date' },
   ];
 
   const handleDeleteClick = (color) => {
@@ -94,8 +94,8 @@ export default function ColorsList() {
     if (!colorToDelete) return;
     
     const success = await deleteItem(colorToDelete.id, {
-      successMessage: t('colors.delete_success') || 'Color eliminado correctamente',
-      errorMessage: t('colors.delete_error') || 'Error al eliminar el color',
+      successMessage: t('product_colors.delete_success') || 'Color eliminado correctamente',
+      errorMessage: t('product_colors.delete_error') || 'Error al eliminar el color',
     });
     
     if (success) {
@@ -116,10 +116,10 @@ export default function ColorsList() {
   };
 
   const renderActions = (color, isDropdown = false) => (
-    <Can permission="manage colors">
+    <Can permission="manage product colors">
       {isDropdown ? (
         <>
-          <DropdownMenuItem onClick={() => navigate(`/colors/edit/${color.id}`)}>
+          <DropdownMenuItem onClick={() => navigate(`/product-colors/edit/${color.id}`)}>
             <Edit className="mr-2 h-4 w-4" /> {t('common.edit')}
           </DropdownMenuItem>
           <DropdownMenuItem onClick={() => handleDeleteClick(color)} className="text-red-500">
@@ -132,7 +132,7 @@ export default function ColorsList() {
             variant="ghost"
             size="icon"
             className="h-8 w-8"
-            onClick={() => navigate(`/colors/edit/${color.id}`)}
+            onClick={() => navigate(`/product-colors/edit/${color.id}`)}
           >
             <Edit className="h-4 w-4" />
           </Button>
@@ -152,18 +152,19 @@ export default function ColorsList() {
   return (
     <div className="space-y-6">
       <PageHeader
-        title={t('colors.title') || 'Colores'}
+        title={t('product_colors.title') || 'Colores'}
         breadcrumbs={[
-          { label: t('colors.title') || 'Colores' },
+          { label: 'PRODUCTOS' },
+          { label: t('product_colors.title') || 'Colores' },
         ]}
       />
 
       <Card>
         <CardHeader className="flex flex-row items-center justify-start gap-2">
-          <Can permission="manage colors">
+          <Can permission="manage product colors">
             <Button asChild>
-              <Link to="/colors/create">
-                <Plus className="mr-2 h-4 w-4" /> {t('colors.create') || 'Crear Color'}
+              <Link to="/product-colors/create">
+                <Plus className="mr-2 h-4 w-4" /> {t('product_colors.create') || 'Crear Color'}
               </Link>
             </Button>
           </Can>
@@ -180,7 +181,7 @@ export default function ColorsList() {
                 <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                 <Input
                   type="search"
-                  placeholder={t('colors.search_placeholder') || 'Buscar colores...'}
+                  placeholder={t('product_colors.search_placeholder') || 'Buscar colores...'}
                   className="pl-8"
                   value={filters.search}
                   onChange={(e) => setFilter('search', e.target.value)}
@@ -203,22 +204,22 @@ export default function ColorsList() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 border rounded-lg bg-muted/50">
                 <div className="space-y-2">
                   <label htmlFor="filterId" className="text-sm font-medium">
-                    {t('colors.id') || 'ID'}
+                    {t('product_colors.id') || 'ID'}
                   </label>
                   <Input
                     id="filterId"
-                    placeholder={t('colors.id') || 'ID'}
+                    placeholder={t('product_colors.id') || 'ID'}
                     value={filters.filter_id}
                     onChange={(e) => setFilter('filter_id', e.target.value)}
                   />
                 </div>
                 <div className="space-y-2">
                   <label htmlFor="filterName" className="text-sm font-medium">
-                    {t('colors.name') || 'Nombre'}
+                    {t('product_colors.name') || 'Nombre'}
                   </label>
                   <Input
                     id="filterName"
-                    placeholder={t('colors.name') || 'Nombre'}
+                    placeholder={t('product_colors.name') || 'Nombre'}
                     value={filters.filter_name}
                     onChange={(e) => setFilter('filter_name', e.target.value)}
                   />

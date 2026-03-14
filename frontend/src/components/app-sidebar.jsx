@@ -141,10 +141,10 @@ const items = [
 				permission: "view product tags",
 			},
 			{
-				title: "sidebar.colors",
-				url: "/colors",
+				title: "sidebar.product_colors",
+				url: "/product-colors",
 				icon: Palette,
-				permission: "view colors",
+				permission: "view product colors",
 			},
 			{
 				title: "sidebar.products_settings",

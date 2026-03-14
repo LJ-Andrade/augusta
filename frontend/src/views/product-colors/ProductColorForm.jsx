@@ -18,30 +18,30 @@ import { useTranslation } from 'react-i18next';
 import { PageHeader } from '@/components/page-header';
 import { useCrudForm } from '@/hooks/use-crud-form';
 
-export default function ColorForm() {
+export default function ProductColorForm() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { id } = useParams();
 
   const formSchema = z.object({
     name: z.string().min(1, t('validation.name_min') || 'El nombre es requerido'),
-    hex_color: z.string().regex(/^#[a-fA-F0-9]{6}$/, t('colors.invalid_hex') || 'Formato de color inválido (use #RRGGBB)'),
+    hex_color: z.string().regex(/^#[a-fA-F0-9]{6}$/, t('product_colors.invalid_hex') || 'Formato de color inválido (use #RRGGBB)'),
   });
 
   const { form, loading, fetching, entityName, onSubmit } = useCrudForm({
-    endpoint: 'colors',
+    endpoint: 'product-colors',
     id,
     schema: formSchema,
     defaultValues: {
       name: '',
       hex_color: '#000000',
     },
-    onSuccess: () => navigate('/colors'),
+    onSuccess: () => navigate('/product-colors'),
     messages: {
-      createSuccess: t('colors.create_success') || 'Color creado correctamente',
-      updateSuccess: t('colors.update_success') || 'Color actualizado correctamente',
-      createError: t('colors.create_error') || 'Error al crear el color',
-      updateError: t('colors.update_error') || 'Error al actualizar el color',
+      createSuccess: t('product_colors.create_success') || 'Color creado correctamente',
+      updateSuccess: t('product_colors.update_success') || 'Color actualizado correctamente',
+      createError: t('product_colors.create_error') || 'Error al crear el color',
+      updateError: t('product_colors.update_error') || 'Error al actualizar el color',
     },
   });
 
@@ -58,11 +58,12 @@ export default function ColorForm() {
       <PageHeader
         title={
           id
-            ? `${t('colors.editing') || 'Editando color'} "${entityName}"`
-            : t('colors.create_title') || 'Crear Color'
+            ? `${t('product_colors.editing') || 'Editando color'} "${entityName}"`
+            : t('product_colors.create_title') || 'Crear Color'
         }
         breadcrumbs={[
-          { label: t('colors.title') || 'Colores', href: '/colors' },
+          { label: 'PRODUCTOS' },
+          { label: t('product_colors.title') || 'Colores', href: '/product-colors' },
           { label: id ? t('common.edit') : t('common.create') },
         ]}
       />
@@ -74,8 +75,8 @@ export default function ColorForm() {
               <CardHeader>
                 <CardTitle>
                   {id
-                    ? `${t('colors.editing') || 'Editando color'} "${entityName}"`
-                    : t('colors.create_title') || 'Crear Color'}
+                    ? `${t('product_colors.editing') || 'Editando color'} "${entityName}"`
+                    : t('product_colors.create_title') || 'Crear Color'}
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -84,9 +85,9 @@ export default function ColorForm() {
                   name="name"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>{t('colors.name') || 'Nombre'}</FormLabel>
+                      <FormLabel>{t('product_colors.name') || 'Nombre'}</FormLabel>
                       <FormControl>
-                        <Input {...field} placeholder={t('colors.name_placeholder') || 'Ej: Rojo'} />
+                        <Input {...field} placeholder={t('product_colors.name_placeholder') || 'Ej: Rojo'} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -98,7 +99,7 @@ export default function ColorForm() {
                   name="hex_color"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>{t('colors.hex_color') || 'Color (Hexadecimal)'}</FormLabel>
+                      <FormLabel>{t('product_colors.hex_color') || 'Color'}</FormLabel>
                       <FormControl>
                         <div className="flex items-center gap-4">
                           <input
@@ -120,7 +121,7 @@ export default function ColorForm() {
                 />
 
                 <div className="flex gap-2 justify-end">
-                  <Button type="button" variant="outline" onClick={() => navigate('/colors')}>
+                  <Button type="button" variant="outline" onClick={() => navigate('/product-colors')}>
                     <X className="mr-2 h-4 w-4" />
                     {t('common.cancel')}
                   </Button>

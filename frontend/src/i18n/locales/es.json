@@ -31,7 +31,7 @@
 		"products": "Productos",
 		"product_categories": "Categorías",
 		"product_tags": "Etiquetas",
-		"colors": "Colores",
+		"product_colors": "Colores",
 		"blog": "Blog",
 		"image_settings": "Config. Imágenes",
 		"image_settings_blog": "Imágenes del Blog",
@@ -380,7 +380,7 @@
 		"update_success": "Etiqueta actualizada correctamente",
 		"create_success": "Etiqueta creada correctamente"
 	},
-	"colors": {
+	"product_colors": {
 		"title": "Colores",
 		"create": "Crear Color",
 		"edit": "Editar Color",

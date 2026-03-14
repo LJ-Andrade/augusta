@@ -31,7 +31,7 @@
 		"products": "Products",
 		"product_categories": "Categories",
 		"product_tags": "Tags",
-		"colors": "Colors",
+		"product_colors": "Colors",
 		"blog": "Blog",
 		"image_settings": "Image Settings",
 		"image_settings_blog": "Blog Images",
@@ -381,7 +381,7 @@
 		"update_success": "Tag updated successfully",
 		"create_success": "Tag created successfully"
 	},
-	"colors": {
+	"product_colors": {
 		"title": "Colors",
 		"create": "Create Color",
 		"edit": "Edit Color",
