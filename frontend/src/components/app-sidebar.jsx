@@ -19,6 +19,7 @@ import {
 	Phone,
 	Building2,
 	MessageSquare,
+	Palette,
 } from "lucide-react"
 
 
@@ -138,6 +139,12 @@ const items = [
 				url: "/product-tags",
 				icon: Tags,
 				permission: "view product tags",
+			},
+			{
+				title: "sidebar.colors",
+				url: "/colors",
+				icon: Palette,
+				permission: "view colors",
 			},
 			{
 				title: "sidebar.products_settings",
