@@ -12,6 +12,8 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProductCategoryController;
 use App\Http\Controllers\ProductTagController;
 use App\Http\Controllers\ProductColorController;
+use App\Http\Controllers\ProductSizeController;
+use App\Http\Controllers\CouponController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ActivityLogController;
 use App\Http\Controllers\AutopostController;
@@ -33,6 +35,9 @@ Route::get('/public/product-categories', [ProductCategoryController::class, 'pub
 Route::get('/public/product-tags', [ProductTagController::class, 'publicIndex']);
 Route::get('/public/business-info', [SystemSettingsController::class, 'publicInfo']);
 Route::post('/public/contact', [ContactController::class, 'store']);
+
+Route::get('/system-settings', [SystemSettingsController::class, 'index']);
+Route::get('/system-settings/{key}', [SystemSettingsController::class, 'show']);
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/dashboard', [AuthController::class, 'dashboard']);
@@ -106,13 +111,25 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/product-colors/{product_color}', [ProductColorController::class, 'destroy'])->middleware('permission:manage product colors');
     Route::post('/product-colors/bulk-delete', [ProductColorController::class, 'bulkDelete'])->middleware('permission:manage product colors');
 
+    Route::get('/product-sizes', [ProductSizeController::class, 'index'])->middleware('permission:view product sizes');
+    Route::get('/product-sizes/{product_size}', [ProductSizeController::class, 'show'])->middleware('permission:view product sizes');
+    Route::post('/product-sizes', [ProductSizeController::class, 'store'])->middleware('permission:manage product sizes');
+    Route::put('/product-sizes/{product_size}', [ProductSizeController::class, 'update'])->middleware('permission:manage product sizes');
+    Route::delete('/product-sizes/{product_size}', [ProductSizeController::class, 'destroy'])->middleware('permission:manage product sizes');
+    Route::post('/product-sizes/bulk-delete', [ProductSizeController::class, 'bulkDelete'])->middleware('permission:manage product sizes');
+
+    Route::get('/coupons', [CouponController::class, 'index'])->middleware('permission:view coupons');
+    Route::get('/coupons/{coupon}', [CouponController::class, 'show'])->middleware('permission:view coupons');
+    Route::post('/coupons', [CouponController::class, 'store'])->middleware('permission:manage coupons');
+    Route::put('/coupons/{coupon}', [CouponController::class, 'update'])->middleware('permission:manage coupons');
+    Route::delete('/coupons/{coupon}', [CouponController::class, 'destroy'])->middleware('permission:manage coupons');
+    Route::post('/coupons/bulk-delete', [CouponController::class, 'bulkDelete'])->middleware('permission:manage coupons');
+
     Route::get('/autopost/settings', [AutopostController::class, 'getSettings']);
     Route::put('/autopost/settings', [AutopostController::class, 'updateSettings']);
     Route::post('/autopost/generate', [AutopostController::class, 'generate']);
     Route::post('/autopost/store', [AutopostController::class, 'store']);
 
-    Route::get('/system-settings', [SystemSettingsController::class, 'index']);
-    Route::get('/system-settings/{key}', [SystemSettingsController::class, 'show']);
     Route::put('/system-settings/{key}', [SystemSettingsController::class, 'update']);
 
     Route::get('/image-settings', [ImageSettingsController::class, 'index']);

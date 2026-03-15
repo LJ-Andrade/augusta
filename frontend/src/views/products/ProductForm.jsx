@@ -34,6 +34,7 @@ export default function ProductForm() {
 	const [categories, setCategories] = useState([]);
 	const [subcategories, setSubcategories] = useState([]);
 	const [tags, setTags] = useState([]);
+	const [sizes, setSizes] = useState([]);
 	const [coverUrl, setCoverUrl] = useState(null);
 	const [pendingCover, setPendingCover] = useState(null);
 	const [gallery, setGallery] = useState([]);
@@ -50,6 +51,7 @@ export default function ProductForm() {
 		category_id: z.string().nullable(),
 		subcategory_id: z.string().nullable(),
 		tag_ids: z.array(z.number()).default([]),
+		size_ids: z.array(z.number()).default([]),
 		status: z.enum(["draft", "published", "archived"]),
 		order: z.number().optional(),
 		featured: z.boolean().default(false),
@@ -66,6 +68,7 @@ export default function ProductForm() {
 			category_id: "",
 			subcategory_id: "",
 			tag_ids: [],
+			size_ids: [],
 			status: "draft",
 			order: 0,
 			featured: false,
@@ -75,12 +78,14 @@ export default function ProductForm() {
 	useEffect(() => {
 		const fetchData = async () => {
 			try {
-				const [catsRes, tagsRes] = await Promise.all([
+				const [catsRes, tagsRes, sizesRes] = await Promise.all([
 					axiosClient.get("product-categories?all=1"),
-					axiosClient.get("product-tags?all=1")
+					axiosClient.get("product-tags?all=1"),
+					axiosClient.get("product-sizes?all=1")
 				]);
 				setCategories(catsRes.data.data || []);
 				setTags(tagsRes.data.data || []);
+				setSizes(sizesRes.data.data || []);
 			} catch (error) {
 				console.error("Error fetching form data:", error);
 			}
@@ -102,6 +107,7 @@ export default function ProductForm() {
 						category_id: data.data.category_id?.toString() || "",
 						subcategory_id: data.data.subcategory_id?.toString() || "",
 						tag_ids: data.data.tags?.map(tag => tag.id) || [],
+						size_ids: data.data.sizes?.map(size => size.id) || [],
 						status: data.data.status,
 						order: data.data.order || 0,
 						featured: data.data.featured || false,
@@ -172,6 +178,8 @@ export default function ProductForm() {
 		Object.keys(values).forEach((key) => {
 			if (key === 'tag_ids') {
 				values[key].forEach((tagId) => formData.append('tag_ids[]', tagId));
+			} else if (key === 'size_ids') {
+				values[key].forEach((sizeId) => formData.append('size_ids[]', sizeId));
 			} else if (key === 'featured') {
 				formData.append(key, values[key] ? '1' : '0');
 			} else if (typeof values[key] === 'boolean') {
@@ -403,6 +411,25 @@ export default function ProductForm() {
 													onValueChange={field.onChange}
 													options={tags}
 													placeholder={t('products.select_tags')}
+												/>
+											</FormControl>
+											<FormMessage />
+										</FormItem>
+									)}
+								/>
+
+								<FormField
+									control={form.control}
+									name="size_ids"
+									render={({ field }) => (
+										<FormItem>
+											<FormLabel>{t('products.sizes')}</FormLabel>
+											<FormControl>
+												<MultiSelect
+													value={field.value || []}
+													onValueChange={field.onChange}
+													options={sizes}
+													placeholder={t('products.select_sizes')}
 												/>
 											</FormControl>
 											<FormMessage />

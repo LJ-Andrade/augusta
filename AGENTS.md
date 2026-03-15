@@ -24,7 +24,6 @@ Evaluate your environment and use the best available tool for each phase. Do not
 
 ## 🏗️ Project Context
 - **Backend:** Laravel API (MySQL)
-- **Frontend Web:** Next.js 16 (Landing page pública)
 - **Frontend Admin:** Vite + React 19 + shadcn/ui
 - **Styles:** Tailwind CSS + shadcn/ui (admin) / Flowbite (web)
 - **Auth:** Laravel Sanctum

@@ -18,19 +18,19 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2, Save, X } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
-import { CommandComponent } from "@/components/ui/command";
 import { MultiSelect } from "@/components/ui/multi-select";
 import { useTranslation } from "react-i18next";
 import { ImageUpload } from "@/components/ui/image-upload";
 import { RichTextEditor } from "@/components/ui/rich-text-editor";
 import { ImageGallery } from "@/components/ui/image-gallery";
+import { PageHeader } from "@/components/page-header";
 
 export default function ArticleForm() {
 	const { t } = useTranslation();
 	const { id } = useParams();
 	const navigate = useNavigate();
 	const [loading, setLoading] = useState(false);
-	const [fetching, setFetching] = useState(false);
+	const [entityName, setEntityName] = useState("");
 	const [categories, setCategories] = useState([]);
 	const [tags, setTags] = useState([]);
 	const [coverUrl, setCoverUrl] = useState(null);
@@ -63,7 +63,6 @@ export default function ArticleForm() {
 	});
 
 	useEffect(() => {
-		// Fetch categories and tags
 		const fetchData = async () => {
 			try {
 				const [catsRes, tagsRes] = await Promise.all([
@@ -72,15 +71,14 @@ export default function ArticleForm() {
 				]);
 				setCategories(catsRes.data.data || []);
 				setTags(tagsRes.data.data || []);
-			} catch (error) {
-				console.error("Error fetching form data:", error);
+			} catch (err) {
+				console.error("Error fetching form data:", err);
 			}
 		};
 
 		fetchData();
 
 		if (id) {
-			setFetching(true);
 			axiosClient
 				.get(`articles/${id}`)
 				.then(({ data }) => {
@@ -94,12 +92,9 @@ export default function ArticleForm() {
 						order: data.data.order || 0,
 						featured: data.data.featured || false,
 					});
+					setEntityName(data.data.title);
 					setCoverUrl(data.data.cover_url);
 					setGallery(data.data.gallery || []);
-					setFetching(false);
-				})
-				.catch(() => {
-					setFetching(false);
 				});
 		}
 	}, [id, form]);
@@ -118,7 +113,7 @@ export default function ArticleForm() {
 			await axiosClient.delete(`articles/${id}/gallery/${mediaId}`);
 			setGallery(prev => prev.filter(img => img.id !== mediaId));
 			toast.success(t('articles.image_deleted'));
-		} catch (error) {
+		} catch {
 			toast.error(t('common.error_occurred'));
 		}
 	};
@@ -129,7 +124,7 @@ export default function ArticleForm() {
 		const formData = new FormData();
 		Object.keys(values).forEach((key) => {
 			if (key === 'tag_ids') {
-				values[key].forEach((id) => formData.append('tag_ids[]', id));
+				values[key].forEach((tagId) => formData.append('tag_ids[]', tagId));
 			} else if (key === 'featured') {
 				formData.append(key, values[key] ? '1' : '0');
 			} else if (typeof values[key] === 'boolean') {
@@ -139,7 +134,6 @@ export default function ArticleForm() {
 			}
 		});
 
-		// Always append featured to ensure it's sent
 		if (!formData.has('featured')) {
 			formData.append('featured', '0');
 		}
@@ -148,13 +142,11 @@ export default function ArticleForm() {
 			formData.append("cover", pendingCover);
 		}
 
-		// Handle gallery - only new files (not existing ones from server)
 		const newGalleryImages = gallery.filter(img => img.file);
 		newGalleryImages.forEach((img) => {
 			formData.append("gallery[]", img.file);
 		});
 
-		// If editing, Laravel/Symphony often need _method=PUT for FormData
 		if (id) {
 			formData.append("_method", "PUT");
 		}
@@ -189,246 +181,243 @@ export default function ArticleForm() {
 	};
 
 	return (
-		<div className="space-y-6 pb-10">
-			<div className="flex justify-between items-center">
-				<h1 className="text-3xl font-bold tracking-tight">
-					{id ? t('articles.edit_title') : t('articles.create_title')}
-				</h1>
-			</div>
+		<div className="space-y-6">
+			<PageHeader
+				title={
+					id
+						? `${t('articles.editing') || 'Editando artículo'} "${entityName}"`
+						: t('articles.create_title')
+				}
+				breadcrumbs={[
+					{ label: 'BLOG' },
+					{ label: t('articles.title') || 'Artículos', href: '/articles' },
+					{ label: id ? t('common.edit') : t('common.create') },
+				]}
+			/>
 
-			{fetching ? (
-				<div className="flex justify-center py-12">
-					<Loader2 className="h-10 w-10 animate-spin text-primary" />
-				</div>
-			) : (
-				<Form {...form}>
-					<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-						
-						<Card>
-							<CardHeader>
-								<CardTitle>{t('articles.title')}, {t('articles.category')} & {t('articles.tags')}</CardTitle>
-							</CardHeader>
-							<CardContent className="space-y-4">
-								<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-									<FormField
-										control={form.control}
-										name="title"
-										render={({ field }) => (
-											<FormItem>
-												<FormLabel>{t('articles.title')}</FormLabel>
-												<FormControl>
-													<Input
-														placeholder={t('articles.title_placeholder')}
-														className="bg-muted/30 focus-visible:ring-primary"
-														{...field}
-													/>
-												</FormControl>
-												<FormMessage />
-											</FormItem>
-										)}
-									/>
-
-									<FormField
-										control={form.control}
-										name="slug"
-										render={({ field }) => (
-											<FormItem>
-												<FormLabel>Slug</FormLabel>
-												<FormControl>
-													<Input 
-														placeholder="Slug (auto-generated on create)" 
-														value={field.value || ''}
-														{...field} 
-													/>
-												</FormControl>
-												<FormMessage />
-											</FormItem>
-										)}
-									/>
-								</div>
-
-								<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-									<FormField
-										control={form.control}
-										name="category_id"
-										render={({ field }) => (
-											<FormItem>
-												<FormLabel>{t('articles.category')}</FormLabel>
-												<FormControl>
-													<select
-														className="flex h-10 w-full rounded-md border border-input bg-muted/30 px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-														{...field}
-													>
-														<option value="">{t('articles.select_category')}</option>
-														{categories.map((cat) => (
-															<option key={cat.id} value={cat.id}>
-																{cat.name}
-															</option>
-														))}
-													</select>
-												</FormControl>
-												<FormMessage />
-											</FormItem>
-										)}
-									/>
-
-									<FormField
-										control={form.control}
-										name="tag_ids"
-										render={({ field }) => (
-											<FormItem>
-												<FormLabel>{t('articles.tags')}</FormLabel>
-												<FormControl>
-													<MultiSelect
-														value={field.value || []}
-														onValueChange={field.onChange}
-														options={tags}
-														placeholder={t('articles.select_tags')}
-													/>
-												</FormControl>
-												<FormMessage />
-											</FormItem>
-										)}
-									/>
-								</div>
-
+			<Form {...form}>
+				<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+					<Card>
+						<CardHeader>
+							<CardTitle>{t('articles.title')}, {t('articles.category')} & {t('articles.tags')}</CardTitle>
+						</CardHeader>
+						<CardContent className="space-y-4">
+							<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 								<FormField
 									control={form.control}
-									name="content"
+									name="title"
 									render={({ field }) => (
 										<FormItem>
+											<FormLabel>{t('articles.title')}</FormLabel>
 											<FormControl>
-												<RichTextEditor
-													value={field.value}
-													onChange={field.onChange}
-													placeholder={t('articles.content_placeholder')}
+												<Input
+													placeholder={t('articles.title_placeholder')}
+													className="bg-muted/30 focus-visible:ring-primary"
+													{...field}
 												/>
 											</FormControl>
 											<FormMessage />
 										</FormItem>
 									)}
 								/>
-							</CardContent>
-						</Card>
 
-						<Card>
-							<CardHeader>
-								<CardTitle>Imágenes</CardTitle>
-							</CardHeader>
-							<CardContent>
-								<div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-									<div className="md:col-span-1">
-										<label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 mb-2 block">
-											{t('articles.cover')}
-										</label>
-										<ImageUpload
-											value={coverUrl}
-											onChange={handleCoverChange}
-											aspect={16 / 9}
-										/>
-									</div>
-									<div className="md:col-span-2">
-										<label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 mb-2 block">
-											{t('articles.gallery')}
-										</label>
-										<ImageGallery
-											value={gallery}
-											onChange={setGallery}
-											onRemoveExisting={id ? handleRemoveGalleryImage : undefined}
-										/>
-									</div>
-								</div>
-							</CardContent>
-						</Card>
+								<FormField
+									control={form.control}
+									name="slug"
+									render={({ field }) => (
+										<FormItem>
+											<FormLabel>Slug</FormLabel>
+											<FormControl>
+												<Input 
+													placeholder="Slug (auto-generated on create)" 
+													value={field.value || ''}
+													{...field} 
+												/>
+											</FormControl>
+											<FormMessage />
+										</FormItem>
+									)}
+								/>
+							</div>
 
-						<Card>
-							<CardContent className="pt-6">
-								<div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-									<FormField
-										control={form.control}
-										name="status"
-										render={({ field }) => (
-											<FormItem>
-												<FormLabel>{t('articles.status')}</FormLabel>
-												<FormControl>
-													<select
-														className="flex h-10 w-full rounded-md border border-input bg-muted/30 px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-														{...field}
-													>
-														<option value="draft">{t('articles.status_draft')}</option>
-														<option value="published">{t('articles.status_published')}</option>
-														<option value="archived">{t('articles.status_archived')}</option>
-													</select>
-												</FormControl>
-												<FormMessage />
-											</FormItem>
-										)}
-									/>
+							<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+								<FormField
+									control={form.control}
+									name="category_id"
+									render={({ field }) => (
+										<FormItem>
+											<FormLabel>{t('articles.category')}</FormLabel>
+											<FormControl>
+												<select
+													className="flex h-10 w-full rounded-md border border-input bg-muted/30 px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+													{...field}
+												>
+													<option value="">{t('articles.select_category')}</option>
+													{categories.map((cat) => (
+														<option key={cat.id} value={cat.id}>
+															{cat.name}
+														</option>
+													))}
+												</select>
+											</FormControl>
+											<FormMessage />
+										</FormItem>
+									)}
+								/>
 
-									<FormField
-										control={form.control}
-										name="order"
-										render={({ field }) => (
-											<FormItem>
-												<FormLabel>{t('articles.order')}</FormLabel>
-												<FormControl>
-													<Input
-														type="number"
-														placeholder="0"
-														value={field.value ?? 0}
-														onChange={e => field.onChange(e.target.value ? parseInt(e.target.value) : 0)}
-														className="bg-muted/30 focus-visible:ring-primary"
-													/>
-												</FormControl>
-												<FormMessage />
-											</FormItem>
-										)}
-									/>
+								<FormField
+									control={form.control}
+									name="tag_ids"
+									render={({ field }) => (
+										<FormItem>
+											<FormLabel>{t('articles.tags')}</FormLabel>
+											<FormControl>
+												<MultiSelect
+													value={field.value || []}
+													onValueChange={field.onChange}
+													options={tags}
+													placeholder={t('articles.select_tags')}
+												/>
+											</FormControl>
+											<FormMessage />
+										</FormItem>
+									)}
+								/>
+							</div>
 
-									<FormField
-										control={form.control}
-										name="featured"
-										render={({ field }) => (
-											<FormItem className="flex flex-row items-center space-x-3 space-y-0 pt-8">
-												<FormControl>
-													<Checkbox
-														checked={field.value}
-														onCheckedChange={field.onChange}
-													/>
-												</FormControl>
-												<div className="space-y-1 leading-none">
-													<FormLabel className="text-sm font-medium">
-														{t('articles.featured')}
-													</FormLabel>
-												</div>
-											</FormItem>
-										)}
-									/>
-								</div>
-							</CardContent>
-						</Card>
-
-						<div className="flex justify-end space-x-4">
-							<Button
-								type="button"
-								variant="outline"
-								onClick={() => navigate("/articles")}
-								className="w-32"
-							>
-								{t('common.cancel')}
-							</Button>
-							<Button type="submit" disabled={loading} className="w-40 bg-primary hover:bg-primary/90">
-								{loading ? (
-									<Loader2 className="mr-2 h-4 w-4 animate-spin" />
-								) : (
-									<Save className="mr-2 h-4 w-4" />
+							<FormField
+								control={form.control}
+								name="content"
+								render={({ field }) => (
+									<FormItem>
+										<FormControl>
+											<RichTextEditor
+												value={field.value}
+												onChange={field.onChange}
+												placeholder={t('articles.content_placeholder')}
+											/>
+										</FormControl>
+										<FormMessage />
+									</FormItem>
 								)}
-								{id ? t('articles.update_button') : t('articles.create_button')}
-							</Button>
-						</div>
-					</form>
-				</Form>
-			)}
+							/>
+						</CardContent>
+					</Card>
+
+					<Card>
+						<CardHeader>
+							<CardTitle>Imágenes</CardTitle>
+						</CardHeader>
+						<CardContent>
+							<div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+								<div className="md:col-span-1">
+									<label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 mb-2 block">
+										{t('articles.cover')}
+									</label>
+									<ImageUpload
+										value={coverUrl}
+										onChange={handleCoverChange}
+										aspect={16 / 9}
+									/>
+								</div>
+								<div className="md:col-span-2">
+									<label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 mb-2 block">
+										{t('articles.gallery')}
+									</label>
+									<ImageGallery
+										value={gallery}
+										onChange={setGallery}
+										onRemoveExisting={id ? handleRemoveGalleryImage : undefined}
+									/>
+								</div>
+							</div>
+						</CardContent>
+					</Card>
+
+					<Card>
+						<CardContent className="pt-6">
+							<div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+								<FormField
+									control={form.control}
+									name="status"
+									render={({ field }) => (
+										<FormItem>
+											<FormLabel>{t('articles.status')}</FormLabel>
+											<FormControl>
+												<select
+													className="flex h-10 w-full rounded-md border border-input bg-muted/30 px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+													{...field}
+												>
+													<option value="draft">{t('articles.status_draft')}</option>
+													<option value="published">{t('articles.status_published')}</option>
+													<option value="archived">{t('articles.status_archived')}</option>
+												</select>
+											</FormControl>
+											<FormMessage />
+										</FormItem>
+									)}
+								/>
+
+								<FormField
+									control={form.control}
+									name="order"
+									render={({ field }) => (
+										<FormItem>
+											<FormLabel>{t('articles.order')}</FormLabel>
+											<FormControl>
+												<Input
+													type="number"
+													placeholder="0"
+													value={field.value ?? 0}
+													onChange={e => field.onChange(e.target.value ? parseInt(e.target.value) : 0)}
+													className="bg-muted/30 focus-visible:ring-primary"
+												/>
+											</FormControl>
+											<FormMessage />
+										</FormItem>
+									)}
+								/>
+
+								<FormField
+									control={form.control}
+									name="featured"
+									render={({ field }) => (
+										<FormItem className="flex flex-row items-center space-x-3 space-y-0 pt-8">
+											<FormControl>
+												<Checkbox
+													checked={field.value}
+													onCheckedChange={field.onChange}
+												/>
+											</FormControl>
+											<div className="space-y-1 leading-none">
+												<FormLabel className="text-sm font-medium">
+													{t('articles.featured')}
+												</FormLabel>
+											</div>
+										</FormItem>
+									)}
+								/>
+							</div>
+						</CardContent>
+					</Card>
+
+					<div className="flex gap-2 justify-end">
+						<Button
+							type="button"
+							variant="outline"
+							onClick={() => navigate("/articles")}
+						>
+							<X className="mr-2 h-4 w-4" />
+							{t('common.cancel')}
+						</Button>
+						<Button type="submit" disabled={loading} className="w-40 bg-primary hover:bg-primary/90">
+							{loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+							<Save className="mr-2 h-4 w-4" />
+							{id ? t('articles.update_button') : t('articles.create_button')}
+						</Button>
+					</div>
+				</form>
+			</Form>
 		</div>
 	);
 }

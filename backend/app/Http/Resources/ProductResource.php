@@ -26,6 +26,7 @@ class ProductResource extends JsonResource
             'category' => new ProductCategoryResource($this->whenLoaded('category')),
             'subcategory' => new ProductCategoryResource($this->whenLoaded('subcategory')),
             'tags' => ProductTagResource::collection($this->whenLoaded('tags')),
+            'sizes' => ProductSizeResource::collection($this->whenLoaded('sizes')),
             'cover_url' => $this->getFirstMediaUrl('cover'),
             'gallery' => $this->getMedia('gallery')->map(function ($media) {
                 return [

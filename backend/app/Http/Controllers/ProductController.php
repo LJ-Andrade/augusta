@@ -93,6 +93,8 @@ class ProductController extends Controller
             'subcategory_id' => 'nullable|exists:product_categories,id',
             'tag_ids' => 'nullable|array',
             'tag_ids.*' => 'exists:product_tags,id',
+            'size_ids' => 'nullable|array',
+            'size_ids.*' => 'exists:product_sizes,id',
             'featured' => 'nullable|boolean',
             'order' => 'nullable|integer',
             'cover' => 'nullable|image|max:2048',
@@ -123,6 +125,10 @@ class ProductController extends Controller
             $product->tags()->sync($request->input('tag_ids'));
         }
 
+        if ($request->has('size_ids')) {
+            $product->sizes()->sync($request->input('size_ids'));
+        }
+
         if ($request->hasFile('cover')) {
             $product->addMediaFromRequest('cover')->toMediaCollection('cover');
         }
@@ -139,19 +145,19 @@ class ProductController extends Controller
             $product->addMediaFromRequest('document')->toMediaCollection('document');
         }
 
-        return new ProductResource($product->load(['author', 'category', 'tags']));
+        return new ProductResource($product->load(['author', 'category', 'tags', 'sizes']));
     }
 
     public function show(Product $product)
     {
-        return new ProductResource($product->load(['author', 'category', 'tags', 'media']));
+        return new ProductResource($product->load(['author', 'category', 'tags', 'sizes', 'media']));
     }
 
     public function regenerateQr(Product $product)
     {
         $product->qr_url = $product->generateQrUrl();
         $product->save();
-        return new ProductResource($product->load(['author', 'category', 'tags', 'media']));
+        return new ProductResource($product->load(['author', 'category', 'tags', 'sizes', 'media']));
     }
 
     public function updateQrUrl(Request $request, Product $product)
@@ -163,7 +169,7 @@ class ProductController extends Controller
         $product->qr_url = $validated['qr_url'];
         $product->save();
         
-        return new ProductResource($product->load(['author', 'category', 'tags', 'media']));
+        return new ProductResource($product->load(['author', 'category', 'tags', 'sizes', 'media']));
     }
 
     public function update(Request $request, Product $product)
@@ -179,6 +185,8 @@ class ProductController extends Controller
             'subcategory_id' => 'nullable|exists:product_categories,id',
             'tag_ids' => 'nullable|array',
             'tag_ids.*' => 'exists:product_tags,id',
+            'size_ids' => 'nullable|array',
+            'size_ids.*' => 'exists:product_sizes,id',
             'featured' => 'nullable|boolean',
             'order' => 'nullable|integer',
             'cover' => 'nullable|image|max:2048',
@@ -209,6 +217,10 @@ class ProductController extends Controller
             $product->tags()->sync($request->input('tag_ids'));
         }
 
+        if ($request->has('size_ids')) {
+            $product->sizes()->sync($request->input('size_ids'));
+        }
+
         if ($request->hasFile('cover')) {
             $product->addMediaFromRequest('cover')->toMediaCollection('cover');
         }
@@ -231,7 +243,7 @@ class ProductController extends Controller
             $product->addMediaFromRequest('document')->toMediaCollection('document');
         }
 
-        return new ProductResource($product->load(['author', 'category', 'tags']));
+        return new ProductResource($product->load(['author', 'category', 'tags', 'sizes']));
     }
 
     public function quickUpdate(Request $request, Product $product)
@@ -262,7 +274,7 @@ class ProductController extends Controller
 
         $product->save();
 
-        return new ProductResource($product->load(['author', 'category', 'tags']));
+        return new ProductResource($product->load(['author', 'category', 'tags', 'sizes']));
     }
 
     public function deleteGalleryImage(Product $product, $mediaId)

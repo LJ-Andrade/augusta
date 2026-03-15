@@ -22,6 +22,8 @@ class BusinessSettingsSeeder extends Seeder
             ['key' => 'business_tiktok', 'value' => '', 'description' => 'URL de TikTok'],
             ['key' => 'mail_to_address', 'value' => '', 'description' => 'Email destino para formulario de contacto'],
             ['key' => 'business_name', 'value' => '', 'description' => 'Nombre del negocio mostrado en el sidebar'],
+            ['key' => 'language_default_mode', 'value' => 'light', 'description' => 'Modo de idioma por defecto (light/dark)'],
+            ['key' => 'language_toggle_enabled', 'value' => 'true', 'description' => 'Habilitar cambio de idioma'],
         ];
 
         foreach ($settings as $setting) {

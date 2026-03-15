@@ -19,6 +19,10 @@ import ProductTagsList from './views/product-tags/TagsList';
 import ProductTagForm from './views/product-tags/TagForm';
 import ProductColorsList from './views/product-colors/ProductColorsList';
 import ProductColorForm from './views/product-colors/ProductColorForm';
+import ProductSizesList from './views/product-sizes/ProductSizesList';
+import ProductSizeForm from './views/product-sizes/ProductSizeForm';
+import CouponsList from './views/coupons/CouponList';
+import CouponForm from './views/coupons/CouponForm';
 import AutopostGenerator from './views/autopost/AutopostGenerator';
 import AutopostSettings from './views/autopost/AutopostSettings';
 import ProductsShow from './views/products/ProductsShow';
@@ -302,6 +306,42 @@ function App() {
         <Route path="/product-colors/edit/:id" element={
           <ProtectedRoute permission="manage product colors">
             <ProductColorForm />
+          </ProtectedRoute>
+        } />
+
+        <Route path="/product-sizes" element={
+          <ProtectedRoute permission="view product sizes">
+            <ProductSizesList />
+          </ProtectedRoute>
+        } />
+
+        <Route path="/product-sizes/create" element={
+          <ProtectedRoute permission="manage product sizes">
+            <ProductSizeForm />
+          </ProtectedRoute>
+        } />
+
+        <Route path="/product-sizes/edit/:id" element={
+          <ProtectedRoute permission="manage product sizes">
+            <ProductSizeForm />
+          </ProtectedRoute>
+        } />
+
+        <Route path="/coupons" element={
+          <ProtectedRoute permission="view coupons">
+            <CouponsList />
+          </ProtectedRoute>
+        } />
+
+        <Route path="/coupons/create" element={
+          <ProtectedRoute permission="manage coupons">
+            <CouponForm />
+          </ProtectedRoute>
+        } />
+
+        <Route path="/coupons/edit/:id" element={
+          <ProtectedRoute permission="manage coupons">
+            <CouponForm />
           </ProtectedRoute>
         } />
 

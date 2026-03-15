@@ -9,8 +9,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Button } from "@/components/ui/button";
-import { AlertTriangle, Mail } from "lucide-react";
+import { AlertTriangle } from "lucide-react";
 
 export function ConfirmationDialog({
   children,
@@ -53,18 +52,16 @@ export function ConfirmationDialog({
                 )}
               </div>
             )}
-            <div>
-              <AlertDialogTitle>{title}</AlertDialogTitle>
-            </div>
+            <AlertDialogTitle>{title}</AlertDialogTitle>
           </div>
           {description && (
-            <AlertDialogDescription className="mt-2">
+            <AlertDialogDescription className="ml-[3.5rem]">
               {description}
             </AlertDialogDescription>
           )}
         </AlertDialogHeader>
-        <AlertDialogFooter>
-          {showCancel && <AlertDialogCancel>{cancelText}</AlertDialogCancel>}
+        <AlertDialogFooter className="flex-col-reverse sm:flex-row">
+          {showCancel && <AlertDialogCancel className="mt-2 sm:mt-0">{cancelText}</AlertDialogCancel>}
           <AlertDialogAction
             onClick={handleConfirm}
             className={variant === "destructive" ? "bg-red-600 hover:bg-red-700" : ""}

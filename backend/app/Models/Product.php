@@ -66,6 +66,11 @@ class Product extends Model implements HasMedia
         return $this->belongsToMany(ProductTag::class, 'product_product_tag', 'product_id', 'product_tag_id');
     }
 
+    public function sizes(): BelongsToMany
+    {
+        return $this->belongsToMany(ProductSize::class, 'product_product_size', 'product_id', 'product_size_id');
+    }
+
     protected static function boot()
     {
         parent::boot();

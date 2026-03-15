@@ -1,7 +1,7 @@
 <?php
 
 $prodOrigins = [
-	'https://augustamoi.com/api'
+	'https://augustamoi.studiovimana.com.ar'
 ];
 
 return [

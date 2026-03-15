@@ -1,0 +1,339 @@
+import * as React from 'react';
+import { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { Switch } from '@/components/ui/switch';
+import { Badge } from '@/components/ui/badge';
+import {
+	Plus,
+	Edit,
+	Trash2,
+	Search,
+	Filter,
+	X,
+	ChevronDown,
+} from 'lucide-react';
+import {
+	Collapsible,
+	CollapsibleContent,
+	CollapsibleTrigger,
+} from '@/components/ui/collapsible';
+import {
+	DropdownMenuItem,
+} from '@/components/ui/dropdown-menu';
+import Can from '@/components/can';
+import { useTranslation } from 'react-i18next';
+import { useCrudList } from '@/hooks/use-crud-list';
+import { CrudTable } from '@/components/crud-table';
+import { CrudPagination } from '@/components/crud-pagination';
+import { BulkActionsBar } from '@/components/bulk-actions-bar';
+import { ConfirmationDialog } from '@/components/confirmation-dialog';
+import { PageHeader } from '@/components/page-header';
+import axiosClient from '@/lib/axios';
+
+export default function CouponList() {
+	const { t } = useTranslation();
+	const navigate = useNavigate();
+	const [isFiltersOpen, setIsFiltersOpen] = useState(false);
+	const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+	const [couponToDelete, setCouponToDelete] = useState(null);
+	const [updatingId, setUpdatingId] = useState(null);
+
+	const {
+		items: coupons,
+		loading,
+		meta,
+		page,
+		setPage,
+		filters,
+		setFilter,
+		clearFilters,
+		sortBy,
+		sortDir,
+		handleSort,
+		deleteItem,
+		bulkDelete,
+		selectedIds,
+		selectedCount,
+		isAllSelected,
+		toggleSelect,
+		toggleSelectAll,
+		clearSelection,
+		fetchItems: refresh,
+	} = useCrudList({
+		endpoint: 'coupons',
+		filterKeys: ['search', 'filter_id', 'filter_code'],
+		defaultSort: { column: 'id', direction: 'desc' },
+	});
+
+	// Listen for refresh event from form
+	React.useEffect(() => {
+		const handleRefresh = () => refresh();
+		window.addEventListener('refresh-coupons', handleRefresh);
+		return () => window.removeEventListener('refresh-coupons', handleRefresh);
+	}, [refresh]);
+
+	const handleActiveToggle = async (coupon) => {
+		if (!coupon || !coupon.id) {
+			console.error('Coupon or coupon.id is undefined:', coupon);
+			return;
+		}
+		console.log('Toggle coupon id:', coupon.id, 'current active:', coupon.active);
+		setUpdatingId(coupon.id);
+		try {
+			const payload = {
+				active: !coupon.active
+			};
+			await axiosClient.put(`/coupons/${coupon.id}`, payload);
+			refresh();
+		} catch (error) {
+			console.error('Error updating coupon:', error);
+		} finally {
+			setUpdatingId(null);
+		}
+	};
+
+	const columns = [
+		{ key: 'id', label: t('coupons.id') || 'ID', sortable: true, width: 'w-[60px]' },
+		{ key: 'code', label: t('coupons.code') || 'Código', sortable: true },
+		{ 
+			key: 'discount_type', 
+			label: t('coupons.discount_type') || 'Tipo de descuento', 
+			sortable: true,
+			render: (_, coupon) => (
+				<Badge variant={coupon.discount_type === 'percentage' ? 'default' : 'secondary'}>
+					{coupon.discount_type === 'percentage' ? t('coupons.percentage') : t('coupons.fixed')}
+				</Badge>
+			)
+		},
+		{ 
+			key: 'amount', 
+			label: t('coupons.amount') || 'Monto', 
+			sortable: true,
+			align: 'right',
+			render: (_, coupon) => (
+				coupon.discount_type === 'percentage' 
+					? `${coupon.amount}%` 
+					: `$${coupon.amount}`
+			)
+		},
+		{ 
+			key: 'expires_at', 
+			label: t('coupons.expires_at') || 'Expira', 
+			sortable: true, 
+			width: 'w-[130px]', 
+			format: 'date' 
+		},
+		{ 
+			key: 'active', 
+			label: t('coupons.active') || 'Activo', 
+			sortable: true,
+			align: 'center',
+			width: 'w-[80px]',
+			render: (_, coupon) => {
+				console.log('Switch render - coupon:', coupon);
+				return (
+				<Switch
+					checked={coupon.active}
+					onCheckedChange={() => handleActiveToggle(coupon)}
+					disabled={updatingId === coupon.id}
+				/>
+			)}
+		},
+	];
+
+	const handleDeleteClick = (coupon) => {
+		setCouponToDelete(coupon);
+		setDeleteDialogOpen(true);
+	};
+
+	const handleConfirmDelete = async () => {
+		if (!couponToDelete) return;
+
+		const success = await deleteItem(couponToDelete.id, {
+			successMessage: t('coupons.delete_success') || 'Cupón eliminado correctamente',
+			errorMessage: t('coupons.delete_error') || 'Error al eliminar el cupón',
+		});
+
+		if (success) {
+			setDeleteDialogOpen(false);
+			setCouponToDelete(null);
+		}
+	};
+
+	const handleBulkDeleteClick = async () => {
+		const success = await bulkDelete(selectedIds, {
+			successMessage: t('common.bulk_delete_success'),
+			errorMessage: t('common.bulk_delete_error'),
+		});
+
+		if (success) {
+			setIsDeleting(false);
+		}
+	};
+
+	const renderActions = (coupon, isDropdown = false) => (
+		<Can permission="manage coupons">
+			{isDropdown ? (
+				<>
+					<DropdownMenuItem onClick={() => navigate(`/coupons/edit/${coupon.id}`)}>
+						<Edit className="mr-2 h-4 w-4" /> {t('common.edit')}
+					</DropdownMenuItem>
+					<DropdownMenuItem onClick={() => handleDeleteClick(coupon)} className="text-red-500">
+						<Trash2 className="mr-2 h-4 w-4" /> {t('common.delete')}
+					</DropdownMenuItem>
+				</>
+			) : (
+				<>
+					<Button
+						variant="ghost"
+						size="icon"
+						className="h-8 w-8"
+						onClick={() => navigate(`/coupons/edit/${coupon.id}`)}
+					>
+						<Edit className="h-4 w-4" />
+					</Button>
+					<Button
+						variant="ghost"
+						size="icon"
+						className="h-8 w-8 text-red-500"
+						onClick={() => handleDeleteClick(coupon)}
+					>
+						<Trash2 className="h-4 w-4" />
+					</Button>
+				</>
+			)}
+		</Can>
+	);
+
+	return (
+		<div className="space-y-6">
+			<PageHeader
+				title={t('coupons.title') || 'Cupones'}
+				breadcrumbs={[
+					{ label: 'PRODUCTOS' },
+					{ label: t('coupons.title') || 'Cupones' },
+				]}
+			/>
+
+			<Card>
+				<CardHeader className="flex flex-row items-center justify-start gap-2">
+					<Can permission="manage coupons">
+						<Button asChild>
+							<Link to="/coupons/create">
+								<Plus className="mr-2 h-4 w-4" /> {t('coupons.create') || 'Crear Cupón'}
+							</Link>
+						</Button>
+					</Can>
+				</CardHeader>
+
+				<CardContent>
+					<Collapsible
+						open={isFiltersOpen}
+						onOpenChange={setIsFiltersOpen}
+						className="space-y-4 pb-4"
+					>
+						<div className="flex items-center justify-between gap-4">
+							<div className="relative w-full max-w-sm">
+								<Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+								<Input
+									type="search"
+									placeholder={t('coupons.search_placeholder') || 'Buscar cupones...'}
+									className="pl-8"
+									value={filters.search}
+									onChange={(e) => setFilter('search', e.target.value)}
+								/>
+							</div>
+							<CollapsibleTrigger asChild>
+								<Button variant="outline" size="sm">
+									<Filter className="mr-2 h-4 w-4" />
+									{t('products.advanced_search') || 'Búsqueda avanzada'}
+									<ChevronDown
+										className={`ml-2 h-4 w-4 transition-transform ${isFiltersOpen ? 'rotate-180' : ''
+											}`}
+									/>
+								</Button>
+							</CollapsibleTrigger>
+						</div>
+
+						<CollapsibleContent className="space-y-4">
+							<div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 border rounded-lg bg-muted/50">
+								<div className="space-y-2">
+									<label htmlFor="filterId" className="text-sm font-medium">
+										{t('coupons.id') || 'ID'}
+									</label>
+									<Input
+										id="filterId"
+										placeholder={t('coupons.id') || 'ID'}
+										value={filters.filter_id}
+										onChange={(e) => setFilter('filter_id', e.target.value)}
+									/>
+								</div>
+								<div className="space-y-2">
+									<label htmlFor="filterCode" className="text-sm font-medium">
+										{t('coupons.code') || 'Código'}
+									</label>
+									<Input
+										id="filterCode"
+										placeholder={t('coupons.code') || 'Código'}
+										value={filters.filter_code}
+										onChange={(e) => setFilter('filter_code', e.target.value)}
+									/>
+								</div>
+							</div>
+							<div className="flex justify-end">
+								<Button variant="ghost" size="sm" onClick={clearFilters}>
+									<X className="mr-2 h-4 w-4" />
+									{t('products.clear_filters') || 'Limpiar filtros'}
+								</Button>
+							</div>
+						</CollapsibleContent>
+					</Collapsible>
+
+					<CrudTable
+						items={coupons}
+						columns={columns}
+						loading={loading}
+						selectable={true}
+						selectedIds={selectedIds}
+						isAllSelected={isAllSelected}
+						onSelect={toggleSelect}
+						onSelectAll={toggleSelectAll}
+						sortBy={sortBy}
+						sortDir={sortDir}
+						onSort={handleSort}
+						actions={renderActions}
+						emptyMessage={t('common.no_data')}
+						loadingMessage={t('common.loading')}
+					/>
+
+					<CrudPagination
+						meta={meta}
+						page={page}
+						onPageChange={setPage}
+						prevLabel={t('common.previous')}
+						nextLabel={t('common.next')}
+					/>
+
+					<ConfirmationDialog
+						open={deleteDialogOpen}
+						onOpenChange={setDeleteDialogOpen}
+						title={t('common.confirm_delete')}
+						description={t('common.confirm_delete_description')}
+						confirmText={t('common.confirm')}
+						cancelText={t('common.cancel')}
+						onConfirm={handleConfirmDelete}
+					/>
+				</CardContent>
+
+				<BulkActionsBar
+					selectedCount={selectedCount}
+					onDelete={handleBulkDeleteClick}
+					onClear={clearSelection}
+				/>
+			</Card>
+		</div>
+	);
+}

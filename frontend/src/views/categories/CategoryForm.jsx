@@ -1,10 +1,5 @@
-import { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
-import { toast } from "sonner";
-import axiosClient from "@/lib/axios";
+import { useNavigate, useParams } from 'react-router-dom';
+import * as z from 'zod';
 import {
   Form,
   FormControl,
@@ -12,99 +7,75 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Loader2 } from "lucide-react";
-import { useTranslation } from "react-i18next";
-import { PageHeader } from "@/components/page-header";
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Loader2, Save, X } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import { PageHeader } from '@/components/page-header';
+import { useCrudForm } from '@/hooks/use-crud-form';
 
 export default function CategoryForm() {
   const { t } = useTranslation();
-  const { id } = useParams();
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(false);
-  const [fetching, setFetching] = useState(false);
+  const { id } = useParams();
 
   const formSchema = z.object({
-    name: z.string().min(2, t('validation.name_min')),
+    name: z.string().min(1, t('validation.name_min')),
   });
 
-  const form = useForm({
-    resolver: zodResolver(formSchema),
+  const { form, loading, fetching, entityName, onSubmit } = useCrudForm({
+    endpoint: 'categories',
+    id,
+    schema: formSchema,
     defaultValues: {
-      name: "",
+      name: '',
+    },
+    onSuccess: () => navigate('/categories'),
+    messages: {
+      createSuccess: t('categories.create_success'),
+      updateSuccess: t('categories.update_success'),
+      createError: t('categories.create_error'),
+      updateError: t('categories.update_error'),
     },
   });
 
-  useEffect(() => {
-    if (id) {
-      setFetching(true);
-      axiosClient
-        .get(`categories/${id}`)
-        .then(({ data }) => {
-          form.reset({
-            name: data.data.name,
-          });
-          setFetching(false);
-        })
-        .catch(() => {
-          setFetching(false);
-        });
-    }
-  }, [id, form]);
-
-  const onSubmit = (values) => {
-    setLoading(true);
-    const request = id
-      ? axiosClient.put(`categories/${id}`, values)
-      : axiosClient.post("categories", values);
-
-    request
-      .then(() => {
-        toast.success(id ? t('categories.update_success') : t('categories.create_success'));
-        form.reset();
-        navigate("/categories");
-      })
-      .catch((error) => {
-        console.error("API Error:", error.response?.data || error.message);
-        if (error.response && error.response.status === 422) {
-          const errors = error.response.data.errors;
-          Object.keys(errors).forEach((key) => {
-            form.setError(key, {
-              type: "manual",
-              message: errors[key][0],
-            });
-          });
-        }
-        setLoading(false);
-      });
-  };
+  if (fetching) {
+    return (
+      <div className="flex items-center justify-center h-96">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
       <PageHeader
-        title={id ? t('categories.edit_title', { name: form.getValues("name") || '' }) : t('categories.create_title')}
+        title={
+          id
+            ? `${t('categories.editing') || 'Editando categoría'} "${entityName}"`
+            : t('categories.create_title')
+        }
         breadcrumbs={[
-          { label: "Blog" },
-          { label: t('categories.title'), href: "/categories" },
-          { label: id ? t('categories.edit') : t('categories.create') }
+          { label: 'BLOG' },
+          { label: t('categories.title') || 'Categorías', href: '/categories' },
+          { label: id ? t('common.edit') : t('common.create') },
         ]}
       />
+
       <div className="max-w-2xl">
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-2xl">{id ? t('categories.edit') : t('categories.create')}</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {fetching ? (
-            <div className="flex justify-center py-8">
-              <Loader2 className="h-8 w-8 animate-spin text-primary" />
-            </div>
-          ) : (
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <Form {...form}>
+          <form onSubmit={onSubmit}>
+            <Card>
+              <CardHeader>
+                <CardTitle>
+                  {id
+                    ? `${t('categories.editing') || 'Editando categoría'} "${entityName}"`
+                    : t('categories.create_title')}
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
                 <FormField
                   control={form.control}
                   name="name"
@@ -112,32 +83,36 @@ export default function CategoryForm() {
                     <FormItem>
                       <FormLabel>{t('categories.name')}</FormLabel>
                       <FormControl>
-                        <Input placeholder={t('categories.name_placeholder')} {...field} />
+                        <Input
+                          {...field}
+                          placeholder={t('categories.name_placeholder')}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
 
-                <div className="flex justify-end space-x-2 pt-4">
+                <div className="flex gap-2 justify-end">
                   <Button
                     type="button"
                     variant="outline"
-                    onClick={() => navigate("/categories")}
+                    onClick={() => navigate('/categories')}
                   >
+                    <X className="mr-2 h-4 w-4" />
                     {t('common.cancel')}
                   </Button>
                   <Button type="submit" disabled={loading}>
                     {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    <Save className="mr-2 h-4 w-4" />
                     {id ? t('categories.update_button') : t('categories.create_button')}
                   </Button>
                 </div>
-              </form>
-            </Form>
-          )}
-        </CardContent>
-      </Card>
+              </CardContent>
+            </Card>
+          </form>
+        </Form>
+      </div>
     </div>
-  </div>
   );
 }

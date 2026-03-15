@@ -2,7 +2,7 @@ import { useEffect, useState, useCallback } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import axiosClient from "@/lib/axios";
-import { cn, formatDate } from "@/lib/utils";
+import { formatDate } from "@/lib/utils";
 import {
 	Table,
 	TableBody,
@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -26,19 +26,13 @@ import {
 	Plus,
 	Edit,
 	Trash2,
-	ChevronLeft,
-	ChevronRight,
 	Search,
-	ArrowUpDown,
-	ArrowUp,
-	ArrowDown,
 	Filter,
 	X,
 	ChevronDown,
 	Image as ImageIcon,
 	Eye,
 	Star,
-	MoreHorizontal,
 } from "lucide-react";
 import ArticlePreview from "@/components/article-preview";
 import {
@@ -48,62 +42,47 @@ import {
 } from "@/components/ui/collapsible";
 import Can from "@/components/can";
 import { useTranslation } from "react-i18next";
-import { useBulkSelect } from "@/hooks/use-bulk-select";
+import { useCrudList } from "@/hooks/use-crud-list";
+import { CrudPagination } from "@/components/crud-pagination";
 import { BulkActionsBar } from "@/components/bulk-actions-bar";
 import { ConfirmationDialog } from "@/components/confirmation-dialog";
+import { PageHeader } from "@/components/page-header";
 
 export default function ArticlesList() {
 	const { t } = useTranslation();
-	const [articles, setArticles] = useState([]);
-	const [categories, setCategories] = useState([]);
-	const [loading, setLoading] = useState(false);
-	const [meta, setMeta] = useState({});
-	const [page, setPage] = useState(1);
-	const [search, setSearch] = useState("");
-	const [debouncedSearch, setDebouncedSearch] = useState("");
-	const [filterCategory, setFilterCategory] = useState("");
-	const [filterStatus, setFilterStatus] = useState("");
-	const [isFiltersOpen, setIsFiltersOpen] = useState(false);
-	const [sortBy, setSortBy] = useState("id");
-	const [sortDir, setSortDir] = useState("desc");
 	const navigate = useNavigate();
+	const [categories, setCategories] = useState([]);
+	const [isFiltersOpen, setIsFiltersOpen] = useState(false);
 	const [previewOpen, setPreviewOpen] = useState(false);
 	const [previewArticle, setPreviewArticle] = useState(null);
-	const [isDeleting, setIsDeleting] = useState(false);
 	const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 	const [articleToDelete, setArticleToDelete] = useState(null);
 
 	const {
+		items: articles,
+		loading,
+		meta,
+		page,
+		setPage,
+		filters,
+		setFilter,
+		clearFilters,
+		sortBy,
+		sortDir,
+		handleSort,
+		deleteItem,
+		bulkDelete,
 		selectedIds,
 		selectedCount,
 		isAllSelected,
 		toggleSelect,
 		toggleSelectAll,
 		clearSelection,
-		isSelected,
-	} = useBulkSelect(articles);
-
-	useEffect(() => {
-		const handler = setTimeout(() => {
-			setDebouncedSearch(search);
-		}, 500);
-
-		return () => {
-			clearTimeout(handler);
-		};
-	}, [search]);
-
-	useEffect(() => {
-		setPage(1);
-	}, [debouncedSearch, filterCategory, filterStatus]);
-
-	useEffect(() => {
-		getArticles();
-	}, [page, debouncedSearch, filterCategory, filterStatus, sortBy, sortDir]);
-
-	useEffect(() => {
-		clearSelection();
-	}, [page, debouncedSearch, filterCategory, filterStatus, sortBy, sortDir]);
+	} = useCrudList({
+		endpoint: 'articles',
+		filterKeys: ['search', 'category_id', 'status'],
+		defaultSort: { column: 'id', direction: 'desc' },
+	});
 
 	useEffect(() => {
 		axiosClient.get("categories?all=1").then(({ data }) => {
@@ -111,45 +90,16 @@ export default function ArticlesList() {
 		});
 	}, []);
 
-	const getArticles = () => {
-		setLoading(true);
-		axiosClient
-			.get("articles", {
-				params: {
-					page,
-					search: debouncedSearch,
-					category_id: filterCategory,
-					status: filterStatus,
-					sort_by: sortBy,
-					sort_dir: sortDir,
-				},
-			})
-			.then(({ data }) => {
-				setArticles(data.data);
-				setMeta(data.meta || {});
-				setLoading(false);
-			})
-			.catch(() => {
-				setLoading(false);
-			});
-	};
-
 	const quickUpdate = useCallback((id, field, value) => {
-		const previousArticles = [...articles];
-		setArticles(articles.map(article =>
-			article.id === id ? { ...article, [field]: value } : article
-		));
-
 		axiosClient.patch(`/articles/${id}`, { [field]: value })
 			.then(() => {
 				toast.success(t('articles.update_success'));
 			})
 			.catch((error) => {
-				setArticles(previousArticles);
 				toast.error(t('common.error_occurred'));
 				console.error(error);
 			});
-	}, [articles, t]);
+	}, [t]);
 
 	const handleToggleFeatured = (article) => {
 		quickUpdate(article.id, 'featured', !article.featured);
@@ -163,68 +113,34 @@ export default function ArticlesList() {
 		quickUpdate(id, 'order', parseInt(newOrder) || 0);
 	}, [quickUpdate]);
 
-	const handleSort = (column) => {
-		if (sortBy === column) {
-			setSortDir(sortDir === "asc" ? "desc" : "asc");
-		} else {
-			setSortBy(column);
-			setSortDir("asc");
-		}
-	};
-
-	const handleClearFilters = () => {
-		setSearch("");
-		setFilterCategory("");
-		setFilterStatus("");
-		setPage(1);
-	};
-
-	const renderSortIcon = (column) => {
-		if (sortBy !== column) {
-			return <ArrowUpDown className="ml-2 h-4 w-4" />;
-		}
-		return sortDir === "asc" ? (
-			<ArrowUp className="ml-2 h-4 w-4" />
-		) : (
-			<ArrowDown className="ml-2 h-4 w-4" />
-		);
-	};
-
-	const onDeleteClick = (article) => {
+	const handleDeleteClick = (article) => {
 		setArticleToDelete(article);
 		setDeleteDialogOpen(true);
 	};
 
-	const handleConfirmDelete = () => {
+	const handleConfirmDelete = async () => {
 		if (!articleToDelete) return;
-		axiosClient.delete(`articles/${articleToDelete.id}`)
-			.then(() => {
-				toast.success(t('articles.delete_success'));
-				getArticles();
-			})
-			.catch((error) => {
-				toast.error(t('articles.delete_error'));
-				console.error(error);
-			})
-			.finally(() => {
-				setArticleToDelete(null);
-			});
+		
+		const success = await deleteItem(articleToDelete.id, {
+			successMessage: t('articles.delete_success'),
+			errorMessage: t('articles.delete_error'),
+		});
+		
+		if (success) {
+			setDeleteDialogOpen(false);
+			setArticleToDelete(null);
+		}
 	};
 
-	const handleBulkDelete = () => {
-		setIsDeleting(true);
-		axiosClient.post('articles/bulk-delete', { ids: selectedIds })
-			.then(() => {
-				toast.success(t('common.bulk_delete_success'));
-				clearSelection();
-				getArticles();
-			})
-			.catch(() => {
-				toast.error(t('common.bulk_delete_error'));
-			})
-			.finally(() => {
-				setIsDeleting(false);
-			});
+	const handleBulkDeleteClick = async () => {
+		const success = await bulkDelete(selectedIds, {
+			successMessage: t('common.bulk_delete_success'),
+			errorMessage: t('common.bulk_delete_error'),
+		});
+		
+		if (success) {
+			clearSelection();
+		}
 	};
 
 	const getStatusBadge = (status) => {
@@ -240,44 +156,78 @@ export default function ArticlesList() {
 		}
 	};
 
-	const renderPagination = () => {
-		const pages = [];
-		const startPage = Math.max(1, page - 2);
-		const endPage = Math.min(meta.last_page, startPage + 4);
-		const adjustedStartPage = Math.max(1, endPage - 4);
-
-		for (let i = adjustedStartPage; i <= endPage; i++) {
-			pages.push(
-				<Button
-					key={i}
-					variant={page === i ? "default" : "outline"}
-					size="sm"
-					onClick={() => setPage(i)}
-				>
-					{i}
-				</Button>
-			);
-		}
-		return pages;
-	};
+	const renderActions = (article, isDropdown = false) => (
+		<Can permission="edit articles">
+			{isDropdown ? (
+				<>
+					<DropdownMenuItem onClick={() => navigate(`/articles/edit/${article.id}`)}>
+						<Edit className="mr-2 h-4 w-4" /> {t('common.edit')}
+					</DropdownMenuItem>
+					<Can permission="delete articles">
+						<DropdownMenuItem onClick={() => handleDeleteClick(article)} className="text-red-500">
+							<Trash2 className="mr-2 h-4 w-4" /> {t('common.delete')}
+						</DropdownMenuItem>
+					</Can>
+				</>
+			) : (
+				<>
+					<Button
+						variant="ghost"
+						size="icon"
+						className="h-8 w-8"
+						onClick={() => {
+							setPreviewArticle(article);
+							setPreviewOpen(true);
+						}}
+					>
+						<Eye className="h-4 w-4" />
+					</Button>
+					<Can permission="edit articles">
+						<Button
+							variant="ghost"
+							size="icon"
+							className="h-8 w-8"
+							onClick={() => navigate(`/articles/edit/${article.id}`)}
+						>
+							<Edit className="h-4 w-4" />
+						</Button>
+					</Can>
+					<Can permission="delete articles">
+						<Button
+							variant="ghost"
+							size="icon"
+							className="h-8 w-8 text-red-500"
+							onClick={() => handleDeleteClick(article)}
+						>
+							<Trash2 className="h-4 w-4" />
+						</Button>
+					</Can>
+				</>
+			)}
+		</Can>
+	);
 
 	return (
 		<div className="space-y-6">
-			<div className="flex justify-between items-center">
-				<h1 className="text-3xl font-bold tracking-tight">{t('articles.title')}</h1>
-				<Can permission="create articles">
-					<Button asChild>
-						<Link to="/articles/create">
-							<Plus className="mr-2 h-4 w-4" /> {t('articles.create')}
-						</Link>
-					</Button>
-				</Can>
-			</div>
+			<PageHeader
+				title={t('articles.title') || 'Artículos'}
+				breadcrumbs={[
+					{ label: 'BLOG' },
+					{ label: t('articles.title') || 'Artículos' },
+				]}
+			/>
 
 			<Card>
-				<CardHeader>
-					<CardTitle>{t('articles.manage')}</CardTitle>
+				<CardHeader className="flex flex-row items-center justify-start gap-2">
+					<Can permission="create articles">
+						<Button asChild>
+							<Link to="/articles/create">
+								<Plus className="mr-2 h-4 w-4" /> {t('articles.create')}
+							</Link>
+						</Button>
+					</Can>
 				</CardHeader>
+
 				<CardContent>
 					<Collapsible
 						open={isFiltersOpen}
@@ -291,8 +241,8 @@ export default function ArticlesList() {
 									type="search"
 									placeholder={t('articles.search_placeholder')}
 									className="pl-8"
-									value={search}
-									onChange={(e) => setSearch(e.target.value)}
+									value={filters.search}
+									onChange={(e) => setFilter('search', e.target.value)}
 								/>
 							</div>
 							<CollapsibleTrigger asChild>
@@ -311,8 +261,8 @@ export default function ArticlesList() {
 									<select
 										id="filterCategory"
 										className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-										value={filterCategory}
-										onChange={(e) => setFilterCategory(e.target.value)}
+										value={filters.category_id}
+										onChange={(e) => setFilter('category_id', e.target.value)}
 									>
 										<option value="">{t('articles.all_categories')}</option>
 										{categories.map((category) => (
@@ -327,8 +277,8 @@ export default function ArticlesList() {
 									<select
 										id="filterStatus"
 										className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-										value={filterStatus}
-										onChange={(e) => setFilterStatus(e.target.value)}
+										value={filters.status}
+										onChange={(e) => setFilter('status', e.target.value)}
 									>
 										<option value="">{t('articles.all_statuses')}</option>
 										<option value="draft">{t('articles.status_draft')}</option>
@@ -341,7 +291,7 @@ export default function ArticlesList() {
 								<Button
 									variant="ghost"
 									size="sm"
-									onClick={handleClearFilters}
+									onClick={clearFilters}
 								>
 									<X className="mr-2 h-4 w-4" />
 									{t('articles.clear_filters')}
@@ -364,7 +314,10 @@ export default function ArticlesList() {
 									onClick={() => handleSort("id")}
 								>
 									<div className="flex items-center">
-										{t('articles.id')} {renderSortIcon("id")}
+										{t('articles.id')} 
+										{sortBy === 'id' ? (
+											sortDir === 'asc' ? <ChevronDown className="ml-2 h-4 w-4 rotate-180" /> : <ChevronDown className="ml-2 h-4 w-4" />
+										) : <ChevronDown className="ml-2 h-4 w-4 opacity-50" />}
 									</div>
 								</TableHead>
 								<TableHead>{t('articles.cover')}</TableHead>
@@ -373,17 +326,20 @@ export default function ArticlesList() {
 									onClick={() => handleSort("title")}
 								>
 									<div className="flex items-center">
-										{t('articles.title_label')} {renderSortIcon("title")}
+										{t('articles.title_label')}
+										{sortBy === 'title' ? (
+											sortDir === 'asc' ? <ChevronDown className="ml-2 h-4 w-4 rotate-180" /> : <ChevronDown className="ml-2 h-4 w-4" />
+										) : <ChevronDown className="ml-2 h-4 w-4 opacity-50" />}
 									</div>
 								</TableHead>
 								<TableHead>{t('articles.category')}</TableHead>
 								<TableHead>{t('articles.status')}</TableHead>
-								<TableHead
-									className="cursor-pointer select-none w-[120px]"
-									onClick={() => handleSort("featured")}
-								>
+								<TableHead className="cursor-pointer select-none w-[120px]" onClick={() => handleSort("featured")}>
 									<div className="flex items-center">
-										{t('articles.featured_order')} {renderSortIcon("featured")}
+										{t('articles.featured_order')}
+										{sortBy === 'featured' ? (
+											sortDir === 'asc' ? <ChevronDown className="ml-2 h-4 w-4 rotate-180" /> : <ChevronDown className="ml-2 h-4 w-4" />
+										) : <ChevronDown className="ml-2 h-4 w-4 opacity-50" />}
 									</div>
 								</TableHead>
 								<TableHead
@@ -391,7 +347,10 @@ export default function ArticlesList() {
 									onClick={() => handleSort("created_at")}
 								>
 									<div className="flex items-center justify-end">
-										{t('articles.created_at')} {renderSortIcon("created_at")}
+										{t('articles.created_at')}
+										{sortBy === 'created_at' ? (
+											sortDir === 'asc' ? <ChevronDown className="ml-2 h-4 w-4 rotate-180" /> : <ChevronDown className="ml-2 h-4 w-4" />
+										) : <ChevronDown className="ml-2 h-4 w-4 opacity-50" />}
 									</div>
 								</TableHead>
 								<TableHead className="text-right w-[150px]">{t('common.actions')}</TableHead>
@@ -416,7 +375,7 @@ export default function ArticlesList() {
 								<TableRow key={article.id}>
 									<TableCell>
 										<Checkbox
-											checked={isSelected(article.id)}
+											checked={selectedIds.includes(article.id)}
 											onCheckedChange={() => toggleSelect(article.id)}
 										/>
 									</TableCell>
@@ -479,17 +438,6 @@ export default function ArticlesList() {
 									<TableCell className="text-right w-[130px]">{formatDate(article.created_at)}</TableCell>
 									<TableCell className="text-right w-[150px]">
 										<div className="flex items-center justify-end gap-1">
-											<Button
-												variant="ghost"
-												size="icon"
-												className="h-8 w-8"
-												onClick={() => {
-													setPreviewArticle(article);
-													setPreviewOpen(true);
-												}}
-											>
-												<Eye className="h-4 w-4" />
-											</Button>
 											<DropdownMenu>
 												<DropdownMenuTrigger asChild>
 													<Button variant="ghost" size="icon" className="h-8 w-8 lg:hidden">
@@ -497,29 +445,14 @@ export default function ArticlesList() {
 													</Button>
 												</DropdownMenuTrigger>
 												<DropdownMenuContent align="end">
-													<Can permission="edit articles">
-														<DropdownMenuItem onClick={() => navigate(`/articles/edit/${article.id}`)}>
-															<Edit className="mr-2 h-4 w-4" /> Editar
-														</DropdownMenuItem>
-													</Can>
-													<Can permission="delete articles">
-														<DropdownMenuItem onClick={() => onDeleteClick(article)} className="text-red-500">
-															<Trash2 className="mr-2 h-4 w-4" /> Eliminar
-														</DropdownMenuItem>
-													</Can>
+													<DropdownMenuItem onClick={() => { setPreviewArticle(article); setPreviewOpen(true); }}>
+														<Eye className="mr-2 h-4 w-4" /> {t('common.view')}
+													</DropdownMenuItem>
+													{renderActions(article, true)}
 												</DropdownMenuContent>
 											</DropdownMenu>
 											<div className="hidden lg:flex items-center gap-1">
-												<Can permission="edit articles">
-													<Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => navigate(`/articles/edit/${article.id}`)}>
-														<Edit className="h-4 w-4" />
-													</Button>
-												</Can>
-												<Can permission="delete articles">
-													<Button variant="ghost" size="icon" className="h-8 w-8 text-red-500" onClick={() => onDeleteClick(article)}>
-														<Trash2 className="h-4 w-4" />
-													</Button>
-												</Can>
+												{renderActions(article, false)}
 											</div>
 										</div>
 									</TableCell>
@@ -528,31 +461,13 @@ export default function ArticlesList() {
 						</TableBody>
 					</Table>
 
-					{meta.last_page > 1 && (
-						<div className="flex items-center justify-end space-x-2 py-4">
-							<Button
-								variant="outline"
-								size="sm"
-								onClick={() => setPage(page - 1)}
-								disabled={page === 1}
-							>
-								<ChevronLeft className="h-4 w-4 mr-2" />
-								{t('common.previous')}
-							</Button>
-							<div className="flex items-center space-x-1">
-								{renderPagination()}
-							</div>
-							<Button
-								variant="outline"
-								size="sm"
-								onClick={() => setPage(page + 1)}
-								disabled={page === meta.last_page}
-							>
-								{t('common.next')}
-								<ChevronRight className="h-4 w-4 ml-2" />
-							</Button>
-						</div>
-					)}
+					<CrudPagination
+						meta={meta}
+						page={page}
+						onPageChange={setPage}
+						prevLabel={t('common.previous')}
+						nextLabel={t('common.next')}
+					/>
 
 					{previewOpen && previewArticle && (
 						<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60" onClick={() => setPreviewOpen(false)}>
@@ -561,13 +476,6 @@ export default function ArticlesList() {
 							</div>
 						</div>
 					)}
-
-					<BulkActionsBar
-						selectedCount={selectedCount}
-						onDelete={handleBulkDelete}
-						onClear={clearSelection}
-						isDeleting={isDeleting}
-					/>
 
 					<ConfirmationDialog
 						open={deleteDialogOpen}
@@ -579,6 +487,12 @@ export default function ArticlesList() {
 						onConfirm={handleConfirmDelete}
 					/>
 				</CardContent>
+
+				<BulkActionsBar
+					selectedCount={selectedCount}
+					onDelete={handleBulkDeleteClick}
+					onClear={clearSelection}
+				/>
 			</Card>
 		</div>
 	);

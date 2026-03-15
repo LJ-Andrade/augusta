@@ -22,6 +22,8 @@ import {
 	Monitor,
 	Sun,
 	Moon,
+	Ruler,
+	Ticket,
 } from "lucide-react"
 
 
@@ -131,25 +133,31 @@ const items = [
 				title: "sidebar.products",
 				url: "/products",
 				icon: Box,
-				permission: "view products",
 			},
 			{
 				title: "sidebar.product_categories",
 				url: "/product-categories",
 				icon: Layers,
-				permission: "view product categories",
 			},
 			{
 				title: "sidebar.product_tags",
 				url: "/product-tags",
 				icon: Tags,
-				permission: "view product tags",
 			},
 			{
 				title: "sidebar.product_colors",
 				url: "/product-colors",
 				icon: Palette,
-				permission: "view product colors",
+			},
+			{
+				title: "sidebar.product_sizes",
+				url: "/product-sizes",
+				icon: Ruler,
+			},
+			{
+				title: "sidebar.coupons",
+				url: "/coupons",
+				icon: Ticket,
 			},
 			{
 				title: "sidebar.products_settings",
@@ -223,9 +231,15 @@ const getUserRole = () => {
 export function AppSidebar() {
 	const { t } = useTranslation();
 	const location = useLocation();
-	const { state } = useSidebar();
+	const { state, isMobile, setOpenMobile } = useSidebar();
 	const { theme, setTheme } = useTheme();
 	const [businessName, setBusinessName] = useState('');
+
+	useEffect(() => {
+		if (isMobile) {
+			setOpenMobile(false);
+		}
+	}, [location.pathname, isMobile, setOpenMobile]);
 
 	useEffect(() => {
 		// Fetch business name from settings
