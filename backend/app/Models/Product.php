@@ -18,6 +18,7 @@ class Product extends Model implements HasMedia
 
     protected $fillable = [
         'name',
+        'code',
         'slug',
         'description',
         'cost_price',
@@ -28,12 +29,15 @@ class Product extends Model implements HasMedia
         'qr_url',
         'user_id',
         'category_id',
-        'subcategory_id',
+        'wholesale_price',
+        'discount',
     ];
 
     protected $casts = [
         'cost_price' => 'decimal:2',
         'sale_price' => 'decimal:2',
+        'wholesale_price' => 'decimal:2',
+        'discount' => 'decimal:2',
         'order' => 'integer',
         'featured' => 'boolean',
     ];
@@ -56,10 +60,6 @@ class Product extends Model implements HasMedia
         return $this->belongsTo(ProductCategory::class, 'category_id');
     }
 
-    public function subcategory(): BelongsTo
-    {
-        return $this->belongsTo(ProductCategory::class, 'subcategory_id');
-    }
 
     public function tags(): BelongsToMany
     {
@@ -69,6 +69,16 @@ class Product extends Model implements HasMedia
     public function sizes(): BelongsToMany
     {
         return $this->belongsToMany(ProductSize::class, 'product_product_size', 'product_id', 'product_size_id');
+    }
+
+    public function colors(): BelongsToMany
+    {
+        return $this->belongsToMany(ProductColor::class, 'product_product_color', 'product_id', 'product_color_id');
+    }
+
+    public function variants(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(ProductVariant::class);
     }
 
     protected static function boot()

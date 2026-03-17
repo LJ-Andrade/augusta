@@ -562,4 +562,134 @@ Add to permissions system:
 - [ ] ProductSizesList displays all sizes with pagination
 - [ ] ProductSizeForm creates and edits sizes
 - [ ] ProductForm integrates sizes via MultiSelect
-- [ ] Sizes are saved/loaded correctly with products
+- [x] ProductForm integrates sizes via MultiSelect
+- [x] Sizes are saved/loaded correctly with products
+
+---
+
+# Technical Specifications - Products & Variants Module
+
+## 1. Data Contract (API)
+
+### Endpoints (Products with Variants)
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/products/{id}` | Get product with variants, colors, and sizes |
+| POST | `/api/products` | Create product and its variants |
+| PUT | `/api/products/{id}` | Update product and sync variants |
+
+### Request/Response (Variants)
+
+**POST /api/products (Partial sample for variants)**
+```json
+{
+  "name": "Product Name",
+  "variants": [
+    {
+      "product_color_id": 1,
+      "product_size_id": 2,
+      "sku": "PROD-RED-M",
+      "stock": 10,
+      "price": 1500.00,
+      "active": true
+    }
+  ]
+}
+```
+
+---
+
+## 2. Database Schema
+
+### Migration: product_variants
+
+```php
+// File: backend/database/migrations/YYYY_MM_DD_HHMMSS_create_product_variants_table.php
+Schema::create('product_variants', function (Blueprint $table) {
+    $table->id();
+    $table->foreignId('product_id')->constrained()->onDelete('cascade');
+    $table->foreignId('product_color_id')->nullable()->constrained('product_colors')->onDelete('set null');
+    $table->foreignId('product_size_id')->nullable()->constrained('product_sizes')->onDelete('set null');
+    $table->string('sku')->unique()->nullable();
+    $table->integer('stock')->default(0);
+    $table->decimal('price', 15, 2)->nullable(); // Overrides product price if set
+    $table->boolean('active')->default(true);
+    $table->timestamps();
+});
+```
+
+### Migration: product_product_color (Pivot Table)
+
+```php
+// File: backend/database/migrations/YYYY_MM_DD_HHMMSS_create_product_product_color_table.php
+Schema::create('product_product_color', function (Blueprint $table) {
+    $table->id();
+    $table->foreignId('product_id')->constrained()->onDelete('cascade');
+    $table->foreignId('product_color_id')->constrained('product_colors')->onDelete('cascade');
+    $table->timestamps();
+    
+    $table->unique(['product_id', 'product_color_id']);
+});
+```
+
+### Model: Product (Relationships)
+
+```php
+// File: backend/app/Models/Product.php
+public function colors(): BelongsToMany
+{
+    return $this->belongsToMany(ProductColor::class, 'product_product_color', 'product_id', 'product_color_id');
+}
+
+public function variants(): HasMany
+{
+    return $this->hasMany(ProductVariant::class);
+}
+```
+
+---
+
+## 3. Frontend Components
+
+### i18n Keys (Products/Variants)
+
+```json
+{
+  "products": {
+    "variants_title": "Variantes y Stock",
+    "generate_variants": "Generar Variantes",
+    "stock": "Stock",
+    "sku": "SKU",
+    "price_override": "Precio Unitario",
+    "no_variants": "No hay variantes generadas",
+    "variant_combination": "Combinación",
+    "apply_to_all_price": "Mismo precio a todos",
+    "apply_to_all_stock": "Misma cantidad a todos"
+  }
+}
+```
+
+### Updated Form: ProductForm.jsx
+
+1. **Matrix logic**:
+   - Watch `color_ids` and `size_ids`.
+   - Function `generateVariants()`: Creates Cartesian product of colors and sizes.
+   - Preserves existing variant data (stock/SKU) when regenerating if possible.
+
+2. **UI for Variants**:
+   - Table displaying rows of variants.
+   - Inputs for Stock, SKU, and Price.
+   - Switches for Active status.
+
+---
+
+## 4. Acceptance Criteria
+
+- [ ] Migration for `product_variants` exists and is applied.
+- [ ] Migration for `product_product_color` pivot exists and is applied.
+- [ ] `Product` model has `colors()` and `variants()` relations.
+- [ ] `ProductForm.jsx` allows selecting colors.
+- [ ] `ProductForm.jsx` displays variants matrix with stock/price/SKU inputs.
+- [ ] Saving product correctly syncs variants (Create/Update/Delete).
+- [ ] Individual stock is correctly saved in `product_variants`.

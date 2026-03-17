@@ -56,6 +56,12 @@ function MultiSelect({
                   variant="secondary" 
                   className="gap-1 pl-2 pr-1 h-6"
                 >
+                  {opt.hex_color && (
+                    <div 
+                      className="w-3 h-3 rounded-full border border-muted-foreground/20" 
+                      style={{ backgroundColor: opt.hex_color }} 
+                    />
+                  )}
                   {opt.name}
                   <span
                     role="button"
@@ -105,6 +111,12 @@ function MultiSelect({
                     <Check className="h-3 w-3" />
                   )}
                 </div>
+                {opt.hex_color && (
+                  <div 
+                    className="w-3 h-3 rounded-full border border-muted-foreground/20 mr-2" 
+                    style={{ backgroundColor: opt.hex_color }} 
+                  />
+                )}
                 {opt.name}
               </div>
             ))

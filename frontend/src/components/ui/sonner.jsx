@@ -24,6 +24,9 @@ const Toaster = ({
         error: <OctagonX className="h-4 w-4" />,
         loading: <LoaderCircle className="h-4 w-4 animate-spin" />,
       }}
+      position="bottom-center"
+      richColors
+      closeButton
       toastOptions={{
         classNames: {
           toast:

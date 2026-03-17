@@ -86,7 +86,7 @@ export function ImageUpload({
       setIsUploading(true)
       const croppedImageBlob = await getCroppedImg(image, croppedAreaPixels)
       
-      const file = new File([croppedImageBlob], 'upload.jpg', {
+      const file = new File([croppedImageBlob], 'cover.jpg', {
         type: 'image/jpeg',
       })
 

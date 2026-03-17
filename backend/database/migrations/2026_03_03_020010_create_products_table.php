@@ -11,18 +11,17 @@ return new class extends Migration
         Schema::create('products', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('category_id')->nullable();
-            $table->string('code', 100)->unique();
+            $table->string('code', 100)->nullable();
             $table->string('name', 255);
             $table->string('slug', 255)->unique();
             $table->text('description')->nullable();
             $table->string('fabric')->nullable();
             
-            // Core Pricing (for UI fallback, real ranges come from Variants)
-            $table->decimal('reseller_price', 10, 2)->default(0);
-            $table->decimal('price', 10, 2)->default(0);
-            $table->decimal('cost', 10, 2)->nullable();
+            // Pricing
+            $table->decimal('cost_price', 15, 2)->nullable();
+            $table->decimal('sale_price', 15, 2)->default(0);
+            $table->decimal('wholesale_price', 15, 2)->nullable();
             $table->decimal('discount', 10, 2)->default(0);
-            $table->decimal('offer_price', 10, 2)->nullable();
 
             // Images and Config
             $table->string('thumb')->nullable();
@@ -31,7 +30,7 @@ return new class extends Migration
             $table->integer('order')->default(0);
             
             // Status and SEO
-            $table->boolean('active')->default(true);
+            $table->string('status')->default('draft');
             $table->string('meta_title')->nullable();
             $table->text('meta_description')->nullable();
 

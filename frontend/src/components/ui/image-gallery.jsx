@@ -84,8 +84,9 @@ export function ImageGallery({ value = [], onChange, onRemoveExisting }) {
 
 	const handleRemove = useCallback((id) => {
 		const image = value.find((img) => img.id === id);
-		// If image has a numeric id, it exists in the backend
-		if (image && typeof image.id === 'number' && onRemoveExisting) {
+		// If image id doesn't start with 'new-', it exists in the backend
+		const isExisting = image && !image.id.toString().startsWith('new-');
+		if (isExisting && onRemoveExisting) {
 			onRemoveExisting(image.id);
 			return;
 		}

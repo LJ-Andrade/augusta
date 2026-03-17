@@ -1,5 +1,65 @@
 # Development Log
 
+## [2026-03-17] - Product Images Storage & Gallery Ordering Fix
+
+### Estado: COMPLETADO ✅
+
+### Resumen de Cambios
+
+#### 1. Sistema de Almacenamiento de Imágenes de Productos
+- **PathGenerator personalizado**: `backend/app/MediaLibrary/ProductPathGenerator.php`
+  - Organiza imágenes por tipo de modelo y ID del producto
+  - Estructura: `products/{product_id}/cover.jpg` y `products/{product_id}/gallery/`
+- **Configuración**: Actualizado `config/media-library.php` para usar el PathGenerator en Productos
+- **Nombres de archivos**:
+  - Cover: Siempre `cover.jpg`
+  - Gallery: `{product_id}_{random}.{ext}` (ej: `1_a3f7b2c1.jpg`)
+
+#### 2. Ordenamiento de Galería - Bug Fix
+- **Problema**: El orden de las imágenes de galería no se persistía al guardar
+- **Solución Backend**:
+  - Campo `order_column` en tabla media ahora se actualiza correctamente
+  - ProductResource usa `loadMedia()` en lugar de `getMedia()` para evitar caché
+  - Ordenamiento por `order_column` al devolver respuesta
+- **Solución Frontend**:
+  - ProductForm envía `gallery_order` como JSON con IDs y posiciones
+  - ImageGallery mantiene estado local del orden arrastrado
+
+#### 3. Eliminación de Subcategorías
+- Eliminados todos los textos relacionados con "subcategory" en traducciones (es/en)
+- Limpiados logs de debug de implementación anterior
+
+#### 4. Eliminación de Sección de Documentos
+- Removida sección de "Documentos" del formulario de productos
+- Eliminados estados `documentUrl` y `pendingDocument`
+- Productos solo manejan imágenes (cover + galería)
+
+#### 5. Fixes Adicionales
+- Corregido error en `.env` (caracter `|` inválido)
+- Creado enlace simbólico `storage:link` para acceso público a imágenes
+- Actualizado `APP_URL` a dominio de producción
+
+### Archivos Modificados
+**Backend:**
+- `app/Http/Controllers/ProductController.php` - Guardado de orden en galería, nombres de archivos
+- `app/Http/Resources/ProductResource.php` - Ordenamiento de galería por order_column
+- `config/media-library.php` - Configuración de PathGenerator
+
+**Nuevos:**
+- `app/MediaLibrary/ProductPathGenerator.php` - PathGenerator personalizado
+
+**Frontend:**
+- `src/components/ui/image-gallery.jsx` - Logs de debug eliminados
+- `src/components/ui/image-upload.jsx` - Nombre fijo "cover.jpg"
+- `src/views/products/ProductForm.jsx` - Envío de gallery_order, sin documentos
+- `src/i18n/locales/en.json` - Eliminadas traducciones de subcategory
+- `src/i18n/locales/es.json` - Eliminadas traducciones de subcategory
+
+### Commits
+- Pending: checkpoint commit for product images and gallery ordering
+
+---
+
 ## [2026-03-14] - UI/UX Improvements: Sidebar, Profile, System Features
 
 ### Estado: COMPLETADO ✅
@@ -639,3 +699,65 @@ Implementación de un nuevo CRUD completo como prueba de las abstracciones.
 - [x] Fix hardcoded baseURL in frontend/src/lib/axios-public.js to use VITE_API_URL fallback
 
 ---
+---
+
+## [2026-03-16] - Feature: Product Variants System
+
+### Estado: COMPLETADO
+
+### Tareas
+
+#### Fase 1: Backend (Laravel)
+- [x] **Tarea 1.1**: Crear migración `create_product_variants_table`
+- [x] **Tarea 1.2**: Crear migración `create_product_product_color_table`
+- [x] **Tarea 1.3**: Crear modelo `ProductVariant`
+- [x] **Tarea 1.4**: Agregar relación `colors()` y `variants()` en `Product.php`
+- [x] **Tarea 1.5**: Actualizar `ProductController@store`
+- [x] **Tarea 1.6**: Actualizar `ProductController@update`
+- [x] **Tarea 1.7**: Asegurar que `ProductResource` incluya variantes y colores
+
+#### Fase 2: Frontend - Preparación
+- [x] **Tarea 2.1**: Agregar claves i18n para variantes en `es.json`
+- [x] **Tarea 2.2**: Agregar claves i18n para variantes en `en.json`
+
+#### Fase 3: Frontend - ProductForm UI
+- [x] **Tarea 3.1**: Actualizar `formSchema` para incluir `color_ids` y array de `variants`
+- [x] **Tarea 3.2**: Implementar lógica `generateVariants`
+- [x] **Tarea 3.3**: Diseñar la tabla de matriz de variantes
+- [x] **Tarea 3.4**: Implementar botones de acciones masivas
+- [x] **Tarea 3.5**: Integrar el guardado de variantes en `onSubmit`
+
+#### Fase 4: Verificación
+- [/] **Tarea 4.1**: Ejecutar migraciones y verificar base de datos
+- [ ] **Tarea 4.2**: Probar creación de producto con variantes
+- [ ] **Tarea 4.3**: Probar edición de producto
+
+### Archivos a Modificar
+- `backend/database/migrations/*`
+- `backend/app/Models/Product.php`
+- `backend/app/Models/ProductVariant.php` (Nuevo)
+- `backend/app/Http/Controllers/ProductController.php`
+- `backend/app/Http/Resources/ProductResource.php`
+- `frontend/src/i18n/locales/es.json`
+- `frontend/src/views/products/ProductForm.jsx`
+
+---
+
+## [2026-03-16] - Fix: Product Gallery Image Deletion
+
+### Estado: EN PROGRESO 🛠️
+
+### Tareas
+
+#### Fase 1: Backend (Unificación MediaLibrary)
+- [ ] **Tarea 1.1**: Eliminar almacenamiento manual de imágenes en `ProductController@store` y `update`.
+- [ ] **Tarea 1.2**: Simplificar `ProductResource` para usar solo MediaLibrary.
+- [ ] **Tarea 1.3**: Verificar que `deleteGalleryImage` elimine físicamente los archivos.
+
+#### Fase 2: Frontend (UI Sync)
+- [ ] **Tarea 2.1**: Ajustar `image-gallery.jsx` para manejar correctamente la eliminación de IDs existentes.
+
+### Archivos a Modificar
+- `backend/app/Http/Controllers/ProductController.php`
+- `backend/app/Http/Resources/ProductResource.php`
+- `frontend/src/components/ui/image-gallery.jsx`

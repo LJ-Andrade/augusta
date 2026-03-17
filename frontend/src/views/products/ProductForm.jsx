@@ -16,7 +16,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Loader2, Save, X } from "lucide-react";
+import { Loader2, Save, X, Plus, Trash2, List } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useTranslation } from "react-i18next";
 import { ImageUpload } from "@/components/ui/image-upload";
@@ -24,6 +24,14 @@ import { RichTextEditor } from "@/components/ui/rich-text-editor";
 import { ImageGallery } from "@/components/ui/image-gallery";
 import { MultiSelect } from "@/components/ui/multi-select";
 import { PageHeader } from "@/components/page-header";
+import { 
+    Table, 
+    TableBody, 
+    TableCell, 
+    TableHead, 
+    TableHeader, 
+    TableRow 
+} from "@/components/ui/table";
 
 export default function ProductForm() {
 	const { t } = useTranslation();
@@ -32,28 +40,50 @@ export default function ProductForm() {
 	const [loading, setLoading] = useState(false);
 	const [fetching, setFetching] = useState(false);
 	const [categories, setCategories] = useState([]);
-	const [subcategories, setSubcategories] = useState([]);
 	const [tags, setTags] = useState([]);
 	const [sizes, setSizes] = useState([]);
+	const [colors, setColors] = useState([]);
 	const [coverUrl, setCoverUrl] = useState(null);
 	const [pendingCover, setPendingCover] = useState(null);
 	const [gallery, setGallery] = useState([]);
-	const [documentUrl, setDocumentUrl] = useState(null);
-	const [pendingDocument, setPendingDocument] = useState(null);
 	const [productName, setProductName] = useState("");
 
 	const formSchema = z.object({
 		name: z.string().min(3, t('products.validation.name_min')),
+		code: z.string().min(1, t('products.validation.required') || 'Campo requerido'),
 		slug: z.string().nullable(),
 		description: z.string().nullable(),
-		cost_price: z.string().min(1, t('products.validation.cost_price_required')),
-		sale_price: z.string().min(1, t('products.validation.sale_price_required')),
-		category_id: z.string().nullable(),
-		subcategory_id: z.string().nullable(),
+		cost_price: z.coerce.number({ 
+			invalid_type_error: t('products.validation.number'),
+			required_error: t('products.validation.cost_price_required')
+		}).min(0, t('products.validation.min_zero')),
+		sale_price: z.coerce.number({ 
+			invalid_type_error: t('products.validation.number'),
+			required_error: t('products.validation.sale_price_required')
+		}).min(0, t('products.validation.min_zero')),
+		wholesale_price: z.coerce.number({ 
+			invalid_type_error: t('products.validation.number')
+		}).min(0, t('products.validation.min_zero')).optional().nullable().default(0),
+		discount: z.coerce.number({ 
+			invalid_type_error: t('products.validation.number')
+		}).min(0, t('products.validation.min_zero')).max(100).optional().nullable().default(0),
+		category_id: z.string().min(1, t('products.validation.category_required')),
 		tag_ids: z.array(z.number()).default([]),
 		size_ids: z.array(z.number()).default([]),
+		color_ids: z.array(z.number()).default([]),
+		variants: z.array(z.object({
+			id: z.number().optional().nullable(),
+			product_color_id: z.number().optional().nullable(),
+			product_size_id: z.number().optional().nullable(),
+			sku: z.string().optional().nullable(),
+			stock: z.coerce.number().default(0),
+			price: z.coerce.number().optional().nullable(),
+			wholesale_price: z.coerce.number().optional().nullable(),
+			discount: z.coerce.number().optional().nullable(),
+			active: z.boolean().default(true),
+		})).default([]),
 		status: z.enum(["draft", "published", "archived"]),
-		order: z.number().optional(),
+		order: z.coerce.number().optional().default(0),
 		featured: z.boolean().default(false),
 	});
 
@@ -61,14 +91,18 @@ export default function ProductForm() {
 		resolver: zodResolver(formSchema),
 		defaultValues: {
 			name: "",
+			code: "",
 			slug: "",
 			description: "",
-			cost_price: "",
-			sale_price: "",
+			cost_price: 0,
+			sale_price: 0,
+			wholesale_price: 0,
+			discount: 0,
 			category_id: "",
-			subcategory_id: "",
 			tag_ids: [],
 			size_ids: [],
+			color_ids: [],
+			variants: [],
 			status: "draft",
 			order: 0,
 			featured: false,
@@ -78,14 +112,16 @@ export default function ProductForm() {
 	useEffect(() => {
 		const fetchData = async () => {
 			try {
-				const [catsRes, tagsRes, sizesRes] = await Promise.all([
+				const [catsRes, tagsRes, sizesRes, colorsRes] = await Promise.all([
 					axiosClient.get("product-categories?all=1"),
 					axiosClient.get("product-tags?all=1"),
-					axiosClient.get("product-sizes?all=1")
+					axiosClient.get("product-sizes?all=1"),
+					axiosClient.get("product-colors?all=1")
 				]);
 				setCategories(catsRes.data.data || []);
 				setTags(tagsRes.data.data || []);
 				setSizes(sizesRes.data.data || []);
+				setColors(colorsRes.data.data || []);
 			} catch (error) {
 				console.error("Error fetching form data:", error);
 			}
@@ -100,26 +136,29 @@ export default function ProductForm() {
 				.then(({ data }) => {
 					form.reset({
 						name: data.data.name,
+						code: data.data.code || "",
 						slug: data.data.slug || "",
 						description: data.data.description || "",
-						cost_price: data.data.cost_price?.toString() || "",
-						sale_price: data.data.sale_price?.toString() || "",
+						cost_price: data.data.cost_price || 0,
+						sale_price: data.data.sale_price || 0,
+						wholesale_price: data.data.wholesale_price || 0,
+						discount: data.data.discount || 0,
 						category_id: data.data.category_id?.toString() || "",
-						subcategory_id: data.data.subcategory_id?.toString() || "",
 						tag_ids: data.data.tags?.map(tag => tag.id) || [],
 						size_ids: data.data.sizes?.map(size => size.id) || [],
+						color_ids: data.data.colors?.map(color => color.id) || [],
+						variants: data.data.variants?.map(v => ({
+							...v,
+							price: v.price?.toString() || "",
+							wholesale_price: v.wholesale_price?.toString() || "",
+							discount: v.discount?.toString() || "",
+						})) || [],
 						status: data.data.status,
 						order: data.data.order || 0,
 						featured: data.data.featured || false,
 					});
-					if (data.data.category_id) {
-						axiosClient.get(`product-categories?parent=${data.data.category_id}`).then(res => {
-							setSubcategories(res.data.data || []);
-						});
-					}
 					setCoverUrl(data.data.cover_url);
 					setGallery(data.data.gallery || []);
-					setDocumentUrl(data.data.document_url);
 					setProductName(data.data.name);
 					setFetching(false);
 				})
@@ -129,19 +168,6 @@ export default function ProductForm() {
 		}
 	}, [id, form]);
 
-	useEffect(() => {
-		const categoryId = form.watch('category_id');
-		if (categoryId) {
-			axiosClient.get(`product-categories?parent=${categoryId}`).then(res => {
-				setSubcategories(res.data.data || []);
-			});
-			if (form.getValues('subcategory_id')) {
-				form.setValue('subcategory_id', '');
-			}
-		} else {
-			setSubcategories([]);
-		}
-	}, [form.watch('category_id')]);
 
 	const handleCoverChange = (file) => {
 		setPendingCover(file);
@@ -152,13 +178,75 @@ export default function ProductForm() {
 		}
 	};
 
-	const handleDocumentChange = (file) => {
-		setPendingDocument(file);
-		if (file) {
-			setDocumentUrl(URL.createObjectURL(file));
-		} else {
-			setDocumentUrl(null);
+	const generateVariants = () => {
+		const selectedSizeIds = form.getValues('size_ids') || [];
+		const selectedColorIds = form.getValues('color_ids') || [];
+		const currentVariants = form.getValues('variants') || [];
+		
+		const newVariants = [];
+		
+		// If neither colors nor sizes are selected, we can't generate matrix
+		if (selectedSizeIds.length === 0 && selectedColorIds.length === 0) {
+			toast.error(t('products.select_sizes_or_colors'));
+			return;
 		}
+
+		// Combinations
+		const colorIds = selectedColorIds.length > 0 ? selectedColorIds : [null];
+		const sizeIds = selectedSizeIds.length > 0 ? selectedSizeIds : [null];
+
+		const productCode = form.getValues('code') || "";
+		
+		colorIds.forEach(colorId => {
+			sizeIds.forEach(sizeId => {
+				// Check if already exists
+				const exists = currentVariants.find(v => 
+					v.product_color_id === colorId && v.product_size_id === sizeId
+				);
+				
+				if (exists) {
+					newVariants.push(exists);
+				} else {
+					const colorObj = colors.find(c => c.id === colorId);
+					const sizeObj = sizes.find(s => s.id === sizeId);
+					
+					let generatedSku = productCode;
+					if (colorObj) generatedSku += `-${colorObj.name.toUpperCase().replace(/\s+/g, '')}`;
+					if (sizeObj) generatedSku += `-${sizeObj.name.toUpperCase().replace(/\s+/g, '')}`;
+
+					newVariants.push({
+						product_color_id: colorId,
+						product_size_id: sizeId,
+						sku: generatedSku,
+						stock: 0,
+						price: "",
+						wholesale_price: "",
+						discount: "",
+						active: true
+					});
+				}
+			});
+		});
+
+		form.setValue('variants', newVariants);
+	};
+
+	const applyToAllPrice = (value) => {
+		const variants = form.getValues('variants').map(v => ({ ...v, price: value }));
+		form.setValue('variants', variants);
+		toast.info(t('products.apply_to_all_price_info'));
+	};
+
+	const applyToAllWholesale = (value) => {
+		const variants = form.getValues('variants').map(v => ({ ...v, wholesale_price: value }));
+		form.setValue('variants', variants);
+		toast.info(t('products.apply_to_all_wholesale_info'));
+	};
+
+	const applyToAllStock = (value) => {
+		const variants = form.getValues('variants').map(v => ({ ...v, stock: parseInt(value) || 0 }));
+		form.setValue('variants', variants);
+		toast.info(t('products.apply_to_all_stock_info'));
 	};
 
 	const handleRemoveGalleryImage = async (mediaId) => {
@@ -180,6 +268,21 @@ export default function ProductForm() {
 				values[key].forEach((tagId) => formData.append('tag_ids[]', tagId));
 			} else if (key === 'size_ids') {
 				values[key].forEach((sizeId) => formData.append('size_ids[]', sizeId));
+			} else if (key === 'color_ids') {
+				values[key].forEach((colorId) => formData.append('color_ids[]', colorId));
+			} else if (key === 'variants') {
+				values[key].forEach((variant, index) => {
+					Object.keys(variant).forEach(vKey => {
+						if (variant[vKey] !== null && variant[vKey] !== undefined) {
+							// Cast boolean to 1/0 for Laravel's boolean validator
+							let val = variant[vKey];
+							if (typeof val === 'boolean') {
+								val = val ? '1' : '0';
+							}
+							formData.append(`variants[${index}][${vKey}]`, val);
+						}
+					});
+				});
 			} else if (key === 'featured') {
 				formData.append(key, values[key] ? '1' : '0');
 			} else if (typeof values[key] === 'boolean') {
@@ -197,14 +300,24 @@ export default function ProductForm() {
 			formData.append("cover", pendingCover);
 		}
 
+		// Send gallery images with their order
 		const newGalleryImages = gallery.filter(img => img.file);
 		newGalleryImages.forEach((img) => {
 			formData.append("gallery[]", img.file);
 		});
 
-		if (pendingDocument) {
-			formData.append("document", pendingDocument);
-		}
+		// Send gallery order for all images (existing IDs and new filenames)
+		const galleryOrder = {};
+		gallery.forEach((img, index) => {
+			if (img.file) {
+				// New image: use filename as key
+				galleryOrder[img.file.name] = index;
+			} else if (img.id) {
+				// Existing image: use ID as key
+				galleryOrder[img.id] = index;
+			}
+		});
+		formData.append("gallery_order", JSON.stringify(galleryOrder));
 
 		if (id) {
 			formData.append("_method", "PUT");
@@ -268,26 +381,46 @@ export default function ProductForm() {
 						<CardHeader>
 							<CardTitle>
 								{id
-									? `${t('products.editing') || 'Editando producto'} "${productName}"`
+									? `${t('products.editing')} "${productName}"`
 									: t('products.create_title')}
 							</CardTitle>
 						</CardHeader>
 						<CardContent className="space-y-4">
-							<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-								<FormField
-									control={form.control}
-									name="name"
-									render={({ field }) => (
-										<FormItem>
-											<FormLabel>{t('products.name')}</FormLabel>
-											<FormControl>
-												<Input {...field} placeholder={t('products.name')} />
-											</FormControl>
-											<FormMessage />
-										</FormItem>
-									)}
-								/>
+							<div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+								<div className="md:col-span-3">
+									<FormField
+										control={form.control}
+										name="name"
+										render={({ field }) => (
+											<FormItem>
+												<FormLabel>{t('products.name')}</FormLabel>
+												<FormControl>
+													<Input {...field} placeholder={t('products.name_placeholder')} />
+												</FormControl>
+												<FormMessage />
+											</FormItem>
+										)}
+									/>
+								</div>
 
+								<div className="md:col-span-1">
+									<FormField
+										control={form.control}
+										name="code"
+										render={({ field }) => (
+											<FormItem>
+												<FormLabel>{t('products.code')}</FormLabel>
+												<FormControl>
+													<Input {...field} placeholder={t('products.code_placeholder')} />
+												</FormControl>
+												<FormMessage />
+											</FormItem>
+										)}
+									/>
+								</div>
+							</div>
+
+							<div className="grid grid-cols-1 gap-4">
 								<FormField
 									control={form.control}
 									name="slug"
@@ -295,7 +428,7 @@ export default function ProductForm() {
 										<FormItem>
 											<FormLabel>{t('products.slug')}</FormLabel>
 											<FormControl>
-												<Input {...field} placeholder={t('products.slug')} value={field.value || ''} />
+												<Input {...field} placeholder={t('products.slug_placeholder')} value={field.value || ''} />
 											</FormControl>
 											<FormMessage />
 										</FormItem>
@@ -303,7 +436,7 @@ export default function ProductForm() {
 								/>
 							</div>
 
-							<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+							<div className="grid grid-cols-1 md:grid-cols-4 gap-4">
 								<FormField
 									control={form.control}
 									name="cost_price"
@@ -326,6 +459,34 @@ export default function ProductForm() {
 											<FormLabel>{t('products.sale_price')}</FormLabel>
 											<FormControl>
 												<Input type="number" step="0.01" {...field} placeholder="0.00" />
+											</FormControl>
+											<FormMessage />
+										</FormItem>
+									)}
+								/>
+
+								<FormField
+									control={form.control}
+									name="wholesale_price"
+									render={({ field }) => (
+										<FormItem>
+											<FormLabel>{t('products.wholesale_price')}</FormLabel>
+											<FormControl>
+												<Input type="number" step="0.01" {...field} placeholder="0.00" />
+											</FormControl>
+											<FormMessage />
+										</FormItem>
+									)}
+								/>
+
+								<FormField
+									control={form.control}
+									name="discount"
+									render={({ field }) => (
+										<FormItem>
+											<FormLabel>{t('products.discount')}</FormLabel>
+											<FormControl>
+												<Input type="number" step="0.01" {...field} placeholder="0%" />
 											</FormControl>
 											<FormMessage />
 										</FormItem>
@@ -375,32 +536,6 @@ export default function ProductForm() {
 
 								<FormField
 									control={form.control}
-									name="subcategory_id"
-									render={({ field }) => (
-										<FormItem>
-											<FormLabel>{t('products.subcategory')}</FormLabel>
-											<FormControl>
-												<select
-													className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background"
-													{...field}
-													value={field.value || ''}
-													disabled={!form.watch('category_id')}
-												>
-													<option value="">{t('products.all_subcategories')}</option>
-													{subcategories.map((cat) => (
-														<option key={cat.id} value={cat.id}>
-															{cat.name}
-														</option>
-													))}
-												</select>
-											</FormControl>
-											<FormMessage />
-										</FormItem>
-									)}
-								/>
-
-								<FormField
-									control={form.control}
 									name="tag_ids"
 									render={({ field }) => (
 										<FormItem>
@@ -436,8 +571,234 @@ export default function ProductForm() {
 										</FormItem>
 									)}
 								/>
+
+								<FormField
+									control={form.control}
+									name="color_ids"
+									render={({ field }) => (
+										<FormItem>
+											<FormLabel>{t('products.colors')}</FormLabel>
+											<FormControl>
+												<MultiSelect
+													value={field.value || []}
+													onValueChange={field.onChange}
+													options={colors}
+													placeholder={t('products.select_colors')}
+												/>
+											</FormControl>
+											<FormMessage />
+										</FormItem>
+									)}
+								/>
 							</div>
 						</CardContent>
+					</Card>
+
+					{/* Variants Matrix */}
+					<Card>
+						<CardHeader>
+							<CardTitle>{t('products.variants_title')}</CardTitle>
+						</CardHeader>
+						<CardContent className="space-y-6">
+							<div className="flex flex-col gap-6 p-4 border rounded-lg bg-muted/30">
+								<div className="flex justify-start">
+									<Button type="button" variant="outline" onClick={generateVariants}>
+										<List className="mr-2 h-4 w-4" />
+										{t('products.generate_variants')}
+									</Button>
+								</div>
+								
+								<div className="flex flex-wrap items-end gap-4 p-4 border rounded-md bg-background shadow-sm">
+									<div className="flex flex-col gap-2">
+										<span className="text-xs font-bold uppercase text-muted-foreground">{t('products.sale_price')}</span>
+										<div className="flex overflow-hidden h-9 border rounded-md">
+											<Input 
+												id="bulk-price"
+												type="number" 
+												className="w-24 h-full border-0 rounded-none focus-visible:ring-0 px-3 text-sm" 
+												placeholder="0.00"
+											/>
+											<Button 
+												type="button" 
+												variant="secondary" 
+												size="sm" 
+												className="rounded-none border-l h-full px-3" 
+												onClick={() => applyToAllPrice(document.getElementById('bulk-price').value)}
+											>
+												{t('products.apply_to_all_price')}
+											</Button>
+										</div>
+									</div>
+
+									<div className="flex flex-col gap-2">
+										<span className="text-xs font-bold uppercase text-muted-foreground">{t('products.wholesale_price')}</span>
+										<div className="flex overflow-hidden h-9 border rounded-md">
+											<Input 
+												id="bulk-wholesale"
+												type="number" 
+												className="w-24 h-full border-0 rounded-none focus-visible:ring-0 px-3 text-sm" 
+												placeholder="0.00"
+											/>
+											<Button 
+												type="button" 
+												variant="secondary" 
+												size="sm" 
+												className="rounded-none border-l h-full px-3" 
+												onClick={() => applyToAllWholesale(document.getElementById('bulk-wholesale').value)}
+											>
+												{t('products.apply_to_all_wholesale')}
+											</Button>
+										</div>
+									</div>
+
+									<div className="flex flex-col gap-2">
+										<span className="text-xs font-bold uppercase text-muted-foreground">{t('products.stock')}</span>
+										<div className="flex overflow-hidden h-9 border rounded-md">
+											<Input 
+												id="bulk-stock"
+												type="number" 
+												className="w-20 h-full border-0 rounded-none focus-visible:ring-0 px-3 text-sm" 
+												placeholder="0"
+											/>
+											<Button 
+												type="button" 
+												variant="secondary" 
+												size="sm" 
+												className="rounded-none border-l h-full px-3" 
+												onClick={() => applyToAllStock(document.getElementById('bulk-stock').value)}
+											>
+												{t('products.apply_to_all_stock')}
+											</Button>
+										</div>
+									</div>
+								</div>
+							</div>
+
+							<div className="border rounded-md overflow-hidden bg-card">
+								{form.watch('variants')?.length > 0 ? (
+									<Table>
+									<TableHeader>
+										<TableRow>
+											<TableHead>{t('products.variant_combination')}</TableHead>
+											<TableHead>{t('products.sku')}</TableHead>
+											<TableHead>{t('products.stock')}</TableHead>
+											<TableHead>{t('products.price_unit')}</TableHead>
+											<TableHead>{t('products.wholesale_price')}</TableHead>
+											<TableHead>{t('products.discount')}</TableHead>
+											<TableHead className="w-[50px]"></TableHead>
+										</TableRow>
+									</TableHeader>
+									<TableBody>
+										{form.watch('variants').map((variant, index) => {
+											const color = colors.find(c => c.id === variant.product_color_id);
+											const size = sizes.find(s => s.id === variant.product_size_id);
+											return (
+												<TableRow key={index}>
+													<TableCell className="font-medium">
+														<div className="flex items-center gap-2">
+															{color && (
+																<div 
+																	className="w-4 h-4 rounded-full border" 
+																	style={{ backgroundColor: color.hex_color }}
+																	title={color.name}
+																/>
+															)}
+															<span>{color?.name || t('common.none')}</span>
+															<span>/</span>
+															<span>{size?.name || t('common.none')}</span>
+														</div>
+													</TableCell>
+													<TableCell>
+														<Input 
+															value={variant.sku || ""} 
+															onChange={(e) => {
+																const newVariants = [...form.getValues('variants')];
+																newVariants[index].sku = e.target.value;
+																form.setValue('variants', newVariants);
+															}}
+															placeholder="SKU"
+														/>
+													</TableCell>
+													<TableCell>
+														<Input 
+															type="number"
+															value={variant.stock ?? 0} 
+															onChange={(e) => {
+																const newVariants = [...form.getValues('variants')];
+																newVariants[index].stock = parseInt(e.target.value) || 0;
+																form.setValue('variants', newVariants);
+															}}
+															className="w-24"
+														/>
+													</TableCell>
+													<TableCell>
+														<Input 
+															type="number"
+															step="0.01"
+															value={variant.price || ""} 
+															onChange={(e) => {
+																const newVariants = [...form.getValues('variants')];
+																newVariants[index].price = e.target.value;
+																form.setValue('variants', newVariants);
+															}}
+															placeholder={form.getValues('sale_price')}
+															className="w-24"
+														/>
+													</TableCell>
+													<TableCell>
+														<Input 
+															type="number"
+															step="0.01"
+															value={variant.wholesale_price || ""} 
+															onChange={(e) => {
+																const newVariants = [...form.getValues('variants')];
+																newVariants[index].wholesale_price = e.target.value;
+																form.setValue('variants', newVariants);
+															}}
+															placeholder={form.getValues('wholesale_price')}
+															className="w-24"
+														/>
+													</TableCell>
+													<TableCell>
+														<Input 
+															type="number"
+															step="0.01"
+															value={variant.discount || ""} 
+															onChange={(e) => {
+																const newVariants = [...form.getValues('variants')];
+																newVariants[index].discount = e.target.value;
+																form.setValue('variants', newVariants);
+															}}
+															placeholder={form.getValues('discount')}
+															className="w-20"
+														/>
+													</TableCell>
+													<TableCell>
+														<Button 
+															type="button" 
+															variant="ghost" 
+															size="sm"
+															onClick={() => {
+																const newVariants = form.getValues('variants').filter((_, i) => i !== index);
+																form.setValue('variants', newVariants);
+															}}
+														>
+															<Trash2 className="h-4 w-4 text-destructive" />
+														</Button>
+													</TableCell>
+												</TableRow>
+											);
+										})}
+									</TableBody>
+								</Table>
+							) : (
+								<div className="flex flex-col items-center justify-center p-8 border-2 border-dashed rounded-md text-muted-foreground">
+									<List className="h-8 w-8 mb-2" />
+									<p>{t('products.no_variants')}</p>
+								</div>
+							)}
+						</div>
+					</CardContent>
 					</Card>
 
 					{/* Row 2: Cover + Gallery */}
@@ -463,7 +824,7 @@ export default function ProductForm() {
 								</CardHeader>
 								<CardContent className="h-[calc(100%-2rem)]">
 									<ImageGallery
-										images={gallery}
+										value={gallery}
 										onChange={setGallery}
 										onRemoveExisting={id ? handleRemoveGalleryImage : undefined}
 									/>
@@ -472,41 +833,7 @@ export default function ProductForm() {
 						</div>
 					</div>
 
-					{/* Row 3: Document */}
-					<Card>
-						<CardHeader>
-							<CardTitle>{t('products.document')}</CardTitle>
-						</CardHeader>
-						<CardContent>
-							{documentUrl ? (
-								<div className="flex items-center justify-between">
-									<a
-										href={documentUrl}
-										target="_blank"
-										rel="noopener noreferrer"
-										className="text-sm text-blue-500 hover:underline"
-									>
-										View Document
-									</a>
-									<Button
-										variant="outline"
-										size="sm"
-										onClick={() => handleDocumentChange(null)}
-									>
-										Remove
-									</Button>
-								</div>
-							) : (
-								<Input
-									type="file"
-									accept=".pdf,.txt,.doc,.docx"
-									onChange={(e) => handleDocumentChange(e.target.files?.[0] || null)}
-								/>
-							)}
-						</CardContent>
-					</Card>
-
-					{/* Row 4: Status, Order, Featured */}
+					{/* Row 3: Status, Order, Featured */}
 					<Card>
 						<CardContent className="pt-6">
 							<div className="grid grid-cols-1 md:grid-cols-4 gap-4">
