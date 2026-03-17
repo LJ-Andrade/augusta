@@ -79,7 +79,8 @@
 		"save_success": "Guardado correctamente",
 		"copied": "Copiado al portapapeles",
 		"not_found": "No encontrado",
-		"error_occurred": "Ocurrió un error"
+		"error_occurred": "Ocurrió un error",
+		"none": "Ninguno"
 	},
 	"profile": {
 		"title": "Mi Perfil",
@@ -365,6 +366,8 @@
 		"apply_to_all_price_info": "Precio de venta aplicado a todas las variantes",
 		"apply_to_all_wholesale_info": "Precio mayorista aplicado a todas las variantes",
 		"apply_to_all_stock_info": "Stock aplicado a todas las variantes",
+		"select_sizes_or_colors": "Por favor selecciona talles o colores",
+		"select_sizes_and_colors": "Debes seleccionar al menos un talle y un color para generar variantes",
 		"colors": "Colores",
 		"select_colors": "Seleccionar colores...",
 		"validation": {

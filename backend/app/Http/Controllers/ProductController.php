@@ -163,6 +163,9 @@ class ProductController extends Controller
             $product->addMediaFromRequest('cover')
                 ->usingFileName('cover.' . $extension)
                 ->toMediaCollection('cover');
+        } elseif ($request->has('remove_cover') && $request->input('remove_cover') === '1') {
+            // Remove existing cover image
+            $product->clearMediaCollection('cover');
         }
 
         if ($request->hasFile('gallery')) {
@@ -337,6 +340,9 @@ class ProductController extends Controller
             $product->addMediaFromRequest('cover')
                 ->usingFileName('cover.' . $extension)
                 ->toMediaCollection('cover');
+        } elseif ($request->has('remove_cover') && $request->input('remove_cover') === '1') {
+            // Remove existing cover image
+            $product->clearMediaCollection('cover');
         }
 
         // Get the order mapping from request (filename => order_index)

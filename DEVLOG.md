@@ -1,6 +1,6 @@
 # Development Log
 
-## [2026-03-17] - Product Images Storage & Gallery Ordering Fix
+## [2026-03-17] - Product Module: UI Improvements, Translations & Validation
 
 ### Estado: COMPLETADO ✅
 
@@ -34,16 +34,50 @@
 - Eliminados estados `documentUrl` y `pendingDocument`
 - Productos solo manejan imágenes (cover + galería)
 
-#### 5. Fixes Adicionales
+#### 5. UI/UX - Reorganización del Formulario
+- **Nuevo layout**:
+  - Fila 1: Nombre + Código (2 columnas)
+  - Fila 2: Slug (ancho completo)
+  - Fila 3: Precio Costo + Precio Venta + Mayorista + Descuento (4 columnas)
+  - Fila 4: Categoría + Etiquetas + Talles + Colores (4 columnas)
+  - Fila 5: Descripción (ancho completo)
+- Mejor aprovechamiento del espacio visual
+
+#### 6. Eliminación de Imagen de Portada
+- Agregado estado `removeCover` en ProductForm
+- Backend procesa `remove_cover=1` para eliminar la imagen de la colección
+- Funcionalidad integrada con el componente ImageUpload
+
+#### 7. Traducciones Completas
+- Agregadas todas las traducciones faltantes en `en.json`:
+  - `slug_placeholder`, `editing`, `price_unit`, `wholesale_price`, `discount`
+  - `apply_to_all_wholesale`, `apply_to_all_price_info`, `apply_to_all_wholesale_info`, `apply_to_all_stock_info`
+  - `select_sizes_or_colors`, `select_sizes_and_colors`
+  - Validaciones: `category_required`, `number`, `min_zero`, `required`
+  - `common.none`: "None" (en) / "Ninguno" (es)
+
+#### 8. Validación de Variantes
+- **Antes**: Permitía crear variantes con solo talles o solo colores
+- **Ahora**: Requiere **ambos** (al menos un talle Y al menos un color)
+- Mensaje claro de error cuando faltan datos necesarios
+
+#### 9. Fixes Adicionales
 - Corregido error en `.env` (caracter `|` inválido)
 - Creado enlace simbólico `storage:link` para acceso público a imágenes
 - Actualizado `APP_URL` a dominio de producción
 
 ### Archivos Modificados
 **Backend:**
-- `app/Http/Controllers/ProductController.php` - Guardado de orden en galería, nombres de archivos
+- `app/Http/Controllers/ProductController.php` - Guardado de orden en galería, nombres de archivos, eliminación de cover
 - `app/Http/Resources/ProductResource.php` - Ordenamiento de galería por order_column
 - `config/media-library.php` - Configuración de PathGenerator
+
+**Frontend:**
+- `src/views/products/ProductForm.jsx` - Reorganización UI, validación de variantes, eliminación de cover
+- `src/components/ui/image-upload.jsx` - Nombre fijo "cover.jpg"
+- `src/components/ui/image-gallery.jsx` - Logs de debug eliminados
+- `src/i18n/locales/en.json` - Traducciones completadas
+- `src/i18n/locales/es.json` - Traducciones agregadas
 
 **Nuevos:**
 - `app/MediaLibrary/ProductPathGenerator.php` - PathGenerator personalizado

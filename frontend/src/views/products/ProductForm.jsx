@@ -45,6 +45,7 @@ export default function ProductForm() {
 	const [colors, setColors] = useState([]);
 	const [coverUrl, setCoverUrl] = useState(null);
 	const [pendingCover, setPendingCover] = useState(null);
+	const [removeCover, setRemoveCover] = useState(false);
 	const [gallery, setGallery] = useState([]);
 	const [productName, setProductName] = useState("");
 
@@ -173,8 +174,10 @@ export default function ProductForm() {
 		setPendingCover(file);
 		if (file) {
 			setCoverUrl(URL.createObjectURL(file));
+			setRemoveCover(false);
 		} else {
 			setCoverUrl(null);
+			setRemoveCover(true);
 		}
 	};
 
@@ -185,15 +188,15 @@ export default function ProductForm() {
 		
 		const newVariants = [];
 		
-		// If neither colors nor sizes are selected, we can't generate matrix
-		if (selectedSizeIds.length === 0 && selectedColorIds.length === 0) {
-			toast.error(t('products.select_sizes_or_colors'));
+		// Both colors AND sizes are required to generate variants
+		if (selectedSizeIds.length === 0 || selectedColorIds.length === 0) {
+			toast.error(t('products.select_sizes_and_colors'));
 			return;
 		}
 
 		// Combinations
-		const colorIds = selectedColorIds.length > 0 ? selectedColorIds : [null];
-		const sizeIds = selectedSizeIds.length > 0 ? selectedSizeIds : [null];
+		const colorIds = selectedColorIds;
+		const sizeIds = selectedSizeIds;
 
 		const productCode = form.getValues('code') || "";
 		
@@ -298,6 +301,8 @@ export default function ProductForm() {
 
 		if (pendingCover) {
 			formData.append("cover", pendingCover);
+		} else if (removeCover) {
+			formData.append("remove_cover", "1");
 		}
 
 		// Send gallery images with their order
@@ -386,49 +391,30 @@ export default function ProductForm() {
 							</CardTitle>
 						</CardHeader>
 						<CardContent className="space-y-4">
-							<div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-								<div className="md:col-span-3">
-									<FormField
-										control={form.control}
-										name="name"
-										render={({ field }) => (
-											<FormItem>
-												<FormLabel>{t('products.name')}</FormLabel>
-												<FormControl>
-													<Input {...field} placeholder={t('products.name_placeholder')} />
-												</FormControl>
-												<FormMessage />
-											</FormItem>
-										)}
-									/>
-								</div>
-
-								<div className="md:col-span-1">
-									<FormField
-										control={form.control}
-										name="code"
-										render={({ field }) => (
-											<FormItem>
-												<FormLabel>{t('products.code')}</FormLabel>
-												<FormControl>
-													<Input {...field} placeholder={t('products.code_placeholder')} />
-												</FormControl>
-												<FormMessage />
-											</FormItem>
-										)}
-									/>
-								</div>
-							</div>
-
-							<div className="grid grid-cols-1 gap-4">
+							{/* Row 1: Name and Code */}
+							<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 								<FormField
 									control={form.control}
-									name="slug"
+									name="name"
 									render={({ field }) => (
 										<FormItem>
-											<FormLabel>{t('products.slug')}</FormLabel>
+											<FormLabel>{t('products.name')}</FormLabel>
 											<FormControl>
-												<Input {...field} placeholder={t('products.slug_placeholder')} value={field.value || ''} />
+												<Input {...field} placeholder={t('products.name_placeholder')} />
+											</FormControl>
+											<FormMessage />
+										</FormItem>
+									)}
+								/>
+
+								<FormField
+									control={form.control}
+									name="code"
+									render={({ field }) => (
+										<FormItem>
+											<FormLabel>{t('products.code')}</FormLabel>
+											<FormControl>
+												<Input {...field} placeholder={t('products.code_placeholder')} />
 											</FormControl>
 											<FormMessage />
 										</FormItem>
@@ -436,6 +422,22 @@ export default function ProductForm() {
 								/>
 							</div>
 
+							{/* Row 2: Slug */}
+							<FormField
+								control={form.control}
+								name="slug"
+								render={({ field }) => (
+									<FormItem>
+										<FormLabel>{t('products.slug')}</FormLabel>
+										<FormControl>
+											<Input {...field} placeholder={t('products.slug_placeholder')} value={field.value || ''} />
+										</FormControl>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
+
+							{/* Row 3: Prices - 4 columns */}
 							<div className="grid grid-cols-1 md:grid-cols-4 gap-4">
 								<FormField
 									control={form.control}
@@ -494,21 +496,8 @@ export default function ProductForm() {
 								/>
 							</div>
 
-							<FormField
-								control={form.control}
-								name="description"
-								render={({ field }) => (
-									<FormItem>
-										<FormLabel>{t('products.description')}</FormLabel>
-										<FormControl>
-											<RichTextEditor value={field.value || ''} onChange={field.onChange} />
-										</FormControl>
-										<FormMessage />
-									</FormItem>
-								)}
-							/>
-
-							<div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+							{/* Row 4: Category, Tags, Sizes, Colors - 4 columns */}
+							<div className="grid grid-cols-1 md:grid-cols-4 gap-4">
 								<FormField
 									control={form.control}
 									name="category_id"
@@ -591,6 +580,21 @@ export default function ProductForm() {
 									)}
 								/>
 							</div>
+
+							{/* Row 5: Description - Full width */}
+							<FormField
+								control={form.control}
+								name="description"
+								render={({ field }) => (
+									<FormItem>
+										<FormLabel>{t('products.description')}</FormLabel>
+										<FormControl>
+											<RichTextEditor value={field.value || ''} onChange={field.onChange} />
+										</FormControl>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
 						</CardContent>
 					</Card>
 
