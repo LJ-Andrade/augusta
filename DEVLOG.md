@@ -26,6 +26,12 @@
 - `@tiptap/extension-underline` - Subrayado
 - `@tiptap/extension-code` - Código inline
 - `@tiptap/extension-blockquote` - Citas
+- `@tiptap/pm` - Dependencia obligatoria de ProseMirror
+
+#### Corrección de Versiones
+- **Problema**: Conflictos de versiones entre paquetes de Tiptap (2.x vs 3.x)
+- **Solución**: Unificar todas las dependencias de Tiptap a versión `^2.11.5`
+- **Nota**: Limpiar node_modules y package-lock.json para instalación limpia
 
 #### Toolbar Reorganizada
 - Grupo 1: Negrita, cursiva, subrayado, tachado, código, color
