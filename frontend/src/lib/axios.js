@@ -36,8 +36,8 @@ axiosClient.interceptors.response.use(
 			localStorage.removeItem('ACCESS_TOKEN');
 
 			// Optional: Prevent redirect if we're already on login to avoid loops
-			if (window.location.pathname !== '/login') {
-				window.location.href = '/login';
+			if (window.location.pathname !== '/vadmin/login') {
+				window.location.href = '/vadmin/login';
 			}
 		}
 

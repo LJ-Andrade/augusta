@@ -36,7 +36,7 @@ export default function Dashboard() {
 				// ensure we stop loading and perhaps show an error state if needed.
 				if (err.response?.status === 403) {
 					// Forbidden - maybe user lost permissions
-					window.location.href = '/login';
+					window.location.href = '/vadmin/login';
 				}
 			} finally {
 				setLoading(false);

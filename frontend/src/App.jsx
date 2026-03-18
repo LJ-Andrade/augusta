@@ -61,7 +61,7 @@ function App() {
   const isAuthenticated = !!localStorage.getItem('ACCESS_TOKEN');
 
   return (
-    <Router>
+    <Router basename="/vadmin">
       <Routes>
 <Route path="/login" element={isAuthenticated ? <Navigate to="/dashboard" /> : <Login />} />
         
