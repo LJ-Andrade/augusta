@@ -17,7 +17,7 @@ class UserResource extends JsonResource
     {
         $avatarPath = 'users/' . $this->id . '/avatar.jpg';
         $avatarUrl = Storage::disk('public')->exists($avatarPath) 
-            ? asset('storage/' . $avatarPath)
+            ? asset('storage/' . $avatarPath) . '?v=' . ($this->updated_at ? $this->updated_at->timestamp : time())
             : null;
 
         return [
