@@ -124,6 +124,12 @@ class Product extends Model implements HasMedia
                 return in_array($file->mimeType, ['image/jpeg', 'image/png', 'image/gif', 'image/webp']);
             });
 
+        $this->addMediaCollection('color_images')
+            ->useDisk('public')
+            ->acceptsFile(function ($file) {
+                return in_array($file->mimeType, ['image/jpeg', 'image/png', 'image/gif', 'image/webp']);
+            });
+
         $this->addMediaCollection('document')
             ->singleFile()
             ->useDisk('public')

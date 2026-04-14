@@ -42,6 +42,15 @@ class ProductResource extends JsonResource
                     ];
                 }),
             'document_url' => $this->getFirstMediaUrl('document'),
+            'color_images' => $this->loadMedia('color_images')
+                ->values()
+                ->map(function ($media) {
+                    return [
+                        'id' => $media->id,
+                        'color_id' => $media->getCustomProperty('color_id'),
+                        'image_url' => $media->getUrl(),
+                    ];
+                }),
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];

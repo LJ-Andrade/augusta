@@ -114,6 +114,10 @@ class ProductController extends Controller
             'variants.*.wholesale_price' => 'nullable|numeric|min:0',
             'variants.*.discount' => 'nullable|numeric|min:0',
             'variants.*.active' => 'nullable|boolean',
+            'remove_color_images' => 'nullable|array',
+            'color_images' => 'nullable|array',
+            'color_images.*.color_id' => 'required_with:color_images|exists:product_colors,id',
+            'color_images.*.file' => 'required_with:color_images|image|max:5120',
         ]);
 
         if ($validator->fails()) {
@@ -208,6 +212,23 @@ class ProductController extends Controller
             $product->addMediaFromRequest('document')->toMediaCollection('document');
         }
 
+        if ($request->has('color_images')) {
+            foreach ($request->input('color_images', []) as $index => $colorImageData) {
+                $colorId = $colorImageData['color_id'];
+                $file = $request->file("color_images.{$index}.file");
+                if ($file && $file->isValid()) {
+                    $extension = $file->getClientOriginalExtension();
+                    $random = substr(str_shuffle('0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'), 0, 8);
+                    $filename = $product->id . '_color_' . $colorId . '_' . $random . '.' . $extension;
+
+                    $product->addMedia($file)
+                        ->usingFileName($filename)
+                        ->withCustomProperties(['color_id' => (int) $colorId])
+                        ->toMediaCollection('color_images');
+                }
+            }
+        }
+
         return new ProductResource($product->load(['author', 'category', 'tags', 'sizes']));
     }
 
@@ -271,6 +292,10 @@ class ProductController extends Controller
             'variants.*.wholesale_price' => 'nullable|numeric|min:0',
             'variants.*.discount' => 'nullable|numeric|min:0',
             'variants.*.active' => 'nullable|boolean',
+            'remove_color_images' => 'nullable|array',
+            'color_images' => 'nullable|array',
+            'color_images.*.color_id' => 'required_with:color_images|exists:product_colors,id',
+            'color_images.*.file' => 'required_with:color_images|image|max:5120',
         ]);
 
         if ($validator->fails()) {
@@ -399,6 +424,41 @@ class ProductController extends Controller
                 ->whereIn('id', $request->input('remove_gallery'));
             foreach ($mediaToRemove as $media) {
                 $media->delete();
+            }
+        }
+
+        if ($request->has('remove_color_images')) {
+            $removeColorIds = $request->input('remove_color_images');
+            $mediaToRemove = $product->getMedia('color_images')->filter(function ($media) use ($removeColorIds) {
+                return in_array($media->getCustomProperty('color_id'), $removeColorIds);
+            });
+            foreach ($mediaToRemove as $media) {
+                $media->delete();
+            }
+        }
+
+        if ($request->has('color_images')) {
+            foreach ($request->input('color_images', []) as $index => $colorImageData) {
+                $colorId = $colorImageData['color_id'];
+                $file = $request->file("color_images.{$index}.file");
+                if ($file && $file->isValid()) {
+                    // Remove existing media for this color
+                    $existingMedia = $product->getMedia('color_images')->filter(function ($media) use ($colorId) {
+                        return $media->getCustomProperty('color_id') == $colorId;
+                    });
+                    foreach ($existingMedia as $media) {
+                        $media->delete();
+                    }
+
+                    $extension = $file->getClientOriginalExtension();
+                    $random = substr(str_shuffle('0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'), 0, 8);
+                    $filename = $product->id . '_color_' . $colorId . '_' . $random . '.' . $extension;
+
+                    $product->addMedia($file)
+                        ->usingFileName($filename)
+                        ->withCustomProperties(['color_id' => (int) $colorId])
+                        ->toMediaCollection('color_images');
+                }
             }
         }
 

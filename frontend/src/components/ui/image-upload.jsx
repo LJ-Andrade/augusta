@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react'
+import React, { useState, useCallback, useId } from 'react'
 import Cropper from 'react-easy-crop'
 import {
   Dialog,
@@ -59,6 +59,7 @@ export function ImageUpload({
   cropShape = 'rect',
   className 
 }) {
+  const inputId = useId()
   const [image, setImage] = useState(null)
   const [crop, setCrop] = useState({ x: 0, y: 0 })
   const [zoom, setZoom] = useState(1)
@@ -135,7 +136,7 @@ export function ImageUpload({
                 <X className="h-5 w-5" />
               </button>
               <label
-                htmlFor="image-input"
+                htmlFor={inputId}
                 className="p-2 bg-primary rounded-full text-primary-foreground hover:bg-primary/90 transition-colors cursor-pointer"
               >
                 <Camera className="h-5 w-5" />
@@ -144,13 +145,13 @@ export function ImageUpload({
           </>
         ) : (
           <label
-            htmlFor="image-input"
+            htmlFor={inputId}
             className="absolute inset-0 flex flex-col items-center justify-center cursor-pointer"
           >
             <ImageIcon className="h-10 w-10 text-muted-foreground mb-2" />
             <span className="text-sm text-muted-foreground font-medium">Click to upload</span>
             <input
-              id="image-input"
+              id={inputId}
               type="file"
               accept="image/*"
               className="hidden"
@@ -160,7 +161,7 @@ export function ImageUpload({
           </label>
         )}
         <input
-          id="image-input"
+          id={inputId}
           type="file"
           accept="image/*"
           className="hidden"

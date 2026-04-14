@@ -1,8 +1,34 @@
 import axios from 'axios';
 import i18n from '@/i18n/config';
 
+const ENVIRONMENTS = {
+	development: {
+		localhost: 'http://planb.test/api/',
+		'planb.test': 'http://planb.test/api/',
+	},
+	staging: {
+		'augustamoi.studiovimana.com.ar': 'https://augustamoi.studiovimana.com.ar/api/',
+	},
+	production: {
+		'augustamoi.studiovimana.com.ar': 'https://augustamoi.studiovimana.com.ar/api/',
+	},
+};
+
+const getBaseURL = () => {
+	const hostname = window.location.hostname;
+	
+	for (const [env, hosts] of Object.entries(ENVIRONMENTS)) {
+		if (hosts[hostname]) {
+			return hosts[hostname];
+		}
+	}
+	
+	console.warn(`Unknown hostname "${hostname}", falling back to localhost`);
+	return ENVIRONMENTS.development.localhost;
+};
+
 const axiosClient = axios.create({
-	baseURL: import.meta.env.VITE_API_URL,
+	baseURL: getBaseURL(),
 	headers: {
 		'Accept': 'application/json',
 	},
