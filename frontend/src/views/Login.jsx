@@ -110,7 +110,7 @@ export default function Login() {
 			localStorage.setItem('USER_PERMISSIONS', JSON.stringify(permissions));
 
 			toast.success(t('login.success'));
-			window.location.href = '/dashboard';
+			window.location.href = '/vadmin/dashboard';
 		} catch (err) {
 			console.error("Login technical error:", err);
 			

@@ -45,7 +45,7 @@ export default function DashboardLayout({ children }) {
 
 	const handleLogout = () => {
 		localStorage.removeItem('ACCESS_TOKEN');
-		window.location.href = '/login';
+		window.location.href = '/vadmin/login';
 	};
 
 	return (
