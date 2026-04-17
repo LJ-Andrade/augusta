@@ -1,0 +1,80 @@
+@import "tailwindcss";
+
+@plugin "@tailwindcss/container-queries";
+@plugin "@tailwindcss/typography";
+
+/* ─── Brand Design Tokens ──────────────────────────────────────────── */
+:root {
+  /* Colors */
+  --pb-bg:             #FFFFFF;
+  --pb-surface:        #F7F7F5;
+  --pb-surface-2:      #EEECEA;
+  --pb-border:         #E5E5E0;
+  --pb-text:           #1A1A1A;
+  --pb-text-secondary: #6B6B6B;
+  --pb-text-muted:     #9E9E9E;
+  --pb-accent:         #1A1A1A;
+  --pb-accent-hover:   #333333;
+  --pb-badge-bg:       #1A1A1A;
+  --pb-badge-text:     #FFFFFF;
+  --pb-announce-bg:    #000000;
+  --pb-announce-text:  #FFFFFF;
+  --pb-card-hover-shadow: 0 8px 32px rgba(0,0,0,0.10);
+
+  /* Typography */
+  --font-serif: 'Playfair Display', Georgia, serif;
+  --font-sans:  'Inter', system-ui, -apple-system, sans-serif;
+}
+
+/* ─── Base Resets ───────────────────────────────────────────────────── */
+@layer base {
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--pb-border);
+  }
+
+  html {
+    font-family: var(--font-sans);
+    background-color: var(--pb-bg);
+    color: var(--pb-text);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Smooth image fade-in on lazy load (Safari fix) */
+  @supports (font: -apple-system-body) and (-webkit-appearance: none) {
+    img[loading="lazy"] {
+      clip-path: inset(0.6px);
+    }
+  }
+}
+
+/* ─── Focus Styles ─────────────────────────────────────────────────── */
+a,
+input,
+button {
+  @apply focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-neutral-400 focus-visible:ring-offset-2 focus-visible:ring-offset-white;
+}
+
+/* ─── Utility Classes ──────────────────────────────────────────────── */
+.font-serif  { font-family: var(--font-serif); }
+.font-sans   { font-family: var(--font-sans); }
+
+/* Product card image zoom on hover */
+.pb-card-image {
+  transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+.pb-card:hover .pb-card-image {
+  transform: scale(1.04);
+}
+
+/* Carousel animation (kept from original) */
+@keyframes carousel {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+.animate-carousel {
+  animation: carousel 30s linear infinite;
+}
