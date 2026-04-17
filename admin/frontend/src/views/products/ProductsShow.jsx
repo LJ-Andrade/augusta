@@ -5,253 +5,455 @@ import axiosClient from "@/lib/axios";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
-import { ArrowLeft, Copy, ExternalLink, Star, RefreshCw } from "lucide-react";
-import { QRCodeSVG } from "qrcode.react";
+import { ArrowLeft, Star, Edit, Package, Image as ImageIcon, Palette, Tag, Layers } from "lucide-react";
+import {
+	Table,
+	TableBody,
+	TableCell,
+	TableHead,
+	TableHeader,
+	TableRow,
+} from "@/components/ui/table";
+import { Separator } from "@/components/ui/separator";
 import { useTranslation } from "react-i18next";
+import { ImageLightbox, useImageLightbox } from "@/components/ui/image-lightbox";
 
 export default function ProductsShow() {
-  const { t } = useTranslation();
-  const { id } = useParams();
-  const [product, setProduct] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [regenerating, setRegenerating] = useState(false);
-  const [qrUrl, setQrUrl] = useState("");
-  const [savingQr, setSavingQr] = useState(false);
+	const { t } = useTranslation();
+	const { id } = useParams();
+	const [product, setProduct] = useState(null);
+	const [loading, setLoading] = useState(true);
+	const {
+		lightboxOpen,
+		lightboxImages,
+		lightboxIndex,
+		openLightbox,
+		closeLightbox,
+		goToPrev,
+		goToNext,
+	} = useImageLightbox();
 
-  const fetchProduct = () => {
-    axiosClient.get(`/products/${id}`)
-      .then(({ data }) => {
-        setProduct(data.data);
-        setQrUrl(data.data.qr_url || "");
-        setLoading(false);
-      })
-      .catch(() => {
-        toast.error(t("common.error_occurred"));
-        setLoading(false);
-      });
-  };
+	useEffect(() => {
+		axiosClient.get(`/products/${id}`)
+			.then(({ data }) => {
+				setProduct(data.data);
+				setLoading(false);
+			})
+			.catch(() => {
+				toast.error(t("common.error_occurred"));
+				setLoading(false);
+			});
+	}, [id, t]);
 
-  useEffect(() => {
-    fetchProduct();
-  }, [id, t]);
+	if (loading) {
+		return (
+			<div className="flex items-center justify-center h-96">
+				<div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full" />
+			</div>
+		);
+	}
 
-  const handleRegenerateQr = () => {
-    setRegenerating(true);
-    axiosClient.post(`/products/${id}/regenerate-qr`)
-      .then(({ data }) => {
-        setProduct(data.data);
-        setQrUrl(data.data.qr_url || "");
-        toast.success(t("products.qr_regenerated"));
-      })
-      .catch(() => {
-        toast.error(t("common.error_occurred"));
-      })
-      .finally(() => {
-        setRegenerating(false);
-      });
-  };
+	if (!product) {
+		return <div className="p-8 text-center">{t("common.not_found")}</div>;
+	}
 
-  const handleSaveQrUrl = () => {
-    setSavingQr(true);
-    axiosClient.patch(`/products/${id}/qr-url`, { qr_url: qrUrl })
-      .then(({ data }) => {
-        setProduct(data.data);
-        toast.success(t("common.save_success"));
-      })
-      .catch(() => {
-        toast.error(t("common.error_occurred"));
-      })
-      .finally(() => {
-        setSavingQr(false);
-      });
-  };
+	const formatPrice = (price) => {
+		if (!price && price !== 0) return "-";
+		return new Intl.NumberFormat("es-AR", {
+			style: "currency",
+			currency: "ARS",
+		}).format(price);
+	};
 
-  const copyToClipboard = (text) => {
-    navigator.clipboard.writeText(text);
-    toast.success(t("common.copied"));
-  };
+	const getColorHex = (colorName) => {
+		const colorMap = {
+			Negro: "#000000",
+			Blanco: "#FFFFFF",
+			Rojo: "#FF0000",
+			Azul: "#0000FF",
+			Verde: "#00FF00",
+			Gris: "#808080",
+			Beige: "#F5F5DC",
+			Amarillo: "#FFFF00",
+			Naranja: "#FFA500",
+			Morado: "#800080",
+			Rosa: "#FFC0CB",
+			Marron: "#8B4513",
+		};
+		return colorMap[colorName] || "#808080";
+	};
 
-  if (loading) {
-    return <div className="p-8 text-center">{t("common.loading")}</div>;
-  }
+	const allGalleryImages = [
+		...(product.cover_url ? [product.cover_url] : []),
+		...(product.gallery?.map((img) => img.url) || []),
+	];
 
-  if (!product) {
-    return <div className="p-8 text-center">{t("common.not_found")}</div>;
-  }
+	return (
+		<div className="space-y-6">
+			{lightboxOpen && (
+				<ImageLightbox
+					images={lightboxImages}
+					currentIndex={lightboxIndex}
+					onClose={closeLightbox}
+					onPrev={goToPrev}
+					onNext={goToNext}
+				/>
+			)}
 
-  return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <Button variant="outline" size="icon" asChild>
-            <Link to="/products">
-              <ArrowLeft className="h-4 w-4" />
-            </Link>
-          </Button>
-          <h1 className="text-3xl font-bold tracking-tight">{product.name}</h1>
-          {product.featured && (
-            <Star className="h-5 w-5 fill-yellow-500 text-yellow-500" />
-          )}
-        </div>
-        <div className="flex gap-2">
-          <Button variant="outline" asChild>
-            <Link to={`/products/edit/${product.id}`}>
-              {t("common.edit")}
-            </Link>
-          </Button>
-        </div>
-      </div>
+			<div className="flex items-center justify-between">
+				<div className="flex items-center gap-4">
+					<Button variant="outline" size="icon" asChild>
+						<Link to="/products">
+							<ArrowLeft className="h-4 w-4" />
+						</Link>
+					</Button>
+					<div className="flex items-center gap-3">
+						<h1 className="text-3xl font-bold tracking-tight">{product.name}</h1>
+						<Badge variant={product.status === "published" ? "default" : "secondary"} className="text-sm">
+							{product.status === "published" ? "Publicado" : "Borrador"}
+						</Badge>
+						{product.featured && (
+							<Star className="h-5 w-5 fill-yellow-500 text-yellow-500" />
+						)}
+					</div>
+				</div>
+				<Button asChild>
+					<Link to={`/products/edit/${product.id}`}>
+						<Edit className="h-4 w-4 mr-2" />
+						{t("common.edit")}
+					</Link>
+				</Button>
+			</div>
 
-      <div className="grid gap-6 md:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle>{t("products.details")}</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="text-sm font-medium text-muted-foreground">
-                  {t("products.id")}
-                </label>
-                <p className="text-lg font-semibold">#{product.id}</p>
-              </div>
-              <div>
-                <label className="text-sm font-medium text-muted-foreground">
-                  {t("products.status")}
-                </label>
-                <p className="mt-1">
-                  <Badge variant={product.status === "published" ? "default" : "secondary"}>
-                    {t(`products.${product.status}`)}
-                  </Badge>
-                </p>
-              </div>
-            </div>
+			<div className="grid gap-6 lg:grid-cols-3">
+				<div className="lg:col-span-2 space-y-6">
+					<Card>
+						<CardHeader>
+							<CardTitle className="flex items-center gap-2">
+								<Package className="h-5 w-5" />
+								Información General
+							</CardTitle>
+						</CardHeader>
+						<CardContent className="space-y-6">
+							<div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+								<div>
+									<p className="text-sm text-muted-foreground">ID</p>
+									<p className="font-semibold">#{product.id}</p>
+								</div>
+								<div>
+									<p className="text-sm text-muted-foreground">Código</p>
+									<p className="font-mono font-semibold">{product.code || "-"}</p>
+								</div>
+								<div>
+									<p className="text-sm text-muted-foreground">Slug</p>
+									<p className="font-mono text-sm break-all">{product.slug || "-"}</p>
+								</div>
+								<div>
+									<p className="text-sm text-muted-foreground">Orden</p>
+									<p className="font-semibold">{product.order ?? 0}</p>
+								</div>
+							</div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="text-sm font-medium text-muted-foreground">
-                  {t("products.cost_price")}
-                </label>
-                <p className="text-lg font-semibold">${product.cost_price}</p>
-              </div>
-              <div>
-                <label className="text-sm font-medium text-muted-foreground">
-                  {t("products.sale_price")}
-                </label>
-                <p className="text-lg font-semibold">${product.sale_price}</p>
-              </div>
-            </div>
+							<Separator />
 
-            {product.category && (
-              <div>
-                <label className="text-sm font-medium text-muted-foreground">
-                  {t("products.category")}
-                </label>
-                <p className="text-lg">{product.category.name}</p>
-              </div>
-            )}
+							<div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+								<div>
+									<p className="text-sm text-muted-foreground">Precio de Costo</p>
+									<p className="font-semibold text-lg">{formatPrice(product.cost_price)}</p>
+								</div>
+								<div>
+									<p className="text-sm text-muted-foreground">Precio de Venta</p>
+									<p className="font-semibold text-lg text-primary">{formatPrice(product.sale_price)}</p>
+								</div>
+								<div>
+									<p className="text-sm text-muted-foreground">Precio Mayorista</p>
+									<p className="font-semibold">{formatPrice(product.wholesale_price)}</p>
+								</div>
+								<div>
+									<p className="text-sm text-muted-foreground">Descuento</p>
+									<p className="font-semibold">
+										{product.discount > 0 ? `${product.discount}%` : "-"}
+									</p>
+								</div>
+							</div>
 
-            {product.description && (
-              <div>
-                <label className="text-sm font-medium text-muted-foreground">
-                  {t("products.description")}
-                </label>
-                <p className="mt-1 text-sm">{product.description}</p>
-              </div>
-            )}
+							<Separator />
 
-            {product.cover_url && (
-              <div>
-                <label className="text-sm font-medium text-muted-foreground">
-                  {t("products.cover")}
-                </label>
-                <img
-                  src={product.cover_url}
-                  alt={product.name}
-                  className="mt-2 h-48 w-48 object-cover rounded-lg border"
-                />
-              </div>
-            )}
-          </CardContent>
-        </Card>
+							<div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+								<div>
+									<p className="text-sm text-muted-foreground">Stock</p>
+									<p className="font-semibold text-lg">
+										{product.stock ?? 0}
+									</p>
+								</div>
+								<div>
+									<p className="text-sm text-muted-foreground">Stock Mínimo</p>
+									<p className="font-semibold">{product.min_stock ?? 0}</p>
+								</div>
+								<div>
+									<p className="text-sm text-muted-foreground">Categoría</p>
+									<p className="font-semibold">{product.category?.name || "-"}</p>
+								</div>
+								<div>
+									<p className="text-sm text-muted-foreground">Tela/Fabric</p>
+									<p className="font-semibold">{product.fabric || "-"}</p>
+								</div>
+							</div>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle>{t("products.qr_code")}</CardTitle>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleRegenerateQr}
-              disabled={regenerating}
-            >
-              <RefreshCw className={`h-4 w-4 mr-2 ${regenerating ? "animate-spin" : ""}`} />
-              {regenerating ? t("common.loading") : t("products.regenerate_qr")}
-            </Button>
-          </CardHeader>
-          <CardContent className="flex flex-col items-center">
-            {product.qr_url ? (
-              <>
-                <div className="bg-white p-4 rounded-lg border shadow-sm">
-                  <QRCodeSVG
-                    value={qrUrl}
-                    size={200}
-                    level="M"
-                    includeMargin={false}
-                  />
-                </div>
+							<Separator />
 
-                <div className="mt-4 w-full">
-                  <label className="text-sm font-medium text-muted-foreground mb-2 block">
-                    {t("products.qr_url")}
-                  </label>
-                  <div className="flex gap-2">
-                    <Input
-                      value={qrUrl}
-                      onChange={(e) => setQrUrl(e.target.value)}
-                      className="font-mono text-sm"
-                    />
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      onClick={handleSaveQrUrl}
-                      disabled={savingQr}
-                    >
-                      {savingQr ? (
-                        <RefreshCw className="h-4 w-4 animate-spin" />
-                      ) : (
-                        <Copy className="h-4 w-4" />
-                      )}
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      onClick={() => copyToClipboard(qrUrl)}
-                    >
-                      <Copy className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      asChild
-                    >
-                      <a
-                        href={qrUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        <ExternalLink className="h-4 w-4" />
-                      </a>
-                    </Button>
-                  </div>
-                </div>
-              </>
-            ) : (
-              <p className="text-muted-foreground">{t("products.no_qr_url")}</p>
-            )}
-          </CardContent>
-        </Card>
-      </div>
-    </div>
-  );
+							<div>
+								<div className="flex items-center gap-2 mb-3">
+									<Tag className="h-4 w-4 text-muted-foreground" />
+									<p className="text-sm text-muted-foreground">Etiquetas</p>
+								</div>
+								<div className="flex flex-wrap gap-2">
+									{product.tags && product.tags.length > 0 ? (
+										product.tags.map((tag) => (
+											<Badge key={tag.id} variant="outline">
+												{tag.name}
+											</Badge>
+										))
+									) : (
+										<span className="text-sm text-muted-foreground">Sin etiquetas</span>
+									)}
+								</div>
+							</div>
+
+							<div>
+								<div className="flex items-center gap-2 mb-3">
+									<Layers className="h-4 w-4 text-muted-foreground" />
+									<p className="text-sm text-muted-foreground">Talles</p>
+								</div>
+								<div className="flex flex-wrap gap-2">
+									{product.sizes && product.sizes.length > 0 ? (
+										product.sizes.map((size) => (
+											<Badge key={size.id} variant="outline" className="px-3 py-1">
+												{size.name}
+											</Badge>
+										))
+									) : (
+										<span className="text-sm text-muted-foreground">Sin talles</span>
+									)}
+								</div>
+							</div>
+
+							<div>
+								<div className="flex items-center gap-2 mb-3">
+									<Palette className="h-4 w-4 text-muted-foreground" />
+									<p className="text-sm text-muted-foreground">Colores</p>
+								</div>
+								<div className="flex flex-wrap gap-3">
+									{product.colors && product.colors.length > 0 ? (
+										product.colors.map((color) => (
+											<div key={color.id} className="flex items-center gap-2">
+												<div
+													className="w-6 h-6 rounded-full border-2 border-border"
+													style={{ backgroundColor: color.hex_color || getColorHex(color.name) }}
+													title={color.name}
+												/>
+												<span className="text-sm">{color.name}</span>
+											</div>
+										))
+									) : (
+										<span className="text-sm text-muted-foreground">Sin colores</span>
+									)}
+								</div>
+							</div>
+						</CardContent>
+					</Card>
+
+					{product.description && (
+						<Card>
+							<CardHeader>
+								<CardTitle>Descripción</CardTitle>
+							</CardHeader>
+							<CardContent>
+								<div
+									className="prose prose-sm max-w-none dark:prose-invert"
+									dangerouslySetInnerHTML={{ __html: product.description }}
+								/>
+							</CardContent>
+						</Card>
+					)}
+
+					{product.meta_title || product.meta_description ? (
+						<Card>
+							<CardHeader>
+								<CardTitle>SEO</CardTitle>
+							</CardHeader>
+							<CardContent className="space-y-4">
+								{product.meta_title && (
+									<div>
+										<p className="text-sm text-muted-foreground mb-1">Meta Título</p>
+										<p className="font-medium">{product.meta_title}</p>
+									</div>
+								)}
+								{product.meta_description && (
+									<div>
+										<p className="text-sm text-muted-foreground mb-1">Meta Descripción</p>
+										<p className="text-sm">{product.meta_description}</p>
+									</div>
+								)}
+							</CardContent>
+						</Card>
+					) : null}
+
+					{product.variants && product.variants.length > 0 && (
+						<Card>
+							<CardHeader>
+								<CardTitle>Variantes ({product.variants.length})</CardTitle>
+							</CardHeader>
+							<CardContent>
+								<Table>
+									<TableHeader>
+										<TableRow>
+											<TableHead>Color</TableHead>
+											<TableHead>Talle</TableHead>
+											<TableHead>SKU</TableHead>
+											<TableHead className="text-right">Stock</TableHead>
+											<TableHead className="text-right">Min</TableHead>
+											<TableHead className="text-center">Activo</TableHead>
+										</TableRow>
+									</TableHeader>
+									<TableBody>
+										{product.variants.map((variant) => (
+											<TableRow key={variant.id}>
+												<TableCell>
+													<div className="flex items-center gap-2">
+														<div
+															className="w-5 h-5 rounded-full border border-border"
+															style={{
+																backgroundColor: variant.color?.hex_color || getColorHex(variant.color?.name),
+															}}
+														/>
+														<span className="text-sm">{variant.color?.name || "-"}</span>
+													</div>
+												</TableCell>
+												<TableCell>
+													<Badge variant="outline" className="px-2 py-0.5">
+														{variant.size?.name || "-"}
+													</Badge>
+												</TableCell>
+												<TableCell className="font-mono text-xs">{variant.sku || "-"}</TableCell>
+												<TableCell className="text-right font-semibold">{variant.stock ?? 0}</TableCell>
+												<TableCell className="text-right text-muted-foreground">{variant.min_stock ?? 0}</TableCell>
+												<TableCell className="text-center">
+													<Badge variant={variant.active ? "default" : "secondary"} className="text-xs">
+														{variant.active ? "Sí" : "No"}
+													</Badge>
+												</TableCell>
+											</TableRow>
+										))}
+									</TableBody>
+								</Table>
+							</CardContent>
+						</Card>
+					)}
+				</div>
+
+				<div className="space-y-6">
+					<Card>
+						<CardHeader>
+							<CardTitle className="flex items-center gap-2">
+								<ImageIcon className="h-5 w-5" />
+								Gallery
+							</CardTitle>
+						</CardHeader>
+						<CardContent className="space-y-4">
+							{product.cover_url ? (
+								<div>
+									<p className="text-sm text-muted-foreground mb-2">Cover</p>
+									<img
+										src={product.cover_url}
+										alt={product.name}
+										className="w-full h-64 object-cover rounded-lg border cursor-pointer hover:opacity-90 transition-opacity"
+										onClick={() => openLightbox(allGalleryImages, 0)}
+									/>
+								</div>
+							) : (
+								<div className="w-full h-48 bg-muted rounded-lg border flex items-center justify-center">
+									<ImageIcon className="h-8 w-8 text-muted-foreground" />
+								</div>
+							)}
+
+							{product.gallery && product.gallery.length > 0 && (
+								<div>
+									<p className="text-sm text-muted-foreground mb-2">
+										Galería ({product.gallery.length})
+									</p>
+									<div className="grid grid-cols-3 gap-2">
+										{product.gallery.map((img, index) => (
+											<img
+												key={img.id}
+												src={img.url}
+												alt=""
+												className="w-full h-24 object-cover rounded border cursor-pointer hover:opacity-80 transition-opacity"
+												onClick={() => openLightbox(allGalleryImages, index + 1)}
+											/>
+										))}
+									</div>
+								</div>
+							)}
+						</CardContent>
+					</Card>
+
+					{product.color_images && product.color_images.length > 0 && (
+						<Card>
+							<CardHeader>
+								<CardTitle className="flex items-center gap-2">
+									<Palette className="h-5 w-5" />
+									Imágenes por Color
+								</CardTitle>
+							</CardHeader>
+							<CardContent className="space-y-3">
+								{product.color_images.map((ci) => {
+									const color = product.colors?.find((c) => c.id === ci.color_id);
+									return (
+										<div key={ci.id} className="flex items-center gap-3">
+											<div
+												className="w-8 h-8 rounded-full border-2 border-border shrink-0"
+												style={{
+													backgroundColor: color?.hex_color || getColorHex(color?.name),
+												}}
+												title={color?.name}
+											/>
+											<span className="text-sm font-medium min-w-[60px]">{color?.name || "-"}</span>
+											<img
+												src={ci.image_url}
+												alt={color?.name}
+												className="w-16 h-16 object-cover rounded border cursor-pointer hover:opacity-80 transition-opacity"
+												onClick={() => openLightbox([ci.image_url], 0)}
+											/>
+										</div>
+									);
+								})}
+							</CardContent>
+						</Card>
+					)}
+
+					<Card>
+						<CardContent className="pt-6">
+							<div className="space-y-3 text-sm">
+								{product.author && (
+									<div className="flex justify-between">
+										<span className="text-muted-foreground">Autor</span>
+										<span className="font-medium">{product.author.name}</span>
+									</div>
+								)}
+								<div className="flex justify-between">
+									<span className="text-muted-foreground">Creado</span>
+									<span>{new Date(product.created_at).toLocaleDateString("es-AR")}</span>
+								</div>
+								<div className="flex justify-between">
+									<span className="text-muted-foreground">Actualizado</span>
+									<span>{new Date(product.updated_at).toLocaleDateString("es-AR")}</span>
+								</div>
+							</div>
+						</CardContent>
+					</Card>
+				</div>
+			</div>
+		</div>
+	);
 }

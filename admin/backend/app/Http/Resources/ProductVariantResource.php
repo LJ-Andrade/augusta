@@ -16,6 +16,7 @@ class ProductVariantResource extends JsonResource
             'product_size_id' => $this->product_size_id,
             'sku' => $this->sku,
             'stock' => $this->stock,
+            'min_stock' => $this->min_stock,
             'active' => $this->active,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,

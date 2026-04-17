@@ -16,7 +16,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Loader2, Save, X, Plus, Trash2, List, Wand2, Check } from "lucide-react";
+import { Loader2, Save, X, Plus, Trash2, List, Wand2, Check, Image } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useTranslation } from "react-i18next";
 import { ImageUpload } from "@/components/ui/image-upload";
@@ -51,6 +51,7 @@ export default function ProductForm() {
 	const [colorImageUrls, setColorImageUrls] = useState({});
 	const [pendingColorImages, setPendingColorImages] = useState({});
 	const [fillingFakeData, setFillingFakeData] = useState(false);
+	const [loadingColorImages, setLoadingColorImages] = useState(false);
 	const [bulkValues, setBulkValues] = useState({
 		stock: "",
 		minStock: "",
@@ -269,6 +270,39 @@ export default function ProductForm() {
 			toast.error("Hubo un error al generar fotos falsas.");
 		} finally {
 			setFillingFakeData(false);
+		}
+	};
+
+	const loadColorImagesFromPicsum = async () => {
+		const selectedColorIds = form.getValues('color_ids');
+		if (!selectedColorIds || selectedColorIds.length === 0) {
+			toast.warning("Selecciona al menos un color primero");
+			return;
+		}
+
+		setLoadingColorImages(true);
+		toast.info("Descargando imágenes por color...");
+
+		try {
+			const newPendingColorImages = { ...pendingColorImages };
+			const newColorImageUrls = { ...colorImageUrls };
+
+			for (const colorId of selectedColorIds) {
+				const cFile = await fetchFakeImage(800, 1000, `color_${colorId}.jpg`);
+				if (cFile) {
+					newPendingColorImages[colorId] = cFile;
+					newColorImageUrls[colorId] = URL.createObjectURL(cFile);
+				}
+			}
+
+			setPendingColorImages(newPendingColorImages);
+			setColorImageUrls(newColorImageUrls);
+			toast.success("Imágenes de color cargadas");
+		} catch (error) {
+			console.error(error);
+			toast.error("Error al cargar imágenes de color");
+		} finally {
+			setLoadingColorImages(false);
 		}
 	};
 
@@ -506,13 +540,27 @@ export default function ProductForm() {
 							</CardTitle>
 						</CardHeader>
 						<CardContent className="space-y-4">
-							{/* Row 1: Name and Code */}
-							<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+							{/* Row 1: Code | Name | Slug */}
+							<div className="grid grid-cols-1 md:grid-cols-6 gap-4">
+								<FormField
+									control={form.control}
+									name="code"
+									render={({ field }) => (
+										<FormItem>
+											<FormLabel>{t('products.code')}</FormLabel>
+											<FormControl>
+												<Input {...field} placeholder={t('products.code_placeholder')} className="w-full" />
+											</FormControl>
+											<FormMessage />
+										</FormItem>
+									)}
+								/>
+
 								<FormField
 									control={form.control}
 									name="name"
 									render={({ field }) => (
-										<FormItem>
+										<FormItem className="md:col-span-3">
 											<FormLabel>{t('products.name')}</FormLabel>
 											<FormControl>
 												<Input {...field} placeholder={t('products.name_placeholder')} />
@@ -524,33 +572,18 @@ export default function ProductForm() {
 
 								<FormField
 									control={form.control}
-									name="code"
+									name="slug"
 									render={({ field }) => (
-										<FormItem>
-											<FormLabel>{t('products.code')}</FormLabel>
+										<FormItem className="md:col-span-2">
+											<FormLabel>{t('products.slug')}</FormLabel>
 											<FormControl>
-												<Input {...field} placeholder={t('products.code_placeholder')} />
+												<Input {...field} placeholder={t('products.slug_placeholder')} value={field.value || ''} />
 											</FormControl>
 											<FormMessage />
 										</FormItem>
 									)}
 								/>
 							</div>
-
-							{/* Row 2: Slug */}
-							<FormField
-								control={form.control}
-								name="slug"
-								render={({ field }) => (
-									<FormItem>
-										<FormLabel>{t('products.slug')}</FormLabel>
-										<FormControl>
-											<Input {...field} placeholder={t('products.slug_placeholder')} value={field.value || ''} />
-										</FormControl>
-										<FormMessage />
-									</FormItem>
-								)}
-							/>
 
 							{/* Row 3: Prices - 4 columns */}
 							<div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -611,8 +644,8 @@ export default function ProductForm() {
 								/>
 							</div>
 
-							{/* Row 3b: Product-level Stock */}
-							<div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+							{/* Row 3b: Stock | Min | Category | Tags */}
+<div className="grid grid-cols-2 md:grid-cols-8 gap-4">
 								<FormField
 									control={form.control}
 									name="stock"
@@ -620,7 +653,7 @@ export default function ProductForm() {
 										<FormItem>
 											<FormLabel>{t('products.stock')}</FormLabel>
 											<FormControl>
-												<Input type="number" {...field} placeholder="0" />
+												<Input type="number" {...field} placeholder="0" className="w-full" />
 											</FormControl>
 											<FormMessage />
 										</FormItem>
@@ -634,7 +667,7 @@ export default function ProductForm() {
 										<FormItem>
 											<FormLabel>{t('products.min_stock')}</FormLabel>
 											<FormControl>
-												<Input type="number" {...field} placeholder="0" />
+												<Input type="number" {...field} placeholder="0" className="w-full" />
 											</FormControl>
 											<FormMessage />
 										</FormItem>
@@ -645,7 +678,7 @@ export default function ProductForm() {
 									control={form.control}
 									name="category_id"
 									render={({ field }) => (
-										<FormItem>
+										<FormItem className="md:col-span-3">
 											<FormLabel>{t('products.category')}</FormLabel>
 											<FormControl>
 												<select
@@ -670,7 +703,7 @@ export default function ProductForm() {
 									control={form.control}
 									name="tag_ids"
 									render={({ field }) => (
-										<FormItem>
+										<FormItem className="md:col-span-3">
 											<FormLabel>{t('products.tags')}</FormLabel>
 											<FormControl>
 												<MultiSelect
@@ -684,9 +717,6 @@ export default function ProductForm() {
 										</FormItem>
 									)}
 								/>
-
-
-
 							</div>
 
 
@@ -752,57 +782,57 @@ export default function ProductForm() {
 								</div>
 							</div>
 
-								{form.watch('variants')?.length > 0 && (
-									<div className="w-fit flex flex-col gap-3 p-4 border rounded-md bg-background shadow-sm">
-										<span className="text-xs font-bold uppercase tracking-wider text-primary/70">
-											{t('products.bulk_actions_title') || 'Acciones para todas las variantes'}
-										</span>
-										<div className="flex flex-wrap items-end gap-4">
-											<div className="flex flex-col gap-2">
-												<span className="text-[10px] font-bold uppercase text-muted-foreground/70">{t('products.stock')}</span>
-												<div className="flex overflow-hidden h-9 border rounded-md bg-muted/20">
-													<Input
-														type="number"
-														className="w-20 h-full border-0 rounded-none focus-visible:ring-0 px-3 text-sm bg-transparent"
-														placeholder="0"
-														value={bulkValues.stock}
-														onChange={(e) => setBulkValues({ ...bulkValues, stock: e.target.value })}
-													/>
-													<Button
-														type="button"
-														variant="secondary"
-														size="sm"
-														className="rounded-none border-l h-full px-3 hover:bg-muted"
-														onClick={() => applyToAllStock(bulkValues.stock)}
-													>
-														<Check className={`h-4 w-4 ${bulkValues.stock ? 'text-green-600 font-bold' : 'text-muted-foreground'}`} />
-													</Button>
-												</div>
+							{form.watch('variants')?.length > 0 && (
+								<div className="w-fit flex flex-col gap-3 p-4 border rounded-md bg-background shadow-sm">
+									<span className="text-xs font-bold uppercase tracking-wider text-primary/70">
+										{t('products.bulk_actions_title') || 'Acciones para todas las variantes'}
+									</span>
+									<div className="flex flex-wrap items-end gap-4">
+										<div className="flex flex-col gap-2">
+											<span className="text-[10px] font-bold uppercase text-muted-foreground/70">{t('products.stock')}</span>
+											<div className="flex overflow-hidden h-9 border rounded-md bg-muted/20">
+												<Input
+													type="number"
+													className="w-20 h-full border-0 rounded-none focus-visible:ring-0 px-3 text-sm bg-transparent"
+													placeholder="0"
+													value={bulkValues.stock}
+													onChange={(e) => setBulkValues({ ...bulkValues, stock: e.target.value })}
+												/>
+												<Button
+													type="button"
+													variant="secondary"
+													size="sm"
+													className="rounded-none border-l h-full px-3 hover:bg-muted"
+													onClick={() => applyToAllStock(bulkValues.stock)}
+												>
+													<Check className={`h-4 w-4 ${bulkValues.stock ? 'text-green-600 font-bold' : 'text-muted-foreground'}`} />
+												</Button>
 											</div>
-											<div className="flex flex-col gap-2">
-												<span className="text-[10px] font-bold uppercase text-muted-foreground/70">{t('products.min_stock')}</span>
-												<div className="flex overflow-hidden h-9 border rounded-md bg-muted/20">
-													<Input
-														type="number"
-														className="w-20 h-full border-0 rounded-none focus-visible:ring-0 px-3 text-sm bg-transparent"
-														placeholder="0"
-														value={bulkValues.minStock}
-														onChange={(e) => setBulkValues({ ...bulkValues, minStock: e.target.value })}
-													/>
-													<Button
-														type="button"
-														variant="secondary"
-														size="sm"
-														className="rounded-none border-l h-full px-3 hover:bg-muted"
-														onClick={() => applyToAllMinStock(bulkValues.minStock)}
-													>
-														<Check className={`h-4 w-4 ${bulkValues.minStock ? 'text-green-600 font-bold' : 'text-muted-foreground'}`} />
-													</Button>
-												</div>
+										</div>
+										<div className="flex flex-col gap-2">
+											<span className="text-[10px] font-bold uppercase text-muted-foreground/70">{t('products.min_stock')}</span>
+											<div className="flex overflow-hidden h-9 border rounded-md bg-muted/20">
+												<Input
+													type="number"
+													className="w-20 h-full border-0 rounded-none focus-visible:ring-0 px-3 text-sm bg-transparent"
+													placeholder="0"
+													value={bulkValues.minStock}
+													onChange={(e) => setBulkValues({ ...bulkValues, minStock: e.target.value })}
+												/>
+												<Button
+													type="button"
+													variant="secondary"
+													size="sm"
+													className="rounded-none border-l h-full px-3 hover:bg-muted"
+													onClick={() => applyToAllMinStock(bulkValues.minStock)}
+												>
+													<Check className={`h-4 w-4 ${bulkValues.minStock ? 'text-green-600 font-bold' : 'text-muted-foreground'}`} />
+												</Button>
 											</div>
 										</div>
 									</div>
-								)}
+								</div>
+							)}
 
 							<div className="border rounded-md overflow-hidden bg-card">
 								{form.watch('variants')?.length > 0 ? (
@@ -897,41 +927,34 @@ export default function ProductForm() {
 									</div>
 								)}
 							</div>
-						</CardContent>
-					</Card>
 
-					{/* Images per Color */}
-					{form.watch('color_ids')?.length > 0 && (
-						<Card>
-							<CardHeader>
-								<CardTitle>{t('products.color_images') || 'Imágenes por Color'}</CardTitle>
-							</CardHeader>
-							<CardContent>
-								<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-									{form.watch('color_ids').map(colorId => {
-										// eslint-disable-next-line eqeqeq
-										const color = colors.find(c => c.id == colorId);
-										if (!color) return null;
-										return (
-											<div key={colorId} className="border rounded-md p-4 flex flex-col gap-4 bg-muted/10 relative">
-												<div className="flex items-center gap-3 border-b pb-2">
-													<div className="w-5 h-5 rounded-full border shadow-sm" style={{ backgroundColor: color.hex_color }} />
-													<span className="font-semibold">{color.name}</span>
-												</div>
-												<div className="w-full relative">
+							{form.watch('color_ids')?.length > 0 && (
+								<div className="border-t mt-4 pt-4">
+									<p className="text-sm font-medium mb-3 px-1">{t('products.color_images') || 'Imágenes por Color'}</p>
+									<div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 px-1">
+										{form.watch('color_ids').map(colorId => {
+											// eslint-disable-next-line eqeqeq
+											const color = colors.find(c => c.id == colorId);
+											if (!color) return null;
+											return (
+												<div key={colorId} className="border rounded-md p-3 flex flex-col gap-3 bg-muted/5">
+													<div className="flex items-center gap-2">
+														<div className="w-4 h-4 rounded-full border shadow-sm" style={{ backgroundColor: color.hex_color }} />
+														<span className="text-xs font-medium">{color.name}</span>
+													</div>
 													<ImageUpload
 														value={colorImageUrls[colorId] || null}
 														onChange={(file) => handleColorImageChange(colorId, file)}
 														onRemove={() => handleColorImageChange(colorId, null)}
 													/>
 												</div>
-											</div>
-										);
-									})}
+											);
+										})}
+									</div>
 								</div>
-							</CardContent>
-						</Card>
-					)}
+							)}
+						</CardContent>
+					</Card>
 
 					{/* Row 2: Cover + Gallery */}
 					<div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -1052,6 +1075,12 @@ export default function ProductForm() {
 								Llenar Datos
 							</Button>
 						)}
+						{id && (
+							<Button type="button" variant="outline" onClick={loadColorImagesFromPicsum} disabled={loading || loadingColorImages}>
+								{loadingColorImages ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Image className="mr-2 h-4 w-4" />}
+								Cargar imágenes por color
+							</Button>
+						)}
 						<Button variant="outline" onClick={() => navigate("/products")} type="button">
 							<X className="mr-2 h-4 w-4" />
 							{t('common.cancel')}
@@ -1064,7 +1093,7 @@ export default function ProductForm() {
 					</div>
 
 				</form>
-			</Form>
-		</div>
+			</Form >
+		</div >
 	);
 }

@@ -234,14 +234,14 @@ class ProductController extends Controller
 
     public function show(Product $product)
     {
-        return new ProductResource($product->load(['author', 'category', 'tags', 'sizes', 'colors', 'variants', 'media']));
+        return new ProductResource($product->load(['author', 'category', 'tags', 'sizes', 'colors', 'media', 'variants.color', 'variants.size']));
     }
 
     public function regenerateQr(Product $product)
     {
         $product->qr_url = $product->generateQrUrl();
         $product->save();
-        return new ProductResource($product->load(['author', 'category', 'tags', 'sizes', 'colors', 'variants', 'media']));
+        return new ProductResource($product->load(['author', 'category', 'tags', 'sizes', 'colors', 'media', 'variants.color', 'variants.size']));
     }
 
     public function updateQrUrl(Request $request, Product $product)
@@ -253,7 +253,7 @@ class ProductController extends Controller
         $product->qr_url = $validated['qr_url'];
         $product->save();
         
-        return new ProductResource($product->load(['author', 'category', 'tags', 'sizes', 'colors', 'variants', 'media']));
+        return new ProductResource($product->load(['author', 'category', 'tags', 'sizes', 'colors', 'media', 'variants.color', 'variants.size']));
     }
 
     public function update(Request $request, Product $product)

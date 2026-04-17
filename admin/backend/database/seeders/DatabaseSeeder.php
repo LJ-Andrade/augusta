@@ -26,6 +26,7 @@ class DatabaseSeeder extends Seeder
             CategorySeeder::class,
             TagSeeder::class,
             BusinessSettingsSeeder::class,
+            ProductSeeder::class,
         ]);
 
         $permissions = Permission::all();
