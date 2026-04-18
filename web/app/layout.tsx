@@ -1,13 +1,6 @@
-import { CartProvider } from "components/cart/cart-context";
-import { AnnouncementBar } from "components/layout/announcement-bar";
-import { Navbar } from "components/layout/navbar";
-import { WelcomeToast } from "components/welcome-toast";
-import { GeistSans } from "geist/font/sans";
-import { getCart } from "lib/vadmin/cart";
-import { ReactNode } from "react";
-import { Toaster } from "sonner";
-import "./globals.css";
 import { baseUrl } from "lib/utils";
+import { ReactNode } from "react";
+import "./globals.css";
 
 const { SITE_NAME } = process.env;
 
@@ -23,14 +16,11 @@ export const metadata = {
   },
 };
 
-export default async function RootLayout({
+export default function RootLayout({
   children,
 }: {
   children: ReactNode;
 }) {
-  // Don't await the fetch, pass the Promise to the context provider
-  const cart = getCart();
-
   return (
     <html lang="es">
       <head>
@@ -43,15 +33,7 @@ export default async function RootLayout({
         />
       </head>
       <body style={{ backgroundColor: "var(--pb-bg)", color: "var(--pb-text)" }}>
-        <CartProvider cartPromise={cart}>
-          <AnnouncementBar />
-          <Navbar />
-          <main>
-            {children}
-            <Toaster closeButton />
-            <WelcomeToast />
-          </main>
-        </CartProvider>
+        {children}
       </body>
     </html>
   );

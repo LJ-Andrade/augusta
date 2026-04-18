@@ -179,6 +179,33 @@ class OrderController extends Controller
     }
 
     /**
+     * Finalize the order (Checkout).
+     */
+    public function checkout(Request $request)
+    {
+        $cart = Order::where('customer_id', $request->user()->id)
+            ->where('status', 'pending')
+            ->first();
+
+        if (!$cart) {
+            return response()->json(['message' => 'No active cart found'], 404);
+        }
+
+        if ($cart->items()->count() === 0) {
+            return response()->json(['message' => 'Cannot checkout an empty cart'], 400);
+        }
+
+        $cart->update([
+            'status' => 'completed'
+        ]);
+
+        return response()->json([
+            'message' => 'Order completed successfully',
+            'order' => $cart
+        ]);
+    }
+
+    /**
      * List all orders (excluding active cart).
      */
     public function index(Request $request)
@@ -239,6 +266,11 @@ class OrderController extends Controller
                             'id' => (string)$item->product_id,
                             'handle' => $item->variant->product->slug,
                             'title' => $item->variant->product->name,
+                            'stock' => $item->variant->stock,
+                            'featuredImage' => [
+                                'url' => $item->variant->product->getFirstMediaUrl('cover'),
+                                'altText' => $item->variant->product->name,
+                            ],
                         ],
                     ],
                 ];

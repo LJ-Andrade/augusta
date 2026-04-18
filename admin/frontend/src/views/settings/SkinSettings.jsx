@@ -31,8 +31,12 @@ export default function SkinSettings() {
 
   const handleSave = async () => {
     const skinData = {};
-    SKIN_FIELDS.forEach(({ key }) => {
-      skinData[`skin_${activeTheme}_${key}`] = getValue(activeTheme, key);
+    const themes = ['light', 'dark'];
+    
+    themes.forEach(t => {
+      SKIN_FIELDS.forEach(({ key }) => {
+        skinData[`skin_${t}_${key}`] = getValue(t, key);
+      });
     });
 
     const success = await saveSkinSettings(skinData);

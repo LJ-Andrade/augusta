@@ -60,9 +60,9 @@ export async function ThreeItemGrid() {
   if (thirdProduct) {
     return (
       <section className="mx-auto grid max-w-(--breakpoint-2xl) gap-4 px-4 pb-4 md:grid-cols-6 md:grid-rows-2 lg:max-h-[calc(100vh-200px)]">
-        <ThreeItemGridItem size="full" item={firstProduct} priority={true} />
-        <ThreeItemGridItem size="half" item={secondProduct} priority={true} />
-        <ThreeItemGridItem size="half" item={thirdProduct} />
+        <ThreeItemGridItem size="full" item={firstProduct!} priority={true} />
+        <ThreeItemGridItem size="half" item={secondProduct!} priority={true} />
+        <ThreeItemGridItem size="half" item={thirdProduct!} />
       </section>
     );
   }
@@ -71,8 +71,8 @@ export async function ThreeItemGrid() {
   if (secondProduct) {
     return (
       <section className="mx-auto grid max-w-(--breakpoint-2xl) gap-4 px-4 pb-4 md:grid-cols-2">
-        <ThreeItemGridItem size="full" item={firstProduct} priority={true} />
-        <ThreeItemGridItem size="full" item={secondProduct} priority={true} />
+        <ThreeItemGridItem size="full" item={firstProduct!} priority={true} />
+        <ThreeItemGridItem size="full" item={secondProduct!} priority={true} />
       </section>
     );
   }
@@ -80,7 +80,7 @@ export async function ThreeItemGrid() {
   // With 1 product: full width
   return (
     <section className="mx-auto grid max-w-(--breakpoint-2xl) gap-4 px-4 pb-4">
-      <ThreeItemGridItem size="full" item={firstProduct} priority={true} />
+      <ThreeItemGridItem size="full" item={firstProduct!} priority={true} />
     </section>
   );
 }

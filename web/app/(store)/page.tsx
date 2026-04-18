@@ -1,8 +1,6 @@
 import { getCollections, getProducts } from "lib/vadmin";
 import Link from "next/link";
-import Image from "next/image";
 import { ProductCard } from "components/catalog/product-card";
-import Footer from "components/layout/footer";
 
 export const metadata = {
   title: "Plan B Store — Moda Mayorista",
@@ -202,8 +200,6 @@ export default async function HomePage() {
           Registrarme
         </Link>
       </section>
-
-      <Footer />
     </>
   );
 }

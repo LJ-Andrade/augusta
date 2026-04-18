@@ -4,8 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Models\Product;
 use App\Http\Resources\ProductResource;
+use App\Http\Resources\ProductVariantResource;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
 
@@ -54,7 +56,7 @@ class ProductController extends Controller
 
     public function index(Request $request)
     {
-        $query = Product::with(['author', 'category', 'tags']);
+        $query = Product::with(['author', 'category', 'tags', 'variants.color', 'variants.size']);
 
         if ($request->filled('search')) {
             $search = $request->input('search');
@@ -516,7 +518,7 @@ class ProductController extends Controller
         return response()->noContent();
     }
 
-    public function bulkDelete(Request $request)
+public function bulkDelete(Request $request)
     {
         $validator = Validator::make($request->all(), [
             'ids' => 'required|array',
@@ -528,8 +530,43 @@ class ProductController extends Controller
         }
 
         $ids = $request->input('ids');
-        Product::whereIn('id', $ids)->delete();
+        Product::whereIn($ids)->delete();
 
         return response()->noContent();
+    }
+
+    public function updateVariant(Request $request, Product $product, $variantId)
+    {
+        $variant = $product->variants()->find($variantId);
+        
+        if (!$variant) {
+            return response()->json(['message' => 'Variant not found'], 404);
+        }
+
+        $validator = Validator::make($request->all(), [
+            'sku' => 'nullable|string|max:255',
+            'stock' => 'nullable|integer|min:0',
+            'min_stock' => 'nullable|integer|min:0',
+            'price' => 'nullable|numeric|min:0',
+            'wholesale_price' => 'nullable|numeric|min:0',
+            'discount' => 'nullable|numeric|min:0',
+            'active' => 'nullable|boolean',
+            'product_color_id' => 'nullable|exists:product_colors,id',
+            'product_size_id' => 'nullable|exists:product_sizes,id',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
+
+        $data = $validator->validated();
+        
+        if (isset($data['active'])) {
+            $data['active'] = filter_var($data['active'], FILTER_VALIDATE_BOOLEAN);
+        }
+
+        $variant->update($data);
+
+        return new ProductVariantResource($variant->load(['color', 'size']));
     }
 }

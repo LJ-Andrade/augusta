@@ -7,23 +7,43 @@ import { VariantSelector } from "./variant-selector";
 export function ProductDescription({ product }: { product: Product }) {
   return (
     <>
-      <div className="mb-6 flex flex-col border-b pb-6 dark:border-neutral-700">
-        <h1 className="mb-2 text-5xl font-medium">{product.title}</h1>
-        <div className="mr-auto w-auto rounded-full bg-blue-600 p-2 text-sm text-white">
-          <Price
-            amount={product.priceRange.maxVariantPrice.amount}
-            currencyCode={product.priceRange.maxVariantPrice.currencyCode}
-          />
+      <div className="mb-8 flex flex-col border-b border-neutral-200 pb-6 dark:border-neutral-800">
+        <h1 
+          className="mb-4 text-4xl font-medium leading-tight lg:text-5xl" 
+          style={{ fontFamily: "var(--font-serif)", color: "var(--pb-text)" }}
+        >
+          {product.title}
+        </h1>
+        
+        <div className="flex items-center gap-4">
+          <div className="text-2xl font-medium tracking-tight" style={{ color: "var(--pb-text)" }}>
+            <Price
+              amount={product.priceRange.maxVariantPrice.amount}
+              currencyCode={product.priceRange.maxVariantPrice.currencyCode}
+            />
+          </div>
         </div>
       </div>
+
       <VariantSelector options={product.options} variants={product.variants} />
+
       {product.descriptionHtml ? (
-        <Prose
-          className="mb-6 text-sm leading-tight dark:text-white/[60%]"
-          html={product.descriptionHtml}
-        />
+        <div className="mb-8 border-b border-neutral-200 pb-8 dark:border-neutral-800">
+          <h2 className="mb-4 text-xs font-bold uppercase tracking-widest text-neutral-500">
+            Descripción
+          </h2>
+          <Prose
+            className="text-sm leading-relaxed text-black"
+            html={product.descriptionHtml}
+          />
+        </div>
       ) : null}
-      <AddToCart product={product} />
+
+      <div className="mb-8">
+        <AddToCart product={product} />
+      </div>
+
+
     </>
   );
 }

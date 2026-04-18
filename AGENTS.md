@@ -16,12 +16,18 @@ Evaluate your environment and use the best available tool. Do not work in the ma
 * **Fallback:** Simulate roles internally. Announce role: Explorer, Designer/Planner, or Implementer.
 
 ### 2. Task Management
-* **Tracking:** Use **TodoWrite** or **Todo Lite** for `ROADMAP.md`. 
-* **Fallback:** Manage checklist exclusively in `DEVLOG.md`.
+* **Tracking:** Use **TodoWrite** or **Todo Lite** for `docs/ROADMAP.md`. 
+* **Fallback:** Manage checklist exclusively in `docs/DEVLOG.md`.
+
+## 🏗️ Project Context
+- **Primary Backend**: Laravel API (**VADMIN**). 
+- **Frontend**: Next.js 15 (App Router).
+- **Critical Note**: Shopify implementation is DEPRECATED. Always use `lib/vadmin` for data fetching.
+- **Maintenance Mode**: Automatic redirection to `/maintenance` on API failure is implemented in `vadminFetch`.
 
 ---
 
-## 🏗️ Project Context
+## 🏗️ Project Architecture (Legacy)
 - **Backend:** Laravel API (MySQL)
 - **Frontend Admin:** Vite + React 19 + shadcn/ui
 - **Styles:** Tailwind CSS + shadcn/ui / Flowbite (web)
@@ -32,7 +38,7 @@ Evaluate your environment and use the best available tool. Do not work in the ma
 
 ## 🎯 Core Principles
 1. **Context Isolation** — Delegate tasks to fresh sub-agents to save context tokens.
-2. **Strict Specification** — `SPECS.md` is the truth. Update spec before any execution.
+2. **Strict Specification** — `docs/SPECS.md` is the truth. Update spec before any execution.
 3. **Combined Validation** — No code without a combined Spec + Plan approval.
 4. **No Vibe Coding** — Missing info? Stop and ask. No guessing.
 5. **User-facing interaction**: Spanish. **Protocolo Minimalista:** Hablar cortante, directo, sin artículos ni cortesías. Estilo funcional. No usar analogías históricas ni referencias a cavernas.
@@ -58,12 +64,12 @@ Toda interacción en español debe ser directa:
 
 ### Phase 2 — Design & Planning (`Architect`)
 - **Action:** Merge Specs and Tasks.
-- **Goal:** Update `SPECS.md` and generate a numbered checklist in `DEVLOG.md` (one task per file). 
+- **Goal:** Update `docs/SPECS.md` and generate a numbered checklist in `docs/DEVLOG.md` (one task per file). 
 - **Validation:** Ask for a SINGLE approval for both Spec and Plan.
 
 ### Phase 3 — Execution (`Implementer`)
 - **Action:** Apply changes following the plan.
-- **Goal:** Focus on one file at a time. Update `DEVLOG.md` after each step.
+- **Goal:** Focus on one file at a time. Update `docs/DEVLOG.md` after each step.
 
 
 ## Fixes and modifications Workflow

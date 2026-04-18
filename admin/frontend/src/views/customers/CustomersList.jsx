@@ -189,7 +189,7 @@ export default function CustomersList() {
                 <TableHead className="w-[60px]">{t('customers.id')}</TableHead>
                 <TableHead>{t('customers.name')}</TableHead>
                 <TableHead>{t('customers.email')}</TableHead>
-                <TableHead>{t('customers.official_domain')}</TableHead>
+                <TableHead>{t('customers.address')}</TableHead>
                 <TableHead>{t('customers.is_active')}</TableHead>
                 <TableHead className="text-right w-[150px]">{t('common.actions')}</TableHead>
               </TableRow>
@@ -218,8 +218,8 @@ export default function CustomersList() {
                   <TableCell>
                     <div className="flex items-center gap-3">
                       <div className="h-8 w-8 rounded bg-muted flex items-center justify-center overflow-hidden border">
-                        {customer.logo_url ? (
-                          <img src={customer.logo_url} alt={customer.name} className="h-full w-full object-cover" />
+                        {customer.avatar_url ? (
+                          <img src={customer.avatar_url} alt={customer.name} className="h-full w-full object-cover" />
                         ) : (
                           <Building2 className="h-4 w-4 text-muted-foreground" />
                         )}
@@ -239,13 +239,11 @@ export default function CustomersList() {
                       )}
                     </div>
                   </TableCell>
-                  <TableCell>
-                    {customer.official_domain ? (
-                      <div className="flex items-center gap-1.5 text-xs font-mono text-cyan-500">
-                        <Globe className="h-3 w-3" /> {customer.official_domain}
-                      </div>
+                  <TableCell className="max-w-[200px] truncate">
+                    {customer.address ? (
+                      <span className="text-xs text-muted-foreground">{customer.address}</span>
                     ) : (
-                      <span className="text-xs text-muted-foreground italic">No configurado</span>
+                      <span className="text-xs text-muted-foreground italic">{t('common.none')}</span>
                     )}
                   </TableCell>
                   <TableCell>
@@ -299,13 +297,13 @@ export default function CustomersList() {
             <div className="flex items-center justify-end space-x-2 py-4">
               <Button variant="outline" size="sm" onClick={() => setPage(page - 1)} disabled={page === 1}>
                 <ChevronLeft className="h-4 w-4 mr-2" />
-                Anterior
+                {t('common.previous')}
               </Button>
               <div className="flex items-center space-x-1">
                 {renderPagination()}
               </div>
               <Button variant="outline" size="sm" onClick={() => setPage(page + 1)} disabled={page === meta.last_page}>
-                Siguiente
+                {t('common.next')}
                 <ChevronRight className="h-4 w-4 ml-2" />
               </Button>
             </div>

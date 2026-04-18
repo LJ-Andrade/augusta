@@ -23,7 +23,7 @@ function AddToCartButton({ productId }: { productId: string }) {
   const [loading, setLoading] = useState(false);
   return (
     <button onClick={() => addToCart(productId)} disabled={loading}>
-      Add to Cart
+      Agregar al carrito
     </button>
   );
 }

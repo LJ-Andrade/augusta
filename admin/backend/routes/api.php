@@ -84,6 +84,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/products', [ProductController::class, 'store'])->middleware('permission:manage products');
     Route::put('/products/{product}', [ProductController::class, 'update'])->middleware('permission:manage products');
     Route::patch('/products/{product}/quick-update', [ProductController::class, 'quickUpdate'])->middleware('permission:manage products');
+    Route::patch('/products/{product}/variants/{variant}', [ProductController::class, 'updateVariant'])->middleware('permission:manage products');
     Route::post('/products/{product}/regenerate-qr', [ProductController::class, 'regenerateQr'])->middleware('permission:manage products');
     Route::patch('/products/{product}/qr-url', [ProductController::class, 'updateQrUrl'])->middleware('permission:manage products');
     Route::delete('/products/{product}', [ProductController::class, 'destroy'])->middleware('permission:manage products');
@@ -141,6 +142,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Customers
     Route::post('admin/customers/bulk-delete', [\App\Http\Controllers\Api\Admin\CustomerController::class, 'bulkDelete'])->middleware('permission:manage customers');
+    Route::post('admin/customers/{customer}/avatar', [\App\Http\Controllers\Api\Admin\CustomerController::class, 'uploadAvatar'])->middleware('permission:manage customers');
     Route::apiResource('admin/customers', \App\Http\Controllers\Api\Admin\CustomerController::class)->middleware('permission:manage customers');
 
     // Orders
@@ -172,6 +174,7 @@ Route::prefix('customer')->group(function () {
         // Cart / Orders
         Route::get('cart', [App\Http\Controllers\Api\OrderController::class, 'getCart']);
         Route::post('cart', [App\Http\Controllers\Api\OrderController::class, 'addToCart']);
+        Route::post('cart/checkout', [App\Http\Controllers\Api\OrderController::class, 'checkout']);
         Route::put('cart/items/{itemId}', [App\Http\Controllers\Api\OrderController::class, 'updateItem']);
         Route::delete('cart/items/{itemId}', [App\Http\Controllers\Api\OrderController::class, 'removeItem']);
         Route::get('orders', [App\Http\Controllers\Api\OrderController::class, 'index']);

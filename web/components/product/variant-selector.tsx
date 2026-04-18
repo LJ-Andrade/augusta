@@ -2,7 +2,9 @@
 
 import clsx from "clsx";
 import { ProductOption, ProductVariant } from "lib/vadmin/types";
+import { COLOR_MAP } from "lib/constants";
 import { useRouter, useSearchParams } from "next/navigation";
+import { toast } from "sonner";
 
 type Combination = {
   id: string;
@@ -39,16 +41,23 @@ export function VariantSelector({
     ),
   }));
 
-  const updateOption = (name: string, value: string) => {
+  const updateOption = (name: string, value: string, isAvailable: boolean) => {
+    if (!isAvailable) {
+      toast.error("Combinación sin stock", {
+        description: `Lo sentimos, la variante seleccionada no tiene unidades disponibles en este momento.`,
+      });
+      return;
+    }
+
     const params = new URLSearchParams(searchParams.toString());
     params.set(name, value);
     router.replace(`?${params.toString()}`, { scroll: false });
   };
 
   return options.map((option) => (
-    <form key={option.id}>
+    <div key={option.id}>
       <dl className="mb-8">
-        <dt className="mb-4 text-sm uppercase tracking-wide">{option.name}</dt>
+        <dt className="mb-4 text-sm uppercase tracking-wide font-medium">{option.name}</dt>
         <dd className="flex flex-wrap gap-3">
           {option.values.map((value) => {
             const optionNameLowerCase = option.name.toLowerCase();
@@ -67,6 +76,7 @@ export function VariantSelector({
                     option.values.includes(value),
                 ),
             );
+            
             const isAvailableForSale = combinations.find((combination) =>
               filtered.every(
                 ([key, value]) =>
@@ -75,32 +85,37 @@ export function VariantSelector({
             );
 
             // The option is active if it's in the selected options.
-            const isActive = searchParams.get(optionNameLowerCase) === value;
+            const isActive = searchParams.get(optionNameLowerCase)?.toLowerCase() === value.toLowerCase();
 
             return (
               <button
-                formAction={() => updateOption(optionNameLowerCase, value)}
+                onClick={() => updateOption(optionNameLowerCase, value, !!isAvailableForSale)}
                 key={value}
                 aria-disabled={!isAvailableForSale}
-                disabled={!isAvailableForSale}
-                title={`${option.name} ${value}${!isAvailableForSale ? " (Out of Stock)" : ""}`}
+                title={`${option.name} ${value}${!isAvailableForSale ? " (Sin stock)" : ""}`}
                 className={clsx(
-                  "flex min-w-[48px] items-center justify-center rounded-full border bg-neutral-100 px-2 py-1 text-sm dark:border-neutral-800 dark:bg-neutral-900",
+                  "flex min-w-[80px] items-center justify-center gap-2 border px-4 py-2 text-[10px] font-bold uppercase tracking-[0.2em] transition-all duration-200",
+                  isActive
+                    ? "border-black bg-black text-white"
+                    : "border-neutral-200 bg-transparent text-neutral-500 hover:border-black hover:bg-neutral-50 hover:text-black dark:border-neutral-800 dark:text-neutral-400 dark:hover:border-white dark:hover:bg-neutral-900 dark:hover:text-white",
                   {
-                    "cursor-default ring-2 ring-blue-600": isActive,
-                    "ring-1 ring-transparent transition duration-300 ease-in-out hover:ring-blue-600":
-                      !isActive && isAvailableForSale,
-                    "relative z-10 cursor-not-allowed overflow-hidden bg-neutral-100 text-neutral-500 ring-1 ring-neutral-300 before:absolute before:inset-x-0 before:-z-10 before:h-px before:-rotate-45 before:bg-neutral-300 before:transition-transform dark:bg-neutral-900 dark:text-neutral-400 dark:ring-neutral-700 dark:before:bg-neutral-700":
+                    "relative z-10 cursor-pointer opacity-40 overflow-hidden before:absolute before:inset-x-0 before:-z-10 before:h-px before:-rotate-45 before:bg-neutral-300 dark:before:bg-neutral-700":
                       !isAvailableForSale,
-                  },
+                  }
                 )}
               >
+                {optionNameLowerCase === "color" && (
+                  <span
+                    className="h-3 w-3 shrink-0 rounded-full border border-black/10"
+                    style={{ backgroundColor: COLOR_MAP[value.toLowerCase()] ?? "#CCC" }}
+                  />
+                )}
                 {value}
               </button>
             );
           })}
         </dd>
       </dl>
-    </form>
+    </div>
   ));
 }

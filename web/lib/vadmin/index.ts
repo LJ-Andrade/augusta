@@ -4,6 +4,7 @@ import {
   unstable_cacheTag as cacheTag,
 } from "next/cache";
 import { headers } from "next/headers";
+import { redirect } from "next/navigation";
 import { 
   Cart, 
   Collection, 
@@ -41,19 +42,29 @@ export async function vadminFetch<T>({
       method,
       headers: {
         "Content-Type": "application/json",
+        "Accept": "application/json",
         ...headers,
       },
       body: body ? JSON.stringify(body) : undefined,
       cache,
     });
 
-    const data = await result.json();
-
-    if (!result.ok) {
+    const contentType = result.headers.get("content-type");
+    let data;
+    if (contentType && contentType.includes("application/json")) {
+      data = await result.json();
+    } else {
+      const text = await result.text();
       throw {
         status: result.status,
-        message: data.message || "API Error",
+        message: `API returned ${contentType || 'no content-type'}. Error: ${text.substring(0, 100)}`,
       };
+    }
+
+    if (!result.ok) {
+      const error = new Error(data.message || "API Error");
+      (error as any).status = result.status;
+      throw error;
     }
 
     return {
@@ -61,11 +72,23 @@ export async function vadminFetch<T>({
       body: data,
     };
   } catch (e: any) {
-    console.error(`[vadminFetch Error] path: ${path}`, e);
-    throw {
-      error: e,
-      path,
-    };
+    console.error(`[vadminFetch Error] path: ${path}`, {
+      message: e.message,
+      cause: e.cause,
+      status: e.status
+    });
+    
+    // Check for connection errors or server failures (500, 503, Network, DB)
+    const isNetworkError = e.message?.includes("fetch failed") || e.cause?.code === "ECONNREFUSED" || e.cause?.code === "ENOTFOUND";
+    const isDbError = e.message?.toLowerCase().includes("base de datos") || e.message?.toLowerCase().includes("database connection");
+    const isServerError = e.status === 500 || e.status === 503;
+
+    if (isNetworkError || isDbError || isServerError) {
+      console.warn(`[vadminFetch] Redirecting to maintenance. Network: ${isNetworkError}, DB: ${isDbError}, Server: ${isServerError}`);
+      redirect("/maintenance");
+    }
+
+    throw e;
   }
 }
 
@@ -187,5 +210,15 @@ export async function getMenu(handle: string): Promise<Menu[]> {
 
 export async function revalidate(req: any): Promise<any> {
     return { status: 200, message: "Revalidation not implemented yet for VADMIN" };
+}
+
+export async function getPage(handle: string): Promise<Page | undefined> {
+  // TODO: Implement VADMIN pages endpoint
+  return undefined;
+}
+
+export async function getPages(): Promise<Page[]> {
+  // TODO: Implement VADMIN pages endpoint
+  return [];
 }
 

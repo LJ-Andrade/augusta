@@ -3,6 +3,7 @@
 import { TAGS } from "lib/constants";
 import {
   addToCart,
+  checkout,
   getCart,
   removeFromCart,
   updateCart,
@@ -19,11 +20,16 @@ export async function addItem(
     return "Error adding item to cart";
   }
 
+  const token = (await cookies()).get("auth_token")?.value;
+  if (!token) {
+    redirect("/login");
+  }
+
   try {
     await addToCart([{ merchandiseId: selectedVariantId, quantity: 1 }]);
     updateTag(TAGS.cart);
-  } catch (e) {
-    return "Error adding item to cart";
+  } catch (e: any) {
+    return e.message || "Error al agregar el producto al carrito";
   }
 }
 
@@ -88,16 +94,16 @@ export async function updateItemQuantity(
     }
 
     updateTag(TAGS.cart);
-  } catch (e) {
-    console.error(e);
-    return "Error updating item quantity";
+  } catch (e: any) {
+    return e.message || "Error al actualizar la cantidad";
   }
 }
 
 export async function redirectToCheckout() {
-  let cart = await getCart();
-  if (cart) {
-    redirect(cart.checkoutUrl);
+  const result = await checkout();
+  if (result.success) {
+    updateTag(TAGS.cart);
+    redirect("/checkout/success");
   }
 }
 

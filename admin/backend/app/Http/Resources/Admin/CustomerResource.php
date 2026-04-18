@@ -19,9 +19,9 @@ class CustomerResource extends JsonResource
             'name' => $this->name,
             'email' => $this->email,
             'phone' => $this->phone,
-            'official_domain' => $this->official_domain,
+            'address' => $this->address,
             'is_active' => $this->is_active,
-            'logo_url' => $this->getFirstMediaUrl('logo'),
+            'avatar_url' => $this->getFirstMediaUrl('avatar'),
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];

@@ -161,8 +161,13 @@ export default function ProductForm() {
 						size_ids: data.data.sizes?.map(size => size.id) || [],
 						color_ids: data.data.colors?.map(color => color.id) || [],
 						variants: data.data.variants?.map(v => ({
+							id: v.id,
+							product_color_id: v.product_color_id,
+							product_size_id: v.product_size_id,
+							sku: v.sku,
 							stock: v.stock || 0,
 							min_stock: v.min_stock || 0,
+							active: v.active,
 						})) || [],
 						status: data.data.status,
 						order: data.data.order || 0,
@@ -354,14 +359,14 @@ export default function ProductForm() {
 			sizeIds.forEach(sizeId => {
 				// Check if already exists
 				const exists = currentVariants.find(v =>
-					v.product_color_id === colorId && v.product_size_id === sizeId
+					v.product_color_id == colorId && v.product_size_id == sizeId
 				);
 
 				if (exists) {
 					newVariants.push(exists);
 				} else {
-					const colorObj = colors.find(c => c.id === colorId);
-					const sizeObj = sizes.find(s => s.id === sizeId);
+					const colorObj = colors.find(c => c.id == colorId);
+					const sizeObj = sizes.find(s => s.id == sizeId);
 
 					let generatedSku = productCode;
 					if (colorObj) generatedSku += `-${colorObj.name.toUpperCase().replace(/\s+/g, '')}`;
@@ -848,8 +853,8 @@ export default function ProductForm() {
 										</TableHeader>
 										<TableBody>
 											{form.watch('variants').map((variant, index) => {
-												const color = colors.find(c => c.id === variant.product_color_id);
-												const size = sizes.find(s => s.id === variant.product_size_id);
+												const color = colors.find(c => c.id == variant.product_color_id);
+												const size = sizes.find(s => s.id == variant.product_size_id);
 												return (
 													<TableRow key={index}>
 														<TableCell className="font-medium">

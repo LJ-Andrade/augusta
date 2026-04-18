@@ -16,7 +16,7 @@ class CatalogController extends Controller
     public function products(Request $request)
     {
         $query = Product::where('status', 'published')
-            ->with(['category', 'tags', 'variants.color', 'variants.size']);
+            ->with(['category', 'tags', 'variants.color', 'variants.size', 'colors', 'media']);
 
         if ($request->has('category')) {
             $query->whereHas('category', function($q) use ($request) {
@@ -55,7 +55,7 @@ class CatalogController extends Controller
             ->where(function($q) use ($slug) {
                 $q->where('slug', $slug)->orWhere('id', $slug);
             })
-            ->with(['category', 'tags', 'variants.color', 'variants.size'])
+            ->with(['category', 'tags', 'variants.color', 'variants.size', 'colors', 'media'])
             ->firstOrFail();
 
         return response()->json($this->transformProduct($product));
@@ -115,6 +115,14 @@ class CatalogController extends Controller
             ],
             'tags' => $product->tags->pluck('name')->toArray(),
             'updatedAt' => $product->updated_at->toISOString(),
+            'colorImages' => $product->getMedia('color_images')->map(function ($media) use ($product) {
+                $color = $product->colors->firstWhere('id', $media->getCustomProperty('color_id'));
+                if (!$color) return null;
+                return [
+                    'color' => $color->name,
+                    'url' => $media->getFullUrl(),
+                ];
+            })->filter()->values()->toArray(),
         ];
     }
 

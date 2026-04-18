@@ -52,6 +52,7 @@ export type Product = {
   seo: SEO;
   tags: string[];
   updatedAt: string;
+  colorImages?: { color: string; url: string }[];
 };
 
 export type Collection = {
@@ -80,6 +81,7 @@ export type CartItem = {
       id: string;
       handle: string;
       title: string;
+      stock?: number;
       featuredImage: Image;
     };
   };

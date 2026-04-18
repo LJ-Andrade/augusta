@@ -1,8 +1,10 @@
 "use client";
 
 import { Product } from "lib/vadmin/types";
+import { COLOR_MAP } from "lib/constants";
 import Image from "next/image";
 import Link from "next/link";
+import { useState } from "react";
 
 type ProductCardProps = {
   product: Product;
@@ -10,8 +12,11 @@ type ProductCardProps = {
 };
 
 export function ProductCard({ product, priority = false }: ProductCardProps) {
-  const imageUrl =
+  const defaultImageUrl =
     product.featuredImage?.url ?? product.images?.[0]?.url ?? "";
+  const [currentImage, setCurrentImage] = useState(defaultImageUrl);
+  const imageUrl = currentImage || defaultImageUrl;
+
   const imageAlt =
     product.featuredImage?.altText ?? product.title;
 
@@ -25,29 +30,17 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
     .find((o) => o.name === "Color")
     ?.values.slice(0, 5) ?? [];
 
-  // Color name → hex (basic palette; extend as needed)
-  const colorMap: Record<string, string> = {
-    beige: "#D4B896",
-    negro: "#1A1A1A",
-    blanco: "#F5F5F0",
-    gris: "#9E9E9E",
-    azul: "#4A6FA5",
-    rojo: "#B94040",
-    verde: "#4A7A5A",
-    marron: "#8B6C5C",
-    rosa: "#D4A0A0",
-    crema: "#F0E8D8",
-  };
+
 
   const getColorHex = (name: string): string =>
-    colorMap[name.toLowerCase()] ?? "#CCCCCC";
+    COLOR_MAP[name.toLowerCase()] ?? "#CCCCCC";
 
   return (
     <article className="pb-card group relative flex flex-col">
       {/* ── Image ──────────────────────────────────────────────────── */}
       <Link
         href={`/product/${product.handle}`}
-        className="relative block overflow-hidden"
+        className="relative block overflow-hidden rounded-[12px] isolate"
         style={{ aspectRatio: "4/5", backgroundColor: "var(--pb-surface)" }}
       >
         {imageUrl ? (
@@ -127,15 +120,50 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
 
         {/* Color swatches */}
         {colors.length > 0 && (
-          <div className="mt-1 flex gap-1.5">
-            {colors.map((color) => (
-              <span
-                key={color}
-                title={color}
-                className="h-3.5 w-3.5 rounded-full border border-white ring-1 ring-gray-300 transition-transform hover:scale-125"
-                style={{ backgroundColor: getColorHex(color) }}
-              />
-            ))}
+          <div className="mt-1 flex items-center gap-1.5">
+            {colors.map((color) => {
+              const hex = getColorHex(color);
+              const colorImage = product.colorImages?.find(
+                (ci) => ci.color.toLowerCase() === color.toLowerCase()
+              );
+
+              return (
+                <button
+                  key={color}
+                  title={color}
+                  type="button"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    if (colorImage?.url) {
+                      setCurrentImage(colorImage.url);
+                    } else {
+                      setCurrentImage(defaultImageUrl);
+                    }
+                  }}
+                  className={`h-3.5 w-3.5 cursor-pointer rounded-full border border-white ring-1 transition-transform hover:scale-125 ${
+                    currentImage === colorImage?.url && colorImage?.url
+                      ? "ring-black scale-125"
+                      : "ring-gray-300"
+                  }`}
+                  style={{ backgroundColor: hex }}
+                />
+              );
+            })}
+
+            {/* Reset button */}
+            {currentImage !== defaultImageUrl && (
+              <button
+                type="button"
+                title="Restablecer vista"
+                onClick={(e) => {
+                  e.preventDefault();
+                  setCurrentImage(defaultImageUrl);
+                }}
+                className="ml-0.5 flex h-3.5 w-3.5 cursor-pointer items-center justify-center rounded-full bg-black/5 text-[8px] text-black/40 transition-colors hover:bg-black/10 hover:text-black/60"
+              >
+                ✕
+              </button>
+            )}
           </div>
         )}
       </div>

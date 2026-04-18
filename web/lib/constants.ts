@@ -48,4 +48,18 @@ export const TAGS = {
 
 export const HIDDEN_PRODUCT_TAG = "vadmin-hidden";
 export const DEFAULT_OPTION = "Default";
+export const SHOPIFY_GRAPHQL_API_ENDPOINT = "/api/2023-01/graphql.json";
+ 
+export const COLOR_MAP: Record<string, string> = {
+  beige: "#D4B896",
+  negro: "#1A1A1A",
+  blanco: "#F5F5F0",
+  gris: "#9E9E9E",
+  azul: "#4A6FA5",
+  rojo: "#B94040",
+  verde: "#4A7A5A",
+  marron: "#8B6C5C",
+  rosa: "#D4A0A0",
+  crema: "#F0E8D8",
+};
 

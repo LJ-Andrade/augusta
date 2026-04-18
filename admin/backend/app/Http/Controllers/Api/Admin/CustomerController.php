@@ -21,7 +21,7 @@ class CustomerController extends Controller
                 $q->where('name', 'like', "%{$search}%")
                   ->orWhere('email', 'like', "%{$search}%")
                   ->orWhere('phone', 'like', "%{$search}%")
-                  ->orWhere('official_domain', 'like', "%{$search}%");
+                  ->orWhere('address', 'like', "%{$search}%");
             });
         }
 
@@ -38,8 +38,8 @@ class CustomerController extends Controller
     {
         $customer = Customer::create($request->validated());
 
-        if ($request->hasFile('logo')) {
-            $customer->addMediaFromRequest('logo')->toMediaCollection('logo');
+        if ($request->hasFile('avatar')) {
+            $customer->addMediaFromRequest('avatar')->toMediaCollection('avatar');
         }
 
         return new CustomerResource($customer);
@@ -52,11 +52,27 @@ class CustomerController extends Controller
 
     public function update(CustomerRequest $request, Customer $customer): CustomerResource
     {
-        $customer->update($request->validated());
-
-        if ($request->hasFile('logo')) {
-            $customer->addMediaFromRequest('logo')->toMediaCollection('logo');
+        $data = $request->validated();
+        if (empty($data['password'])) {
+            unset($data['password']);
         }
+        
+        $customer->update($data);
+
+        if ($request->hasFile('avatar')) {
+            $customer->addMediaFromRequest('avatar')->toMediaCollection('avatar');
+        }
+
+        return new CustomerResource($customer);
+    }
+
+    public function uploadAvatar(Request $request, Customer $customer): CustomerResource
+    {
+        $request->validate([
+            'avatar' => 'required|image|max:2048',
+        ]);
+
+        $customer->addMediaFromRequest('avatar')->toMediaCollection('avatar');
 
         return new CustomerResource($customer);
     }

@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import axiosClient from '@/lib/axios';
@@ -36,6 +36,9 @@ import {
   ArrowUpDown,
   ArrowUp,
   ArrowDown,
+  ChevronRight,
+  Check,
+  Loader2,
 } from 'lucide-react';
 import {
   Collapsible,
@@ -57,6 +60,9 @@ export default function ProductsList() {
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [productToDelete, setProductToDelete] = useState(null);
+  const [expandedProductId, setExpandedProductId] = useState(null);
+  const [variantChanges, setVariantChanges] = useState({});
+  const [savingVariantId, setSavingVariantId] = useState(null);
 
   const {
     items: products,
@@ -117,6 +123,59 @@ export default function ProductsList() {
   const handleOrderChange = useCallback((id, newOrder) => {
     quickUpdate(id, 'order', parseInt(newOrder) || 0);
   }, [quickUpdate]);
+
+  const hasVariantChanges = useMemo(() => {
+    return Object.keys(variantChanges).length > 0;
+  }, [variantChanges]);
+
+  const handleVariantFieldChange = (productId, variantId, field, value) => {
+    setVariantChanges(prev => ({
+      ...prev,
+      [productId]: {
+        ...prev[productId],
+        [variantId]: {
+          ...(prev[productId]?.[variantId] || {}),
+          [field]: value,
+        }
+      }
+    }));
+  };
+
+  const handleSaveVariants = async (productId) => {
+    const changes = variantChanges[productId];
+    if (!changes) return;
+
+    setSavingVariantId(productId);
+    
+    try {
+      const updatePromises = Object.entries(changes).map(([variantId, fields]) => {
+        return axiosClient.patch(`/products/${productId}/variants/${variantId}`, fields);
+      });
+      
+      await Promise.all(updatePromises);
+      toast.success(t('products.update_success'));
+      setVariantChanges(prev => {
+        const newChanges = { ...prev };
+        delete newChanges[productId];
+        return newChanges;
+      });
+      fetchItems();
+    } catch (error) {
+      toast.error(t('common.error_occurred'));
+      console.error(error);
+    } finally {
+      setSavingVariantId(null);
+    }
+  };
+
+  const toggleExpandProduct = (productId) => {
+    setExpandedProductId(prev => prev === productId ? null : productId);
+    setVariantChanges({});
+  };
+
+  const getVariantChangesForProduct = (productId) => {
+    return variantChanges[productId] || {};
+  };
 
   const renderSortIcon = (column) => {
     if (sortBy !== column) {
@@ -217,7 +276,7 @@ export default function ProductsList() {
               </CollapsibleTrigger>
             </div>
 
-            <CollapsibleContent className="space-y-4">
+            <CollapsibleContent className="space-y-4 overflow-visible">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 border rounded-lg bg-muted/50">
                 <div className="space-y-2">
                   <label htmlFor="filterCategory" className="text-sm font-medium">{t('products.category')}</label>
@@ -303,113 +362,199 @@ export default function ProductsList() {
               )}
               {!loading && products.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={10} className="text-center py-8 text-muted-foreground">
+                  <TableCell colSpan={11} className="text-center py-8 text-muted-foreground">
                     {t('common.no_data')}
                   </TableCell>
                 </TableRow>
               )}
               {products.map((product) => (
-                <TableRow key={product.id}>
-                  <TableCell>
-                    <Checkbox checked={selectedIds.includes(product.id)} onCheckedChange={() => toggleSelect(product.id)} />
-                  </TableCell>
-                  <TableCell className="w-[60px]">{product.id}</TableCell>
-                  <TableCell>
-                    {product.cover_url ? (
-                      <img src={product.cover_url} alt={product.name} className="h-10 w-10 object-cover rounded shadow-sm" />
-                    ) : (
-                      <div className="h-10 w-10 bg-muted flex items-center justify-center rounded">
-                        <ImageIcon className="h-5 w-5 text-muted-foreground" />
+                <>
+                  <TableRow key={product.id}>
+                    <TableCell>
+                      <Checkbox checked={selectedIds.includes(product.id)} onCheckedChange={() => toggleSelect(product.id)} />
+                    </TableCell>
+                    <TableCell className="w-[60px]">{product.id}</TableCell>
+                    <TableCell>
+                      {product.cover_url ? (
+                        <img src={product.cover_url} alt={product.name} className="h-10 w-10 object-cover rounded shadow-sm" />
+                      ) : (
+                        <div className="h-10 w-10 bg-muted flex items-center justify-center rounded">
+                          <ImageIcon className="h-5 w-5 text-muted-foreground" />
+                        </div>
+                      )}
+                    </TableCell>
+                    <TableCell className="font-medium">{product.name}</TableCell>
+                    <TableCell>{product.category?.name}</TableCell>
+                    <TableCell>
+                      <div className="text-xs">
+                        <div>{product.cost_price}</div>
+                        <div className="font-medium">{product.sale_price}</div>
                       </div>
-                    )}
-                  </TableCell>
-                  <TableCell className="font-medium">{product.name}</TableCell>
-                  <TableCell>{product.category?.name}</TableCell>
-                  <TableCell>
-                    <div className="text-xs">
-                      <div>{product.cost_price}</div>
-                      <div className="font-medium">{product.sale_price}</div>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" className="h-8 w-full justify-start px-2">
-                          {getStatusBadge(product.status)}
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="start">
-                        <DropdownMenuItem onClick={() => handleStatusChange(product, 'draft')}>
-                          {t('products.status_draft')}
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => handleStatusChange(product, 'published')}>
-                          {t('products.status_published')}
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => handleStatusChange(product, 'archived')}>
-                          {t('products.status_archived')}
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </TableCell>
-                  <TableCell className="w-[120px]">
-                    <div className="flex items-center gap-2">
-                      <button onClick={() => handleToggleFeatured(product)} className="focus:outline-none">
-                        {product.featured ? (
-                          <Star className="h-4 w-4 fill-yellow-400 text-yellow-400 shrink-0 cursor-pointer hover:scale-110 transition-transform" />
-                        ) : (
-                          <Star className="h-4 w-4 text-muted-foreground/30 shrink-0 cursor-pointer hover:scale-110 transition-transform" />
-                        )}
-                      </button>
-                      <Input
-                        type="number"
-                        className="h-7 w-16 text-sm"
-                        value={product.order ?? 0}
-                        onChange={(e) => handleOrderChange(product.id, e.target.value)}
-                      />
-                    </div>
-                  </TableCell>
-                  <TableCell className="text-right w-[130px]">{formatDate(product.created_at)}</TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex items-center justify-end gap-1">
-                      <Can permission="view products">
-                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => navigate(`/products/${product.id}`)}>
-                          <Eye className="h-4 w-4" />
-                        </Button>
-                      </Can>
+                    </TableCell>
+                    <TableCell>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon" className="h-8 w-8 lg:hidden">
-                            <ChevronDown className="h-4 w-4" />
+                          <Button variant="ghost" className="h-8 w-full justify-start px-2 cursor-pointer">
+                            {getStatusBadge(product.status)}
                           </Button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <Can permission="edit products">
-                            <DropdownMenuItem onClick={() => navigate(`/products/edit/${product.id}`)}>
-                              <Edit className="mr-2 h-4 w-4" /> {t('common.edit')}
-                            </DropdownMenuItem>
-                          </Can>
-                          <Can permission="delete products">
-                            <DropdownMenuItem onClick={() => onDeleteClick(product)} className="text-red-500">
-                              <Trash2 className="mr-2 h-4 w-4" /> {t('common.delete')}
-                            </DropdownMenuItem>
-                          </Can>
+                        <DropdownMenuContent align="start">
+                          <DropdownMenuItem onClick={() => handleStatusChange(product, 'draft')}>
+                            {t('products.status_draft')}
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => handleStatusChange(product, 'published')}>
+                            {t('products.status_published')}
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => handleStatusChange(product, 'archived')}>
+                            {t('products.status_archived')}
+                          </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
-                      <div className="hidden lg:flex items-center gap-1">
+                    </TableCell>
+                    <TableCell className="w-[120px]">
+                      <div className="flex items-center gap-2">
+                        <button onClick={() => handleToggleFeatured(product)} className="focus:outline-none">
+                          {product.featured ? (
+                            <Star className="h-4 w-4 fill-yellow-400 text-yellow-400 shrink-0 cursor-pointer hover:scale-110 transition-transform" />
+                          ) : (
+                            <Star className="h-4 w-4 text-muted-foreground/30 shrink-0 cursor-pointer hover:scale-110 transition-transform" />
+                          )}
+                        </button>
+                        <Input
+                          type="number"
+                          className="h-7 w-16 text-sm"
+                          value={product.order ?? 0}
+                          onChange={(e) => handleOrderChange(product.id, e.target.value)}
+                        />
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-right w-[130px]">{formatDate(product.created_at)}</TableCell>
+                    <TableCell className="text-right w-[150px]">
+                      <div className="flex items-center justify-end gap-1">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 cursor-pointer"
+                          onClick={() => toggleExpandProduct(product.id)}
+                          title={t('products.show_variants')}
+                        >
+                          <ChevronRight className={`h-4 w-4 transition-transform ${expandedProductId === product.id ? 'rotate-90' : ''}`} />
+                        </Button>
+                        <Can permission="view products">
+                          <Button variant="ghost" size="icon" className="h-8 w-8 cursor-pointer" onClick={() => navigate(`/products/${product.id}`)}>
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                        </Can>
                         <Can permission="edit products">
-                          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => navigate(`/products/edit/${product.id}`)}>
+                          <Button variant="ghost" size="icon" className="h-8 w-8 cursor-pointer" onClick={() => navigate(`/products/edit/${product.id}`)}>
                             <Edit className="h-4 w-4" />
                           </Button>
                         </Can>
                         <Can permission="delete products">
-                          <Button variant="ghost" size="icon" className="h-8 w-8 text-red-500" onClick={() => onDeleteClick(product)}>
+                          <Button variant="ghost" size="icon" className="h-8 w-8 text-red-500 cursor-pointer" onClick={() => onDeleteClick(product)}>
                             <Trash2 className="h-4 w-4" />
                           </Button>
                         </Can>
                       </div>
-                    </div>
-                  </TableCell>
-                </TableRow>
+                    </TableCell>
+                  </TableRow>
+                  {(expandedProductId === product.id && product.variants && product.variants.length > 0) && (
+                    <TableRow className="bg-muted/30 hover:bg-muted/30">
+                      <TableCell colSpan={10} className="p-4">
+                        <div className="space-y-3">
+                          <div className="max-w-3xl ml-auto">
+                            <div className="flex items-center justify-between mb-3">
+                              <h4 className="font-medium text-sm">{t('products.variants_title')}</h4>
+                            </div>
+                            <Table className="border rounded-lg">
+                            <TableHeader>
+                              <TableRow className="bg-muted/50">
+                                <TableHead className="w-[100px] text-left">{t('products.sku')}</TableHead>
+                                <TableHead className="text-left">{t('products.color')}</TableHead>
+                                <TableHead className="text-left">{t('products.size')}</TableHead>
+                                <TableHead className="text-right">{t('products.stock')}</TableHead>
+                                <TableHead className="text-right">{t('products.min_stock')}</TableHead>
+                              </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                              {product.variants.map((variant) => {
+                                const changes = getVariantChangesForProduct(product.id);
+                                const hasChanges = changes && changes[variant.id];
+                                return (
+                                  <TableRow key={variant.id} className={hasChanges ? 'bg-yellow-50 dark:bg-yellow-900/30' : ''}>
+                                      <TableCell className="w-[100px]">
+                                        <Input
+                                          className="h-8 text-sm"
+                                          value={hasChanges ? (changes[variant.id].sku ?? variant.sku) : (variant.sku ?? '')}
+                                          onChange={(e) => handleVariantFieldChange(product.id, variant.id, 'sku', e.target.value)}
+                                          placeholder="-"
+                                        />
+                                      </TableCell>
+                                      <TableCell className="text-left">
+                                        <div className="flex items-center gap-2">
+                                          {variant.color?.hex_color && (
+                                            <span
+                                              className="h-4 w-4 rounded-full border shrink-0"
+                                              style={{ backgroundColor: variant.color.hex_color }}
+                                            />
+                                          )}
+                                          <span>{variant.color?.name || '-'}</span>
+                                        </div>
+                                      </TableCell>
+                                      <TableCell className="text-left">
+                                        {variant.size?.name || '-'}
+                                      </TableCell>
+                                      <TableCell className="text-right">
+                                        <div className="flex justify-end">
+                                          <Input
+                                            type="number"
+                                            className="h-8 w-[80px] text-sm text-right"
+                                            value={hasChanges ? (changes[variant.id].stock ?? variant.stock) : (variant.stock ?? 0)}
+                                            onChange={(e) => handleVariantFieldChange(product.id, variant.id, 'stock', parseInt(e.target.value) || 0)}
+                                          />
+                                        </div>
+                                      </TableCell>
+                                      <TableCell className="text-right">
+                                        <div className="flex justify-end">
+                                          <Input
+                                            type="number"
+                                            className="h-8 w-[80px] text-sm text-right"
+                                            value={hasChanges ? (changes[variant.id].min_stock ?? variant.min_stock) : (variant.min_stock ?? 0)}
+                                            onChange={(e) => handleVariantFieldChange(product.id, variant.id, 'min_stock', parseInt(e.target.value) || 0)}
+                                          />
+                                        </div>
+                                      </TableCell>
+                                  </TableRow>
+                                );
+                              })}
+                            </TableBody>
+                          </Table>
+                          </div>
+                          {(() => {
+                            const changes = getVariantChangesForProduct(product.id);
+                            const hasChanges = changes && Object.keys(changes).length > 0;
+                            return hasChanges ? (
+                              <div className="flex justify-end mt-3">
+                                <Button
+                                  size="sm"
+                                  onClick={() => handleSaveVariants(product.id)}
+                                  disabled={savingVariantId === product.id}
+                                >
+                                  {savingVariantId === product.id ? (
+                                    <Loader2 className="h-4 w-4 animate-spin mr-1" />
+                                  ) : (
+                                    <Check className="h-4 w-4 mr-1" />
+                                  )}
+                                  {t('common.save')}
+                                </Button>
+                              </div>
+                            ) : null;
+                          })()}
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </>
               ))}
             </TableBody>
           </Table>

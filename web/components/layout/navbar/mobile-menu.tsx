@@ -4,12 +4,22 @@ import { Dialog, Transition } from "@headlessui/react";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { Fragment, Suspense, useEffect, useState } from "react";
+import { logoutAction } from "lib/vadmin/actions";
 
-import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
-import { Menu } from "lib/vadmin/types";
-import Search, { SearchSkeleton } from "./search";
+// Manual Icons with forced black color
+const BarsIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="#000000" className="h-4 w-4">
+    <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+  </svg>
+);
 
-export default function MobileMenu({ menu }: { menu: Menu[] }) {
+const XIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="#000000" className="h-6 w-6">
+    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
+  </svg>
+);
+
+export default function MobileMenu({ menu, customer }: { menu: any[]; customer: any }) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const [isOpen, setIsOpen] = useState(false);
@@ -35,9 +45,9 @@ export default function MobileMenu({ menu }: { menu: Menu[] }) {
       <button
         onClick={openMobileMenu}
         aria-label="Open mobile menu"
-        className="flex h-11 w-11 items-center justify-center rounded-md border border-neutral-200 text-black transition-colors md:hidden dark:border-neutral-700 dark:text-white"
+        className="flex h-10 w-10 items-center justify-center rounded-[12px] border border-neutral-200 text-black transition-colors md:hidden dark:border-neutral-700"
       >
-        <Bars3Icon className="h-4" />
+        <BarsIcon />
       </button>
       <Transition show={isOpen}>
         <Dialog onClose={closeMobileMenu} className="relative z-50">
@@ -64,36 +74,36 @@ export default function MobileMenu({ menu }: { menu: Menu[] }) {
             <Dialog.Panel className="fixed bottom-0 left-0 right-0 top-0 flex h-full w-full flex-col bg-white pb-6 dark:bg-black">
               <div className="p-4">
                 <button
-                  className="mb-4 flex h-11 w-11 items-center justify-center rounded-md border border-neutral-200 text-black transition-colors dark:border-neutral-700 dark:text-white"
+                  className="mb-4 flex h-10 w-10 items-center justify-center rounded-[12px] border border-neutral-200 text-black transition-colors dark:border-neutral-700"
                   onClick={closeMobileMenu}
                   aria-label="Close mobile menu"
                 >
-                  <XMarkIcon className="h-6" />
+                  <XIcon />
                 </button>
 
-                <div className="mb-4 w-full">
-                  <Suspense fallback={<SearchSkeleton />}>
-                    <Search />
-                  </Suspense>
-                </div>
-                {menu.length ? (
-                  <ul className="flex w-full flex-col">
-                    {menu.map((item: Menu) => (
-                      <li
-                        className="py-2 text-xl text-black transition-colors hover:text-neutral-500 dark:text-white"
-                        key={item.title}
-                      >
-                        <Link
-                          href={item.path}
-                          prefetch={true}
-                          onClick={closeMobileMenu}
-                        >
-                          {item.title}
+                <ul className="flex w-full flex-col">
+                  <li className="py-2 text-xl text-black transition-colors hover:text-neutral-500 dark:text-white">
+                    <Link href="/catalog" prefetch={true} onClick={closeMobileMenu}>
+                      Catálogo
+                    </Link>
+                  </li>
+                  <li className="py-2 text-xl text-black transition-colors hover:text-neutral-500 dark:text-white border-t mt-4 pt-4">
+                    {customer ? (
+                      <>
+                        <Link href="/profile" onClick={closeMobileMenu} className="block mb-2 font-medium">
+                          Mi Perfil
                         </Link>
-                      </li>
-                    ))}
-                  </ul>
-                ) : null}
+                        <button onClick={() => logoutAction()} className="text-left w-full text-red-500 font-medium">
+                          Cerrar Sesión
+                        </button>
+                      </>
+                    ) : (
+                      <Link href="/login" onClick={closeMobileMenu} className="font-medium">
+                        Ingresar
+                      </Link>
+                    )}
+                  </li>
+                </ul>
               </div>
             </Dialog.Panel>
           </Transition.Child>

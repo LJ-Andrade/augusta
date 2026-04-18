@@ -21,6 +21,9 @@
   --pb-announce-text:  #FFFFFF;
   --pb-card-hover-shadow: 0 8px 32px rgba(0,0,0,0.10);
 
+  /* Radius */
+  --pb-radius:         12px;
+
   /* Typography */
   --font-serif: 'Playfair Display', Georgia, serif;
   --font-sans:  'Inter', system-ui, -apple-system, sans-serif;
@@ -48,6 +51,22 @@
     img[loading="lazy"] {
       clip-path: inset(0.6px);
     }
+  }
+  /* Global cursor pointer for interactive elements */
+  button,
+  [role="button"],
+  input[type="button"],
+  input[type="submit"],
+  input[type="checkbox"],
+  input[type="radio"],
+  label {
+    cursor: pointer;
+    border-radius: var(--pb-radius);
+    isolation: isolate;
+  }
+
+  img {
+    border-radius: var(--pb-radius) !important;
   }
 }
 

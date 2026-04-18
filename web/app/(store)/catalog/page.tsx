@@ -106,27 +106,6 @@ export default async function CatalogPage(props: {
 
   return (
     <div className="mx-auto max-w-screen-2xl px-4 py-8 lg:px-8">
-      {/* ── Page Title ─────────────────────────────────────────────── */}
-      <div className="mb-8 text-center">
-        <h1
-          className="text-4xl font-medium"
-          style={{ fontFamily: "var(--font-serif)", color: "var(--pb-text)" }}
-        >
-          {category
-            ? sidebarCategories.find((c) => c.handle === category)?.title ??
-              category
-            : "Catálogo"}
-        </h1>
-        {query && (
-          <p
-            className="mt-2 text-sm"
-            style={{ color: "var(--pb-text-secondary)" }}
-          >
-            Resultados para "{query}"
-          </p>
-        )}
-      </div>
-
       {/* ── Main Layout ────────────────────────────────────────────── */}
       <div className="flex gap-10 lg:gap-16">
         {/* Sidebar */}

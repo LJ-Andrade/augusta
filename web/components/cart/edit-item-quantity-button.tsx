@@ -4,30 +4,8 @@ import { MinusIcon, PlusIcon } from "@heroicons/react/24/outline";
 import clsx from "clsx";
 import { updateItemQuantity } from "components/cart/actions";
 import type { CartItem } from "lib/vadmin/types";
-import { useActionState } from "react";
-
-function SubmitButton({ type }: { type: "plus" | "minus" }) {
-  return (
-    <button
-      type="submit"
-      aria-label={
-        type === "plus" ? "Increase item quantity" : "Reduce item quantity"
-      }
-      className={clsx(
-        "ease flex h-full min-w-[36px] max-w-[36px] flex-none items-center justify-center rounded-full p-2 transition-all duration-200 hover:border-neutral-800 hover:opacity-80",
-        {
-          "ml-auto": type === "minus",
-        },
-      )}
-    >
-      {type === "plus" ? (
-        <PlusIcon className="h-4 w-4 dark:text-neutral-500" />
-      ) : (
-        <MinusIcon className="h-4 w-4 dark:text-neutral-500" />
-      )}
-    </button>
-  );
-}
+import { useTransition } from "react";
+import { toast } from "sonner";
 
 export function EditItemQuantityButton({
   item,
@@ -38,24 +16,63 @@ export function EditItemQuantityButton({
   type: "plus" | "minus";
   optimisticUpdate: any;
 }) {
-  const [message, formAction] = useActionState(updateItemQuantity, null);
-  const payload = {
-    merchandiseId: item.merchandise.id,
-    quantity: type === "plus" ? item.quantity + 1 : item.quantity - 1,
+  const [isPending, startTransition] = useTransition();
+
+  // ONLY disable the PLUS button if stock is exhausted
+  const isPlusDisabled = type === "plus" && item.merchandise.product.stock !== undefined && item.merchandise.product.stock <= 0;
+
+  const handleAction = async () => {
+    if (isPlusDisabled) {
+      toast.error("Stock insuficiente", {
+        description: "Has alcanzado el límite de unidades disponibles para este producto.",
+      });
+      return;
+    }
+
+    const newQuantity = type === "plus" ? item.quantity + 1 : item.quantity - 1;
+    const payload = {
+      merchandiseId: item.merchandise.id,
+      quantity: newQuantity,
+    };
+
+    startTransition(async () => {
+      // Optimistic update
+      optimisticUpdate(payload.merchandiseId, type);
+      
+      try {
+        const result = await updateItemQuantity(null, payload);
+        if (result && (result.toLowerCase().includes("stock") || result.includes("Insufficient"))) {
+          toast.error("Stock insuficiente", {
+            description: "No hay más unidades disponibles de este producto.",
+          });
+        } else if (result) {
+          toast.error(result);
+        }
+      } catch (e: any) {
+        toast.error("Error al actualizar la cantidad");
+      }
+    });
   };
-  const updateItemQuantityAction = formAction.bind(null, payload);
 
   return (
-    <form
-      action={async () => {
-        optimisticUpdate(payload.merchandiseId, type);
-        updateItemQuantityAction();
-      }}
+    <button
+      type="button"
+      onClick={handleAction}
+      disabled={isPending || isPlusDisabled}
+      aria-label={type === "plus" ? "Aumentar cantidad" : "Reducir cantidad"}
+      className={clsx(
+        "ease flex h-full min-w-[36px] max-w-[36px] flex-none items-center justify-center rounded-full p-2 transition-all duration-200 hover:bg-neutral-100 dark:hover:bg-neutral-800",
+        {
+          "ml-auto": type === "minus",
+          "opacity-30 cursor-not-allowed": isPending || isPlusDisabled,
+        }
+      )}
     >
-      <SubmitButton type={type} />
-      <p aria-live="polite" className="sr-only" role="status">
-        {message}
-      </p>
-    </form>
+      {type === "plus" ? (
+        <PlusIcon className={clsx("h-4 w-4", isPending && "animate-pulse")} />
+      ) : (
+        <MinusIcon className={clsx("h-4 w-4", isPending && "animate-pulse")} />
+      )}
+    </button>
   );
 }

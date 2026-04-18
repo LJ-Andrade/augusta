@@ -6,21 +6,28 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
+use Laravel\Sanctum\HasApiTokens;
 
 class Customer extends Model implements HasMedia
 {
-    use HasFactory, InteractsWithMedia;
+    use HasApiTokens, HasFactory, InteractsWithMedia;
 
     protected $fillable = [
         'name',
         'email',
+        'password',
         'phone',
-        'official_domain',
+        'address',
         'is_active'
+    ];
+
+    protected $hidden = [
+        'password',
     ];
 
     protected $casts = [
         'is_active' => 'boolean',
+        'password' => 'hashed',
     ];
 
     /**
@@ -28,7 +35,7 @@ class Customer extends Model implements HasMedia
      */
     public function registerMediaCollections(): void
     {
-        $this->addMediaCollection('logo')
+        $this->addMediaCollection('avatar')
             ->singleFile();
     }
 }

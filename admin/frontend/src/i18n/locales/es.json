@@ -379,6 +379,10 @@
 		"select_sizes_and_colors": "Debes seleccionar al menos un talle y un color para generar variantes",
 		"colors": "Colores",
 		"select_colors": "Seleccionar colores...",
+		"show_variants": "Ver variantes",
+		"color": "Color",
+		"size": "Talle",
+		"active": "Activo",
 		"validation": {
 			"name_min": "El nombre debe tener al menos 3 caracteres",
 			"cost_price_required": "El precio de costo es requerido",

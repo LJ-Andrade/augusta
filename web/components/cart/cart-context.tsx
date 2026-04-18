@@ -29,6 +29,8 @@ type CartAction =
 
 type CartContextType = {
   cartPromise: Promise<Cart | undefined>;
+  isOpen: boolean;
+  setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -198,8 +200,10 @@ export function CartProvider({
   children: React.ReactNode;
   cartPromise: Promise<Cart | undefined>;
 }) {
+  const [isOpen, setIsOpen] = React.useState(false);
+
   return (
-    <CartContext.Provider value={{ cartPromise }}>
+    <CartContext.Provider value={{ cartPromise, isOpen, setIsOpen }}>
       {children}
     </CartContext.Provider>
   );
@@ -211,7 +215,8 @@ export function useCart() {
     throw new Error("useCart must be used within a CartProvider");
   }
 
-  const initialCart = use(context.cartPromise);
+  const { cartPromise, isOpen, setIsOpen } = context;
+  const initialCart = use(cartPromise);
   const [optimisticCart, updateOptimisticCart] = useOptimistic(
     initialCart,
     cartReducer,
@@ -233,7 +238,9 @@ export function useCart() {
       cart: optimisticCart,
       updateCartItem,
       addCartItem,
+      isOpen,
+      setIsOpen,
     }),
-    [optimisticCart],
+    [optimisticCart, isOpen, setIsOpen],
   );
 }

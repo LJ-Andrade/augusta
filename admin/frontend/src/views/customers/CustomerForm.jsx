@@ -1,299 +1,298 @@
-import { useState, useEffect } from 'react';
-import { useNavigate, useParams, Link } from 'react-router-dom';
-import axios from '@/lib/axios';
-import { 
-  ArrowLeft, 
-  Save, 
-  Building2, 
-  Mail, 
-  Phone, 
-  Globe, 
-  Upload, 
-  X,
-  CheckCircle2,
-  AlertCircle
-} from 'lucide-react';
-import { Button } from "@/components/ui/button";
+import { useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import { toast } from "sonner";
+import axiosClient from "@/lib/axios";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Loader2 } from "lucide-react";
+import { useTranslation } from "react-i18next";
+import { AvatarUpload } from "@/components/ui/avatar-upload";
+import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
-import { toast } from 'sonner';
-import { useTranslation } from 'react-i18next';
 
 export default function CustomerForm() {
-	const { t } = useTranslation();
-	const { id } = useParams();
-	const navigate = useNavigate();
-	const isEdit = !!id;
+  const { t } = useTranslation();
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
+  const [fetching, setFetching] = useState(false);
+  const [avatarUrl, setAvatarUrl] = useState(null);
+  const [pendingAvatar, setPendingAvatar] = useState(null);
 
-	const [loading, setLoading] = useState(false);
-	const [fetching, setFetching] = useState(isEdit);
-	const [formData, setFormData] = useState({
-		name: '',
-		email: '',
-		phone: '',
-		official_domain: '',
-		is_active: true
-	});
-	const [logo, setLogo] = useState(null);
-	const [logoPreview, setLogoPreview] = useState(null);
+  const formSchema = z.object({
+    name: z.string().min(2, t('validation.name_min')),
+    email: z.string().email(t('validation.email_invalid')),
+    password: id 
+      ? z.string().optional().or(z.literal(""))
+      : z.string().min(8, "Password must be at least 8 characters."),
+    phone: z.string().optional().or(z.literal("")),
+    address: z.string().optional().or(z.literal("")),
+    is_active: z.boolean().default(true),
+  });
 
-	useEffect(() => {
-		if (isEdit) {
-			fetchCustomer();
-		}
-	}, [id]);
+  const form = useForm({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      name: "",
+      email: "",
+      password: "",
+      phone: "",
+      address: "",
+      is_active: true,
+    },
+  });
 
-	const fetchCustomer = async () => {
-		try {
-			const response = await axios.get(`admin/customers/${id}`);
-			const customer = response.data.data;
-			setFormData({
-				name: customer.name || '',
-				email: customer.email || '',
-				phone: customer.phone || '',
-				official_domain: customer.official_domain || '',
-				is_active: customer.is_active
-			});
-			if (customer.logo_url) {
-				setLogoPreview(customer.logo_url);
-			}
-		} catch (error) {
-			toast.error('Error al cargar el cliente');
-			navigate('/customers');
-		} finally {
-			setFetching(false);
-		}
-	};
+  useEffect(() => {
+    if (id) {
+      setFetching(true);
+      axiosClient
+        .get(`admin/customers/${id}`)
+        .then(({ data }) => {
+          form.reset({
+            name: data.data.name || "",
+            email: data.data.email || "",
+            password: "",
+            phone: data.data.phone || "",
+            address: data.data.address || "",
+            is_active: !!data.data.is_active,
+          });
+          setAvatarUrl(data.data.avatar_url);
+          setFetching(false);
+        })
+        .catch(() => {
+          setFetching(false);
+          toast.error(t('customers.load_error') || "Error loading customer");
+        });
+    }
+  }, [id, form, t]);
 
-	const handleLogoChange = (e) => {
-		const file = e.target.files[0];
-		if (file) {
-			setLogo(file);
-			setLogoPreview(URL.createObjectURL(file));
-		}
-	};
+  const handleAvatarChange = async (file) => {
+    if (!id) {
+      setPendingAvatar(file);
+      setAvatarUrl(URL.createObjectURL(file));
+      return;
+    }
 
-	const removeLogo = () => {
-		setLogo(null);
-		setLogoPreview(null);
-	};
+    const formData = new FormData();
+    formData.append('avatar', file);
 
-	const handleSubmit = async (e) => {
-		e.preventDefault();
-		setLoading(true);
+    try {
+      const { data } = await axiosClient.post(`admin/customers/${id}/avatar`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      setAvatarUrl(`${data.data.avatar_url}?t=${new Date().getTime()}`);
+      toast.success(t('profile.avatar_update_success'));
+    } catch (error) {
+      console.error("Error uploading avatar:", error);
+      toast.error(t('profile.avatar_update_error'));
+    }
+  };
 
-		const data = new FormData();
-		Object.keys(formData).forEach(key => {
-			if (formData[key] !== null) {
-				data.append(key, formData[key] === true ? 1 : (formData[key] === false ? 0 : formData[key]));
-			}
-		});
+  const onSubmit = (values) => {
+    setLoading(true);
+    const payload = { ...values };
+    if (id && !payload.password) {
+      delete payload.password;
+    }
 
-		if (logo) {
-			data.append('logo', logo);
-		}
+    // Convert boolean to integer for Laravel if using FormData or just rely on cast if JSON
+    // But since we might send file, we use FormData if there is a pending avatar
+    
+    let request;
+    if (!id && pendingAvatar) {
+      const formData = new FormData();
+      Object.keys(payload).forEach((key) => {
+        if (payload[key] !== undefined && payload[key] !== null) {
+          formData.append(key, payload[key] === true ? 1 : (payload[key] === false ? 0 : payload[key]));
+        }
+      });
+      formData.append("avatar", pendingAvatar);
+      request = axiosClient.post("admin/customers", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+    } else {
+      request = id
+        ? axiosClient.put(`admin/customers/${id}`, payload)
+        : axiosClient.post("admin/customers", payload);
+    }
 
-		if (isEdit) {
-			data.append('_method', 'PUT');
-		}
+    request
+      .then(() => {
+        toast.success(id ? t('common.save_success') : t('customers.create_success'));
+        navigate("/customers");
+      })
+      .catch((error) => {
+        if (error.response && error.response.status === 422) {
+          const errors = error.response.data.errors;
+          Object.keys(errors).forEach((key) => {
+            form.setError(key, {
+              type: "manual",
+              message: errors[key][0],
+            });
+          });
+        } else {
+            toast.error(error.response?.data?.message || t('common.error_occurred'));
+        }
+        setLoading(false);
+      });
+  };
 
-		try {
-			const url = isEdit ? `admin/customers/${id}` : 'admin/customers';
-			await axios.post(url, data, {
-				headers: { 'Content-Type': 'multipart/form-data' }
-			});
-			toast.success(isEdit ? 'Cliente actualizado' : 'Cliente creado');
-			navigate('/customers');
-		} catch (error) {
-			const message = error.response?.data?.message || 'Error al guardar';
-			toast.error(message);
-		} finally {
-			setLoading(false);
-		}
-	};
+  return (
+    <div className="max-w-2xl mx-auto pb-10">
+      <Card>
+        <CardHeader>
+          <CardTitle>
+            {id ? t('customers.edit') : t('customers.create')}
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {fetching ? (
+            <div className="flex justify-center py-8">
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            </div>
+          ) : (
+            <div className="space-y-6">
+              <div className="flex justify-center pb-6 border-b">
+                <AvatarUpload 
+                  value={avatarUrl} 
+                  onChange={handleAvatarChange}
+                />
+              </div>
+              
+              <Form {...form}>
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                  <FormField
+                    control={form.control}
+                    name="name"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>{t('customers.name')}</FormLabel>
+                        <FormControl>
+                          <Input placeholder="John Doe" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="email"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>{t('customers.email')}</FormLabel>
+                          <FormControl>
+                            <Input type="email" placeholder="john@example.com" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="password"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>
+                            {t('customers.password')} {id && t('users.password_help')}
+                          </FormLabel>
+                          <FormControl>
+                            <Input type="password" placeholder="********" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
 
-	if (fetching) {
-		return (
-			<div className="flex items-center justify-center min-h-[400px]">
-				<div className="animate-spin rounded-full h-8 w-8 border-b-2 border-cyan-500"></div>
-			</div>
-		);
-	}
+                  <FormField
+                    control={form.control}
+                    name="phone"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>{t('customers.phone')}</FormLabel>
+                        <FormControl>
+                          <Input placeholder="+1 234 567 890" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-	return (
-		<div className="max-w-4xl mx-auto space-y-6 pb-20">
-			<div className="flex items-center gap-4">
-				<Button variant="ghost" size="icon" asChild className="rounded-full hover:bg-slate-800">
-					<Link to="/customers">
-						<ArrowLeft className="h-5 w-5" />
-					</Link>
-				</Button>
-				<div>
-					<h1 className="text-3xl font-bold tracking-tight">
-						{isEdit ? t('customers.edit') : t('customers.create')}
-					</h1>
-				<p className="text-muted-foreground">
-					{isEdit ? 'Modifica la información del cliente.' : 'Configura un nuevo cliente en el sistema.'}
-				</p>
-				</div>
-			</div>
+                  <FormField
+                    control={form.control}
+                    name="address"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>{t('customers.address')}</FormLabel>
+                        <FormControl>
+                          <Textarea 
+                            placeholder="Street, City, Country" 
+                            className="resize-none" 
+                            {...field} 
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-			<form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-3 gap-6">
-				<div className="md:col-span-2 space-y-6">
-						<Card>
-							<CardHeader>
-								<CardTitle className="text-lg flex items-center gap-2">
-									<Building2 className="h-4 w-4 text-cyan-500" /> {t('customers.general_info')}
-								</CardTitle>
-								<CardDescription>Datos principales de contacto.</CardDescription>
-							</CardHeader>
-							<CardContent className="space-y-4">
-							<div className="grid grid-cols-1 gap-4">
-								<div className="space-y-2">
-									<Label htmlFor="name">{t('customers.name')}</Label>
-									<Input 
-										id="name"
-										placeholder="Ej: Acme Corp"
-										className="bg-slate-900/50 border-slate-800"
-										value={formData.name}
-										onChange={(e) => setFormData({...formData, name: e.target.value})}
-										required
-									/>
-								</div>
+                  <FormField
+                    control={form.control}
+                    name="is_active"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                        <div className="space-y-0.5">
+                          <FormLabel className="text-base">
+                            {t('customers.is_active')}
+                          </FormLabel>
+                        </div>
+                        <FormControl>
+                          <Switch
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
 
-								<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-									<div className="space-y-2">
-										<Label htmlFor="email" className="flex items-center gap-2">
-											<Mail className="h-3 w-3" /> {t('customers.email')}
-										</Label>
-										<Input 
-											id="email"
-											type="email"
-											placeholder="contacto@empresa.com"
-											value={formData.email}
-											onChange={(e) => setFormData({...formData, email: e.target.value})}
-										/>
-									</div>
-									<div className="space-y-2">
-										<Label htmlFor="phone" className="flex items-center gap-2">
-											<Phone className="h-3 w-3" /> Teléfono
-										</Label>
-										<Input 
-											id="phone"
-											placeholder="+54 11 ..."
-											className="bg-slate-900/50 border-slate-800"
-											value={formData.phone}
-											onChange={(e) => setFormData({...formData, phone: e.target.value})}
-										/>
-									</div>
-								</div>
-							</div>
-						</CardContent>
-					</Card>
-
-					<Card>
-						<CardHeader>
-							<CardTitle className="text-lg flex items-center gap-2">
-								<Globe className="h-4 w-4 text-cyan-500" /> {t('customers.authorized_domain')}
-							</CardTitle>
-							<CardDescription>Para seguridad CORS del widget de chat.</CardDescription>
-						</CardHeader>
-						<CardContent className="space-y-4">
-							<div className="space-y-2">
-								<Label htmlFor="domain">Dominio (URL)</Label>
-								<div className="relative">
-									<p className="text-[10px] text-slate-500 mb-1 ml-1 flex items-center gap-1">
-										<AlertCircle className="h-2.5 w-2.5" /> El widget solo funcionará en este dominio.
-									</p>
-									<Input 
-										id="domain"
-										placeholder="https://cliente.com"
-										className="bg-slate-900/50 border-slate-800 pl-4 font-mono text-xs"
-										value={formData.official_domain}
-										onChange={(e) => setFormData({...formData, official_domain: e.target.value})}
-									/>
-								</div>
-							</div>
-						</CardContent>
-					</Card>
-				</div>
-
-				<div className="space-y-6">
-					<Card>
-						<CardHeader>
-							<CardTitle className="text-sm">{t('customers.logo')}</CardTitle>
-						</CardHeader>
-						<CardContent className="flex flex-col items-center gap-4">
-							<div className="relative group">
-								<div className="h-32 w-32 rounded-xl bg-slate-900 border-2 border-dashed border-slate-800 flex items-center justify-center overflow-hidden transition-all group-hover:border-cyan-500/50">
-									{logoPreview ? (
-										<img src={logoPreview} alt="Preview" className="h-full w-full object-contain" />
-									) : (
-										<Building2 className="h-10 w-10 text-slate-700" />
-									)}
-								</div>
-								{logoPreview && (
-									<button 
-										type="button"
-										onClick={removeLogo}
-										className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
-									>
-										<X className="h-3 w-3" />
-									</button>
-								)}
-							</div>
-							<div className="w-full">
-								<Label 
-									htmlFor="logo-upload" 
-									className="flex items-center justify-center gap-2 w-full py-2 bg-slate-800 hover:bg-slate-700 rounded-md cursor-pointer transition-colors text-xs font-medium"
-								>
-									<Upload className="h-3 w-3" /> Subir Logo
-									<input 
-										id="logo-upload"
-										type="file"
-										className="hidden"
-										accept="image/*"
-										onChange={handleLogoChange}
-									/>
-								</Label>
-							</div>
-						</CardContent>
-					</Card>
-
-					<Card>
-						<CardHeader>
-							<CardTitle className="text-sm">{t('customers.config')}</CardTitle>
-						</CardHeader>
-						<CardContent className="space-y-4">
-							<div className="flex items-center justify-between p-3 rounded-lg bg-slate-900/40 border border-slate-800">
-								<div className="space-y-0.5">
-									<Label className="text-sm">{t('customers.is_active')}</Label>
-									<p className="text-[10px] text-muted-foreground">Permitir acceso al sistema.</p>
-								</div>
-								<Switch 
-									checked={formData.is_active}
-									onCheckedChange={(checked) => setFormData({...formData, is_active: checked})}
-								/>
-							</div>
-						</CardContent>
-					</Card>
-
-					<div className="flex flex-col gap-3">
-						<Button 
-							type="submit" 
-							disabled={loading}
-							className="w-full py-6 text-lg"
-						>
-							{loading ? t('common.loading') : <><Save className="mr-2 h-5 w-5" /> {t('common.save')}</>}
-						</Button>
-						<Button asChild variant="ghost" className="w-full">
-							<Link to="/customers">{t('common.cancel')}</Link>
-						</Button>
-					</div>
-				</div>
-			</form>
-		</div>
-	);
+                  <div className="flex justify-end space-x-2 pt-4">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => navigate("/customers")}
+                    >
+                      {t('common.cancel')}
+                    </Button>
+                    <Button type="submit" disabled={loading}>
+                      {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                      {t('common.save')}
+                    </Button>
+                  </div>
+                </form>
+              </Form>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </div>
+  );
 }
