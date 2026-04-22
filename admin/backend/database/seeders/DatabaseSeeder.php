@@ -23,25 +23,12 @@ class DatabaseSeeder extends Seeder
             ProductAttributeSeeder::class,
             RoleSeeder::class,
             PermissionSeeder::class,
-            CategorySeeder::class,
-            TagSeeder::class,
-            BusinessSettingsSeeder::class,
-            ProductSeeder::class,
         ]);
 
         $permissions = Permission::all();
         $superAdmin = Role::firstOrCreate(['name' => 'Super Admin']);
 		$admin = Role::firstOrCreate(['name' => 'Admin']);
         $superAdmin->permissions()->sync($permissions);
-
-        // $admin = User::firstOrCreate(
-        //     ['email' => 'sadmin@vadmin3.com'],
-        //     [
-        //         'name' => 'Super Admin',
-        //         'password' => bcrypt('123456'),
-        //     ]
-        // );
-        // $admin->roles()->sync($superAdmin);
 
         $javzero = User::firstOrCreate(
             ['email' => 'javzero1@gmail.com'],
@@ -72,14 +59,11 @@ class DatabaseSeeder extends Seeder
         );
         $geo->roles()->sync($admin);
 
-        // $roles = Role::where('name', '!=', 'Super Admin')->get();
-        // User::factory(10)->create()->each(function ($user) use ($roles) {
-        //     if ($roles->isNotEmpty()) {
-        //         $user->roles()->sync($roles->random());
-        //     }
-        // });
-
         $this->call([
+            CategorySeeder::class,
+            TagSeeder::class,
+            BusinessSettingsSeeder::class,
+            ProductSeeder::class,
             PostSeeder::class,
         ]);
     }
