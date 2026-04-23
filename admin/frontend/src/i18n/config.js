@@ -27,10 +27,10 @@ i18n
 // Function to apply system language settings
 export const applySystemLanguageSettings = async () => {
   try {
-    const response = await fetch('/api/system-settings/language_default_mode');
-    if (response.ok) {
-      const { data } = await response.json();
-      const mode = data?.value || 'auto';
+    const { default: axiosClient } = await import('@/lib/axios');
+    const response = await axiosClient.get('/system-settings/language_default_mode');
+    if (response.status === 200) {
+      const mode = response.data?.data?.value || 'auto';
       
       if (mode !== 'auto') {
         // Force the specified language

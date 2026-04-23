@@ -61,7 +61,7 @@ export default function SkinSettings() {
     const isNone = value === 'none';
 
     return (
-      <div className="flex items-center gap-4">
+      <div key={`${theme}-${fieldKey}`} className="flex items-center gap-4">
         <input
           type="color"
           value={isNone ? '#ffffff' : value}

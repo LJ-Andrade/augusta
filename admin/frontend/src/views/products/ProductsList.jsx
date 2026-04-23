@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback, useMemo } from 'react';
+import React, { useEffect, useState, useCallback, useMemo, Fragment } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import axiosClient from '@/lib/axios';
@@ -368,8 +368,8 @@ export default function ProductsList() {
                 </TableRow>
               )}
               {products.map((product) => (
-                <>
-                  <TableRow key={product.id}>
+                <Fragment key={product.id}>
+                  <TableRow>
                     <TableCell>
                       <Checkbox checked={selectedIds.includes(product.id)} onCheckedChange={() => toggleSelect(product.id)} />
                     </TableCell>
@@ -554,7 +554,7 @@ export default function ProductsList() {
                       </TableCell>
                     </TableRow>
                   )}
-                </>
+                </Fragment>
               ))}
             </TableBody>
           </Table>
