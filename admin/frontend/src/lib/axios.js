@@ -6,11 +6,8 @@ const ENVIRONMENTS = {
 		localhost: 'http://planb.test/api/',
 		'planb.test': 'http://planb.test/api/',
 	},
-	staging: {
-		'augustamoi.studiovimana.com.ar': 'https://augustamoi.studiovimana.com.ar/api/',
-	},
 	production: {
-		'augustamoi.studiovimana.com.ar': 'https://augustamoi.studiovimana.com.ar/api/',
+		'planb.studiovimana.com.ar': 'https://planb.studiovimana.com.ar/api/',
 	},
 };
 
