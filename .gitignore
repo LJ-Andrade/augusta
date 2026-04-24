@@ -3,6 +3,12 @@
 Thumbs.db
 db.json
 
+# Windows reserved device names (created accidentally by some tools)
+/nul
+/con
+/prn
+/aux
+
 # IDEs and editors
 .idea/
 .vscode/
