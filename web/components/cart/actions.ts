@@ -25,6 +25,7 @@ export async function addItem(
     redirect("/login");
   }
 
+
   try {
     await addToCart([{ merchandiseId: selectedVariantId, quantity: 1 }]);
     updateTag(TAGS.cart);
@@ -100,10 +101,6 @@ export async function updateItemQuantity(
 }
 
 export async function redirectToCheckout() {
-  const result = await checkout();
-  if (result.success) {
-    updateTag(TAGS.cart);
-    redirect("/checkout/success");
-  }
+  redirect("/checkout");
 }
 

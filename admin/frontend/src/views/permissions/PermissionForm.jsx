@@ -17,10 +17,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2 } from "lucide-react";
-import { useTranslation } from "react-i18next";
-
 export default function PermissionForm() {
-  const { t } = useTranslation();
   const { id } = useParams();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
@@ -62,8 +59,8 @@ export default function PermissionForm() {
 
     request
       .then(() => {
-        toast.success(id ? t('permissions.update_success') : t('permissions.create_success'));
-        navigate("/permissions");
+        toast.success(id ? "Permiso actualizado correctamente" : "Permiso creado correctamente");
+        navigate('/permisos');
       })
       .catch((error) => {
         if (error.response && error.response.status === 422) {
@@ -83,7 +80,7 @@ export default function PermissionForm() {
     <div className="max-w-2xl mx-auto">
       <Card>
         <CardHeader>
-          <CardTitle>{id ? t('permissions.edit_title', { name: form.getValues("name") }) : t('permissions.create_title')}</CardTitle>
+          <CardTitle>{id ? `Editando Permiso ${name}` : "Crear Nuevo Permiso"}</CardTitle>
         </CardHeader>
         <CardContent>
           {fetching ? (
@@ -98,9 +95,9 @@ export default function PermissionForm() {
                   name="name"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>{t('users.name')}</FormLabel>
+                      <FormLabel>{"Nombre"}</FormLabel>
                       <FormControl>
-                        <Input placeholder={t('permissions.name_placeholder')} {...field} />
+                        <Input placeholder={"Nombre del Permiso"} {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -110,13 +107,13 @@ export default function PermissionForm() {
                   <Button
                     type="button"
                     variant="outline"
-                    onClick={() => navigate("/permissions")}
+                    onClick={() => navigate('/permisos')}
                   >
-                    {t('common.cancel')}
+                    {"Cancelar"}
                   </Button>
                   <Button type="submit" disabled={loading}>
                     {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                    {id ? t('permissions.update_button') : t('permissions.create_button')}
+                    {id ? "Actualizar Permiso" : "Crear Permiso"}
                   </Button>
                 </div>
               </form>

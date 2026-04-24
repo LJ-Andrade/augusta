@@ -4,24 +4,23 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import {
-  Plus,
-  Edit,
-  Trash2,
-  Search,
-  Filter,
-  X,
-  ChevronDown,
+	Plus,
+	Edit,
+	Trash2,
+	Search,
+	Filter,
+	X,
+	ChevronDown,
 } from 'lucide-react';
 import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
+	Collapsible,
+	CollapsibleContent,
+	CollapsibleTrigger,
 } from '@/components/ui/collapsible';
 import {
-  DropdownMenuItem,
+	DropdownMenuItem,
 } from '@/components/ui/dropdown-menu';
 import Can from '@/components/can';
-import { useTranslation } from 'react-i18next';
 import { useCrudList } from '@/hooks/use-crud-list';
 import { CrudTable } from '@/components/crud-table';
 import { CrudPagination } from '@/components/crud-pagination';
@@ -30,236 +29,234 @@ import { ConfirmationDialog } from '@/components/confirmation-dialog';
 import { PageHeader } from '@/components/page-header';
 
 export default function TagsList() {
-  const { t } = useTranslation();
-  const navigate = useNavigate();
-  const [isFiltersOpen, setIsFiltersOpen] = useState(false);
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [tagToDelete, setTagToDelete] = useState(null);
+	const navigate = useNavigate();
+	const [isFiltersOpen, setIsFiltersOpen] = useState(false);
+	const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+	const [tagToDelete, setTagToDelete] = useState(null);
 
-  const {
-    items: tags,
-    loading,
-    meta,
-    page,
-    setPage,
-    filters,
-    setFilter,
-    clearFilters,
-    sortBy,
-    sortDir,
-    handleSort,
-    deleteItem,
-    bulkDelete,
-    selectedIds,
-    selectedCount,
-    isAllSelected,
-    toggleSelect,
-    toggleSelectAll,
-    clearSelection,
-  } = useCrudList({
-    endpoint: 'product-tags',
-    filterKeys: ['search', 'filter_id', 'filter_name'],
-    defaultSort: { column: 'id', direction: 'desc' },
-  });
+	const {
+		items: tags,
+		loading,
+		meta,
+		page,
+		setPage,
+		filters,
+		setFilter,
+		clearFilters,
+		sortBy,
+		sortDir,
+		handleSort,
+		deleteItem,
+		bulkDelete,
+		selectedIds,
+		selectedCount,
+		isAllSelected,
+		toggleSelect,
+		toggleSelectAll,
+		clearSelection,
+	} = useCrudList({
+		endpoint: 'product-tags',
+		filterKeys: ['search', 'filter_id', 'filter_name'],
+		defaultSort: { column: 'id', direction: 'desc' },
+	});
 
-  const columns = [
-    { key: 'id', label: t('product_tags.id'), sortable: true, width: 'w-[60px]' },
-    { key: 'name', label: t('product_tags.name'), sortable: true },
-    { key: 'slug', label: t('product_tags.slug'), sortable: true },
-    { key: 'created_at', label: t('product_tags.created_at') || 'Creado', sortable: true, align: 'right', width: 'w-[130px]', format: 'date' },
-  ];
+	const columns = [
+		{ key: 'id', label: "ID", sortable: true, width: 'w-[60px]' },
+		{ key: 'name', label: "Nombre", sortable: true },
+		{ key: 'slug', label: "Slug", sortable: true },
+		{ key: 'created_at', label: "Creado el" || 'Creado', sortable: true, align: 'right', width: 'w-[130px]', format: 'date' },
+	];
 
-  const handleDeleteClick = (tag) => {
-    setTagToDelete(tag);
-    setDeleteDialogOpen(true);
-  };
+	const handleDeleteClick = (tag) => {
+		setTagToDelete(tag);
+		setDeleteDialogOpen(true);
+	};
 
-  const handleConfirmDelete = async () => {
-    if (!tagToDelete) return;
-    
-    const success = await deleteItem(tagToDelete.id, {
-      successMessage: t('product_tags.delete_success'),
-      errorMessage: t('product_tags.delete_error'),
-    });
-    
-    if (success) {
-      setDeleteDialogOpen(false);
-      setTagToDelete(null);
-    }
-  };
+	const handleConfirmDelete = async () => {
+		if (!tagToDelete) return;
 
-  const handleBulkDeleteClick = async () => {
-    const success = await bulkDelete(selectedIds, {
-      successMessage: t('common.bulk_delete_success'),
-      errorMessage: t('common.bulk_delete_error'),
-    });
-    
-    if (success) {
-      setIsDeleting(false);
-    }
-  };
+		const success = await deleteItem(tagToDelete.id, {
+			successMessage: "Etiqueta eliminada correctamente",
+			errorMessage: "Error al eliminar la etiqueta",
+		});
 
-  const renderActions = (tag, isDropdown = false) => (
-    <Can permission="manage product tags">
-      {isDropdown ? (
-        <>
-          <DropdownMenuItem onClick={() => navigate(`/product-tags/edit/${tag.id}`)}>
-            <Edit className="mr-2 h-4 w-4" /> {t('common.edit')}
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => handleDeleteClick(tag)} className="text-red-500">
-            <Trash2 className="mr-2 h-4 w-4" /> {t('common.delete')}
-          </DropdownMenuItem>
-        </>
-      ) : (
-        <>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8"
-            onClick={() => navigate(`/product-tags/edit/${tag.id}`)}
-          >
-            <Edit className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8 text-red-500"
-            onClick={() => handleDeleteClick(tag)}
-          >
-            <Trash2 className="h-4 w-4" />
-          </Button>
-        </>
-      )}
-    </Can>
-  );
+		if (success) {
+			setDeleteDialogOpen(false);
+			setTagToDelete(null);
+		}
+	};
 
-  return (
-    <div className="space-y-6">
-      <PageHeader
-        title={t('product_tags.title') || 'Etiquetas'}
-        breadcrumbs={[
-          { label: 'PRODUCTOS' },
-          { label: t('product_tags.title') || 'Etiquetas' },
-        ]}
-      />
+	const handleBulkDeleteClick = async () => {
+		const success = await bulkDelete(selectedIds, {
+			successMessage: "Elementos eliminados exitosamente",
+			errorMessage: "Error al eliminar elementos",
+		});
 
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-start gap-2">
-          <Can permission="manage product tags">
-            <Button asChild>
-              <Link to="/product-tags/create">
-                <Plus className="mr-2 h-4 w-4" /> {t('product_tags.create')}
-              </Link>
-            </Button>
-          </Can>
-        </CardHeader>
+		if (success) {
+			setIsDeleting(false);
+		}
+	};
 
-        <CardContent>
-          <Collapsible
-            open={isFiltersOpen}
-            onOpenChange={setIsFiltersOpen}
-            className="space-y-4 pb-4"
-          >
-            <div className="flex items-center justify-between gap-4">
-              <div className="relative w-full max-w-sm">
-                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                <Input
-                  type="search"
-                  placeholder={t('product_tags.search_placeholder')}
-                  className="pl-8"
-                  value={filters.search}
-                  onChange={(e) => setFilter('search', e.target.value)}
-                />
-              </div>
-              <CollapsibleTrigger asChild>
-                <Button variant="outline" size="sm">
-                  <Filter className="mr-2 h-4 w-4" />
-                  {t('products.advanced_search')}
-                  <ChevronDown
-                    className={`ml-2 h-4 w-4 transition-transform ${
-                      isFiltersOpen ? 'rotate-180' : ''
-                    }`}
-                  />
-                </Button>
-              </CollapsibleTrigger>
-            </div>
+	const renderActions = (tag, isDropdown = false) => (
+		<Can permission="manage product tags">
+			{isDropdown ? (
+				<>
+					<DropdownMenuItem onClick={() => navigate(`/productos-etiquetas/editar/${tag.id}`)}>
+						<Edit className="mr-2 h-4 w-4" /> {"Editar"}
+					</DropdownMenuItem>
+					<DropdownMenuItem onClick={() => handleDeleteClick(tag)} className="text-red-500">
+						<Trash2 className="mr-2 h-4 w-4" /> {"Eliminar"}
+					</DropdownMenuItem>
+				</>
+			) : (
+				<>
+					<Button
+						variant="ghost"
+						size="icon"
+						className="h-8 w-8"
+						onClick={() => navigate(`/productos-etiquetas/editar/${tag.id}`)}
+					>
+						<Edit className="h-4 w-4" />
+					</Button>
+					<Button
+						variant="ghost"
+						size="icon"
+						className="h-8 w-8 text-red-500"
+						onClick={() => handleDeleteClick(tag)}
+					>
+						<Trash2 className="h-4 w-4" />
+					</Button>
+				</>
+			)}
+		</Can>
+	);
 
-            <CollapsibleContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 border rounded-lg bg-muted/50">
-                <div className="space-y-2">
-                  <label htmlFor="filterId" className="text-sm font-medium">
-                    {t('product_tags.id') || 'ID'}
-                  </label>
-                  <Input
-                    id="filterId"
-                    placeholder={t('product_tags.id') || 'ID'}
-                    value={filters.filter_id}
-                    onChange={(e) => setFilter('filter_id', e.target.value)}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label htmlFor="filterName" className="text-sm font-medium">
-                    {t('product_tags.name') || 'Nombre'}
-                  </label>
-                  <Input
-                    id="filterName"
-                    placeholder={t('product_tags.name') || 'Nombre'}
-                    value={filters.filter_name}
-                    onChange={(e) => setFilter('filter_name', e.target.value)}
-                  />
-                </div>
-              </div>
-              <div className="flex justify-end">
-                <Button variant="ghost" size="sm" onClick={clearFilters}>
-                  <X className="mr-2 h-4 w-4" />
-                  {t('products.clear_filters')}
-                </Button>
-              </div>
-            </CollapsibleContent>
-          </Collapsible>
+	return (
+		<div className="space-y-6">
+			<PageHeader
+				title={"Etiquetas"}
+				breadcrumbs={[
+					{ label: 'TIENDA' },
+					{ label: "Etiquetas" },
+				]}
+			/>
 
-          <CrudTable
-            items={tags}
-            columns={columns}
-            loading={loading}
-            selectable={true}
-            selectedIds={selectedIds}
-            isAllSelected={isAllSelected}
-            onSelect={toggleSelect}
-            onSelectAll={toggleSelectAll}
-            sortBy={sortBy}
-            sortDir={sortDir}
-            onSort={handleSort}
-            actions={renderActions}
-            emptyMessage={t('common.no_data')}
-            loadingMessage={t('common.loading')}
-          />
+			<Card>
+				<CardHeader className="flex flex-row items-center justify-start gap-2">
+					<Can permission="manage product tags">
+						<Button asChild>
+							<Link to="/productos-etiquetas/crear">
+								<Plus className="mr-2 h-4 w-4" /> {"Crear Etiqueta"}
+							</Link>
+						</Button>
+					</Can>
+				</CardHeader>
 
-          <CrudPagination
-            meta={meta}
-            page={page}
-            onPageChange={setPage}
-            prevLabel={t('common.previous')}
-            nextLabel={t('common.next')}
-          />
+				<CardContent>
+					<Collapsible
+						open={isFiltersOpen}
+						onOpenChange={setIsFiltersOpen}
+						className="space-y-4 pb-4"
+					>
+						<div className="flex items-center justify-between gap-4">
+							<div className="relative w-full max-w-sm">
+								<Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+								<Input
+									type="search"
+									placeholder={"Buscar etiquetas..."}
+									className="pl-8"
+									value={filters.search}
+									onChange={(e) => setFilter('search', e.target.value)}
+								/>
+							</div>
+							<CollapsibleTrigger asChild>
+								<Button variant="outline" size="sm">
+									<Filter className="mr-2 h-4 w-4" />
+									{"Búsqueda Avanzada"}
+									<ChevronDown
+										className={`ml-2 h-4 w-4 transition-transform ${isFiltersOpen ? 'rotate-180' : ''
+											}`}
+									/>
+								</Button>
+							</CollapsibleTrigger>
+						</div>
 
-          <ConfirmationDialog
-            open={deleteDialogOpen}
-            onOpenChange={setDeleteDialogOpen}
-            title={t('common.confirm_delete')}
-            description={t('common.confirm_delete_description')}
-            confirmText={t('common.confirm')}
-            cancelText={t('common.cancel')}
-            onConfirm={handleConfirmDelete}
-          />
-        </CardContent>
+						<CollapsibleContent className="space-y-4">
+							<div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 border rounded-lg bg-muted/50">
+								<div className="space-y-2">
+									<label htmlFor="filterId" className="text-sm font-medium">
+										{"ID"}
+									</label>
+									<Input
+										id="filterId"
+										placeholder={"ID"}
+										value={filters.filter_id}
+										onChange={(e) => setFilter('filter_id', e.target.value)}
+									/>
+								</div>
+								<div className="space-y-2">
+									<label htmlFor="filterName" className="text-sm font-medium">
+										{"Nombre"}
+									</label>
+									<Input
+										id="filterName"
+										placeholder={"Nombre"}
+										value={filters.filter_name}
+										onChange={(e) => setFilter('filter_name', e.target.value)}
+									/>
+								</div>
+							</div>
+							<div className="flex justify-end">
+								<Button variant="ghost" size="sm" onClick={clearFilters}>
+									<X className="mr-2 h-4 w-4" />
+									{"Limpiar Filtros"}
+								</Button>
+							</div>
+						</CollapsibleContent>
+					</Collapsible>
 
-        <BulkActionsBar
-          selectedCount={selectedCount}
-          onDelete={handleBulkDeleteClick}
-          onClear={clearSelection}
-        />
-      </Card>
-    </div>
-  );
+					<CrudTable
+						items={tags}
+						columns={columns}
+						loading={loading}
+						selectable={true}
+						selectedIds={selectedIds}
+						isAllSelected={isAllSelected}
+						onSelectt={toggleSelect}
+						onSelecttAll={toggleSelectAll}
+						sortBy={sortBy}
+						sortDir={sortDir}
+						onSortt={handleSort}
+						actions={renderActions}
+						emptyMessage={"No se encontraron datos."}
+						loadingMessage={"Cargando..."}
+					/>
+
+					<CrudPagination
+						meta={meta}
+						page={page}
+						onPageChange={setPage}
+						prevLabel={"Anterior"}
+						nextLabel={"Siguiente"}
+					/>
+
+					<ConfirmationDialog
+						open={deleteDialogOpen}
+						onOpenChange={setDeleteDialogOpen}
+						title={"Confirmar eliminación"}
+						description={"Esta acción no se puede deshacer."}
+						confirmText={"Confirmar"}
+						cancelText={"Cancelar"}
+						onConfirm={handleConfirmDelete}
+					/>
+				</CardContent>
+
+				<BulkActionsBar
+					selectedCount={selectedCount}
+					onDelete={handleBulkDeleteClick}
+					onClear={clearSelection}
+				/>
+			</Card>
+		</div>
+	);
 }

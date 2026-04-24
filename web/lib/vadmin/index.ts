@@ -16,7 +16,7 @@ import {
 const endpoint = process.env.NEXT_PUBLIC_VADMIN_API_URL || "http://localhost:8000/api";
 
 export async function vadminFetch<T>({
-  cache = "force-cache",
+  cache,
   headers,
   method = "GET",
   params,
@@ -38,15 +38,20 @@ export async function vadminFetch<T>({
       });
     }
 
+    const finalHeaders = {
+      "Content-Type": "application/json",
+      "Accept": "application/json",
+      ...headers,
+    };
+
+    const isMutation = ["POST", "PUT", "PATCH", "DELETE"].includes(method.toUpperCase());
+    const finalCache = cache || (isMutation ? "no-store" : "force-cache");
+
     const result = await fetch(url.toString(), {
       method,
-      headers: {
-        "Content-Type": "application/json",
-        "Accept": "application/json",
-        ...headers,
-      },
+      headers: finalHeaders,
       body: body ? JSON.stringify(body) : undefined,
-      cache,
+      cache: finalCache,
     });
 
     const contentType = result.headers.get("content-type");
@@ -72,11 +77,14 @@ export async function vadminFetch<T>({
       body: data,
     };
   } catch (e: any) {
-    console.error(`[vadminFetch Error] path: ${path}`, {
-      message: e.message,
-      cause: e.cause,
-      status: e.status
-    });
+    const isSilent = e.status === 404;
+    if (!isSilent) {
+      console.error(`[vadminFetch Error] path: ${path}`, {
+        message: e.message,
+        cause: e.cause,
+        status: e.status
+      });
+    }
     
     // Check for connection errors or server failures (500, 503, Network, DB)
     const isNetworkError = e.message?.includes("fetch failed") || e.cause?.code === "ECONNREFUSED" || e.cause?.code === "ENOTFOUND";

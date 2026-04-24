@@ -18,7 +18,7 @@ const DatePicker = React.forwardRef(({ className, ...props }, ref) => {
   const [open, setOpen] = React.useState(false)
 
   const handleSelect = (date) => {
-    props.onSelect(date)
+    props.onSelectdate
     setOpen(false)
   }
 
@@ -43,7 +43,7 @@ const DatePicker = React.forwardRef(({ className, ...props }, ref) => {
         <Calendar
           mode="single"
           selected={props.value}
-          onSelect={handleSelect}
+          onSelectt={handleSelect}
           disabled={(date) =>
             date < new Date("1900-01-01")
           }

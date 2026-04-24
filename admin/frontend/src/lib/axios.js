@@ -1,6 +1,4 @@
 import axios from 'axios';
-import i18n from '@/i18n/config';
-
 const ENVIRONMENTS = {
 	development: {
 		localhost: 'http://planb.test/api/',
@@ -36,7 +34,7 @@ axiosClient.interceptors.request.use((config) => {
 	if (token) {
 		config.headers.Authorization = `Bearer ${token}`;
 	}
-	config.headers['Accept-Language'] = i18n.language;
+
 
 	if (config.data instanceof FormData) {
 		delete config.headers['Content-Type'];

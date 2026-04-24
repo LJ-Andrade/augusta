@@ -112,14 +112,14 @@
 /* Dark theme */
 .dark {
   /* Dark theme - sidebar */
-  --skin-dark-sidebar-bg: #1a1a2b;
+  --skin-dark-sidebar-bg: #0d0d14;
   --skin-dark-sidebar-foreground: #f5f5f5;
   --skin-dark-sidebar-accent: #1e1e2a;
   --skin-dark-sidebar-border: #1e1e2a;
 
   /* Dark theme - gradient */
-  --skin-dark-gradient-start: #21214e;
-  --skin-dark-gradient-end: #181835;
+  --skin-dark-gradient-start: #313159;
+  --skin-dark-gradient-end: #232334;
 
   /* Base colors - dark */
   --background: 230 25% 7%;

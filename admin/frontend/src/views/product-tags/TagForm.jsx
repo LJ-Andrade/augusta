@@ -14,17 +14,15 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Loader2, Save, X } from 'lucide-react';
-import { useTranslation } from 'react-i18next';
 import { PageHeader } from '@/components/page-header';
 import { useCrudForm } from '@/hooks/use-crud-form';
 
 export default function TagForm() {
-  const { t } = useTranslation();
   const navigate = useNavigate();
   const { id } = useParams();
 
   const formSchema = z.object({
-    name: z.string().min(1, t('validation.name_min')),
+    name: z.string().min(1, "El nombre debe tener al menos 2 caracteres."),
     slug: z.string().nullable(),
   });
 
@@ -36,12 +34,12 @@ export default function TagForm() {
       name: '',
       slug: '',
     },
-    onSuccess: () => navigate('/product-tags'),
+    onSuccess: () => navigate('/productos-etiquetas'),
     messages: {
-      createSuccess: t('product_tags.create_success'),
-      updateSuccess: t('product_tags.update_success'),
-      createError: t('product_tags.create_error'),
-      updateError: t('product_tags.update_error'),
+      createSuccess: "Etiqueta creada correctamente",
+      updateSuccess: "Etiqueta actualizada correctamente",
+      createError: "product_Error al crear la etiqueta",
+      updateError: "product_Error al actualizar la etiqueta",
     },
   });
 
@@ -58,13 +56,13 @@ export default function TagForm() {
       <PageHeader
         title={
           id
-            ? `${t('product_tags.editing') || 'Editando etiqueta'} "${entityName}"`
-            : t('product_tags.create_title')
+            ? `${"Editando etiqueta"} "${entityName}"`
+            : "Crear Nueva Etiqueta"
         }
         breadcrumbs={[
           { label: 'PRODUCTOS' },
-          { label: t('product_tags.title') || 'Etiquetas', href: '/product-tags' },
-          { label: id ? t('common.edit') : t('common.create') },
+          { label: "Etiquetas de Productos" || 'Etiquetas', href: '/product-tags' },
+          { label: id ? "Editar" : "Crear" },
         ]}
       />
 
@@ -75,8 +73,8 @@ export default function TagForm() {
               <CardHeader>
                 <CardTitle>
                   {id
-                    ? `${t('product_tags.editing') || 'Editando etiqueta'} "${entityName}"`
-                    : t('product_tags.create_title')}
+                    ? `${"Editando etiqueta"} "${entityName}"`
+                    : "Crear Nueva Etiqueta"}
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -85,9 +83,9 @@ export default function TagForm() {
                   name="name"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>{t('product_tags.name')}</FormLabel>
+                      <FormLabel>{"Nombre"}</FormLabel>
                       <FormControl>
-                        <Input {...field} placeholder={t('product_tags.name')} />
+                        <Input {...field} placeholder={"Nombre"} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -99,9 +97,9 @@ export default function TagForm() {
                   name="slug"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>{t('product_tags.slug')}</FormLabel>
+                      <FormLabel>{"Slug"}</FormLabel>
                       <FormControl>
-                        <Input {...field} placeholder={t('product_tags.slug')} value={field.value || ''} />
+                        <Input {...field} placeholder={"Slug"} value={field.value || ''} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -109,14 +107,14 @@ export default function TagForm() {
                 />
 
                 <div className="flex gap-2 justify-end">
-                  <Button type="button" variant="outline" onClick={() => navigate('/product-tags')}>
+                  <Button type="button" variant="outline" onClick={() => navigate('/productos-etiquetas')}>
                     <X className="mr-2 h-4 w-4" />
-                    {t('common.cancel')}
+                    {"Cancelar"}
                   </Button>
                   <Button type="submit" disabled={loading}>
                     {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                     <Save className="mr-2 h-4 w-4" />
-                    {id ? t('common.save') : t('common.create')}
+                    {id ? "Guardar" : "Crear"}
                   </Button>
                 </div>
               </CardContent>

@@ -16,13 +16,10 @@ import {
   Tag,
   ArrowLeft,
 } from "lucide-react";
-import { useTranslation } from "react-i18next";
-
 const SITE_NAME = "Vadmin3 Blog";
 const SITE_URL = window.location.origin;
 
 export default function ArticlesPublicList() {
-  const { t } = useTranslation();
   const [searchParams, setSearchParams] = useSearchParams();
   const [articles, setArticles] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -30,10 +27,10 @@ export default function ArticlesPublicList() {
   const [loading, setLoading] = useState(true);
   const [meta, setMeta] = useState({});
   
-  const page = parseInt(searchParams.get("page") || "1");
-  const search = searchParams.get("search") || "";
-  const categoryId = searchParams.get("category_id") || "";
-  const tagId = searchParams.get("tag_id") || "";
+  const page = parseInt(t)(searchParams.get("page") || ")1");
+  const search = searchParams.get("search") || ")";
+  const categoryId = searchParams.get("category_id") || ")";
+  const tagId = searchParams.get("tag_id") || ")";
 
   useEffect(() => {
     getCategories();
@@ -156,14 +153,14 @@ export default function ArticlesPublicList() {
   const hasFilters = search || categoryId || tagId;
 
   const pageTitle = search || categoryId || tagId 
-    ? `${t("public_articles.title")}${search ? ` - "${search}"` : ""} | ${SITE_NAME}`
-    : t("public_articles.title");
+    ? `${"Blog"}${search ? ` - "${search}"` : ""} | ${SITE_NAME}`
+    : "Blog";
 
   const seo = {
     title: pageTitle,
-    description: t("public_articles.subtitle") || "Browse our latest articles and blog posts.",
+    description: "Lee nuestros últimos artículos" || "Browse our latest articles and blog postts.",
     ogTitle: pageTitle,
-    ogDescription: t("public_articles.subtitle"),
+    ogDescription: "Lee nuestros últimos artículos",
     ogType: "website",
     ogUrl: `${SITE_URL}/blog`,
   };
@@ -177,10 +174,10 @@ export default function ArticlesPublicList() {
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
               <div>
                 <CardTitle className="text-3xl font-bold tracking-tight">
-                  {t("public_articles.title")}
+                  {"Blog"}
                 </CardTitle>
                 <p className="text-muted-foreground mt-1">
-                  {t("public_articles.subtitle")}
+                  {"Lee nuestros últimos artículos"}
                 </p>
               </div>
             </div>
@@ -193,13 +190,13 @@ export default function ArticlesPublicList() {
                   <Input
                     type="search"
                     name="search"
-                    placeholder={t("public_articles.search_placeholder")}
+                    placeholder={"Buscar artículos..."}
                     className="pl-10"
                     defaultValue={search}
                   />
                 </div>
                 <Button type="submit" variant="secondary">
-                  {t("public_articles.search")}
+                  {"Buscar"}
                 </Button>
               </form>
 
@@ -209,7 +206,7 @@ export default function ArticlesPublicList() {
                   value={categoryId}
                   onChange={(e) => handleCategoryChange(e.target.value)}
                 >
-                  <option value="">{t("public_articles.all_categories")}</option>
+                  <option value="">{"Todas las Categorías"}</option>
                   {categories.map((category) => (
                     <option key={category.id} value={category.id}>
                       {category.name}
@@ -222,7 +219,7 @@ export default function ArticlesPublicList() {
                   value={tagId}
                   onChange={(e) => handleTagChange(e.target.value)}
                 >
-                  <option value="">{t("public_articles.all_tags")}</option>
+                  <option value="">{"Todas las Etiquetas"}</option>
                   {tags.map((tag) => (
                     <option key={tag.id} value={tag.id}>
                       {tag.name}
@@ -233,7 +230,7 @@ export default function ArticlesPublicList() {
                 {hasFilters && (
                   <Button variant="ghost" size="sm" onClick={clearFilters}>
                     <ArrowLeft className="mr-2 h-4 w-4" />
-                    {t("public_articles.clear_filters")}
+                    {"Limpiar Filtros"}
                   </Button>
                 )}
               </div>
@@ -255,11 +252,11 @@ export default function ArticlesPublicList() {
             ) : articles.length === 0 ? (
               <div className="text-center py-12">
                 <p className="text-muted-foreground text-lg">
-                  {t("public_articles.no_articles")}
+                  {"No se encontraron artículos."}
                 </p>
                 {hasFilters && (
                   <Button variant="link" onClick={clearFilters} className="mt-2">
-                    {t("public_articles.clear_filters")}
+                    {"Limpiar Filtros"}
                   </Button>
                 )}
               </div>
@@ -268,7 +265,7 @@ export default function ArticlesPublicList() {
             {articles.map((article) => (
               <Card key={article.id} className="overflow-hidden flex flex-col">
                 {article.cover_url ? (
-                  <Link to={`/articles/${article.slug}`}>
+                  <Link to={`/articulos/${article.slug}`}>
                     <img
                       src={article.cover_url}
                       alt={article.title}
@@ -278,7 +275,7 @@ export default function ArticlesPublicList() {
                 ) : (
                   <div className="h-48 bg-muted flex items-center justify-center">
                     <span className="text-muted-foreground">
-                      {t("public_articles.no_image")}
+                      {"Sin imagen"}
                     </span>
                   </div>
                 )}
@@ -288,7 +285,7 @@ export default function ArticlesPublicList() {
                       {article.category.name}
                     </Badge>
                   )}
-                  <Link to={`/articles/${article.slug}`}>
+                  <Link to={`/articulos/${article.slug}`}>
                     <h2 className="text-xl font-semibold hover:text-primary transition-colors line-clamp-2 mb-2">
                       {article.title}
                     </h2>
@@ -347,7 +344,7 @@ export default function ArticlesPublicList() {
               disabled={page === 1}
             >
               <ChevronLeft className="h-4 w-4 mr-2" />
-              {t("common.previous")}
+              {"Anterior"}
             </Button>
             <div className="flex items-center space-x-1">{renderPagination()}</div>
             <Button
@@ -360,7 +357,7 @@ export default function ArticlesPublicList() {
               }}
               disabled={page === meta.last_page}
             >
-              {t("common.next")}
+              {"Siguiente"}
               <ChevronRight className="h-4 w-4 ml-2" />
             </Button>
           </div>

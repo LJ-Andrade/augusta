@@ -13,7 +13,7 @@ export function useImageValidation() {
 
 	const loadSettings = async () => {
 		try {
-			const { data } = await axiosClient.get('/image-settings');
+			const { data } = await axiosClient.get("/image-settings");
 			const settingsMap = {};
 			data.data.forEach((item) => {
 				settingsMap[item.section] = item;
@@ -39,8 +39,8 @@ export function useImageValidation() {
 		}
 
 		if (config.allowed_extensions) {
-			const allowed = config.allowed_extensions.split(',').map(e => e.trim().toLowerCase());
-			const ext = file.name.split('.').pop()?.toLowerCase();
+			const allowed = config.allowed_extensions.split(",").map(e => e.trim().toLowerCase());
+			const ext = file.name.split(".").pop()?.toLowerCase();
 			if (!allowed.includes(ext)) {
 				errors.push(`Extensión no permitida. Permitidas: ${config.allowed_extensions}`);
 			}
@@ -83,7 +83,7 @@ export function useImageValidation() {
 				}
 
 				if (config.aspect_ratio) {
-					const [w, h] = config.aspect_ratio.split(':').map(Number);
+					const [w, h] = config.aspect_ratio.split(":").map(Number);
 					const expectedRatio = w / h;
 					const actualRatio = width / height;
 					const tolerance = 0.02;
@@ -93,13 +93,13 @@ export function useImageValidation() {
 					}
 				}
 
-				URL.revokeObjectURL(url);
+				URL.revokeObjectURLurl;
 				resolve(errors);
 			};
 
 			img.onerror = () => {
 				errors.push('No se pudo leer la imagen');
-				URL.revokeObjectURL(url);
+				URL.revokeObjectURLurl;
 				resolve(errors);
 			};
 

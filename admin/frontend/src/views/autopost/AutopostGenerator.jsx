@@ -18,16 +18,14 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Loader2, Sparkles, Save, FileText, AlertCircle } from "lucide-react";
-import { useTranslation } from "react-i18next";
 import { Separator } from "@/components/ui/separator";
 
 export default function AutopostGenerator() {
-	const { t } = useTranslation();
 	const navigate = useNavigate();
 	const [loading, setLoading] = useState(false);
-	const [generating, setGenerating] = useState(false);
+	const [getnerating, setGenerating] = useState(false);
 	const [hasApiKey, setHasApiKey] = useState(null);
-	const [generated, setGenerated] = useState(false);
+	const [getnerated, setGenerated] = useState(false);
 
 	const topicFormSchema = z.object({
 		topic: z.string().min(5, "El tema debe tener al menos 5 caracteres"),
@@ -72,7 +70,7 @@ export default function AutopostGenerator() {
 		setGenerating(true);
 		setGenerated(false);
 		try {
-			const { data: response } = await axiosClient.post("autopost/generate", {
+			const { data: response } = await axiosClient.post("autopost/getnerate", {
 				topic: data.topic,
 			});
 
@@ -83,7 +81,7 @@ export default function AutopostGenerator() {
 				tags: Array.isArray(response.tags) ? response.tags.join(", ") : "",
 			});
 			setGenerated(true);
-			toast.success(t('autopost.generated_success') || "Contenido generado correctamente");
+			toast.success("Contenido generado correctamente" || "Contenido generado correctamente");
 		} catch (error) {
 			const errorMsg = error.response?.data?.error || "Error al generar contenido";
 			toast.error(errorMsg);
@@ -98,7 +96,7 @@ export default function AutopostGenerator() {
 		try {
 			const data = contentForm.getValues();
 			const tagsArray = data.tags
-				? data.tags.split(',').map(tag => tag.trim()).filter(Boolean)
+				? data.tags.split(",").map(tag => tag.trim()).filter(Boolean)
 				: [];
 
 			await axiosClient.post("autopost/store", {
@@ -109,8 +107,8 @@ export default function AutopostGenerator() {
 				status: status,
 			});
 
-			toast.success(t('autopost.saved_success') || `Artículo guardado como ${status}`);
-			navigate("/articles");
+			toast.success(`Artículo guardado como ${status}` || `Artículo guardado como ${status}`);
+			navigate('/articulos');
 		} catch (error) {
 			toast.error(error.response?.data?.error || "Error al guardar artículo");
 		} finally {
@@ -130,9 +128,9 @@ export default function AutopostGenerator() {
 		return (
 			<div className="space-y-6">
 				<div>
-					<h1 className="text-3xl font-bold">{t('autopost.title') || "AutoBlog - Generador de Artículos"}</h1>
+					<h1 className="text-3xl font-bold">{"AutoBlog - Generador de Artículos"}</h1>
 					<p className="text-muted-foreground mt-2">
-						{t('autopost.description') || "Genera artículos automáticamente usando IA."}
+						{"Genera artículos automáticamente usando IA."}
 					</p>
 				</div>
 
@@ -141,16 +139,16 @@ export default function AutopostGenerator() {
 						<div className="flex items-start gap-4">
 							<AlertCircle className="h-6 w-6 text-yellow-500 mt-0.5" />
 							<div>
-								<h3 className="font-semibold text-yellow-500">{t('autopost.api_not_configured') || "API no configurada"}</h3>
+								<h3 className="font-semibold text-yellow-500">{"API no configurada"}</h3>
 								<p className="text-sm text-muted-foreground mt-1">
-									{t('autopost.api_not_configured_desc') || "Debes configurar tu API key de Gemini antes de usar el generador."}
+									{"Debes configurar tu API key de Gemini antes de usar el generador."}
 								</p>
 								<Button
 									variant="outline"
 									className="mt-4"
-									onClick={() => navigate("/autopost-settings")}
+									onClick={() => navigate('/autopost-configuracion')}
 								>
-									{t('autopost.go_to_settings') || "Ir a configuración"}
+									{"Ir a configuración"}
 								</Button>
 							</div>
 						</div>
@@ -163,37 +161,37 @@ export default function AutopostGenerator() {
 	return (
 		<div className="space-y-6">
 			<div>
-				<h1 className="text-3xl font-bold">{t('autopost.title') || "AutoBlog - Generador de Artículos"}</h1>
+				<h1 className="text-3xl font-bold">{"AutoBlog - Generador de Artículos"}</h1>
 				<p className="text-muted-foreground mt-2">
-					{t('autopost.description') || "Genera artículos automáticamente usando IA."}
+					{"Genera artículos automáticamente usando IA."}
 				</p>
 			</div>
 
 			<Separator />
 
-			{!generated ? (
+			{!getnerated ? (
 				<Card className="max-w-2xl">
 					<CardHeader>
 						<CardTitle className="flex items-center gap-2">
 							<Sparkles className="h-5 w-5" />
-							{t('autopost.generate_title') || "Generar Artículo"}
+							{"Generar Artículo"}
 						</CardTitle>
 						<CardDescription>
-							{t('autopost.generate_description') || "Ingresa un tema o palabras clave para que la IA genere un artículo."}
+							{"Ingresa un tema o palabras clave para que la IA getnere un artículo."}
 						</CardDescription>
 					</CardHeader>
 					<CardContent>
 						<Form {...topicForm}>
-							<form onSubmit={topicForm.handleSubmit(handleGenerate)} className="space-y-4">
+							<form onSubmit={topicForm.handleSubmihandleGenerate} className="space-y-4">
 								<FormField
 									control={topicForm.control}
 									name="topic"
 									render={({ field }) => (
 										<FormItem>
-											<FormLabel>{t('autopost.topic') || "Tema del artículo"}</FormLabel>
+											<FormLabel>{"Tema del artículo"}</FormLabel>
 											<FormControl>
 												<Textarea
-													placeholder={t('autopost.topic_placeholder') || "Ej: Razones para tener una web para tu empresa..."}
+													placeholder={"Ej: Razones para tener una web para tu empresa..."}
 													className="min-h-[100px]"
 													{...field}
 												/>
@@ -203,16 +201,16 @@ export default function AutopostGenerator() {
 									)}
 								/>
 
-								<Button type="submit" disabled={generating} className="w-full">
-									{generating ? (
+								<Button type="submit" disabled={getnerating} className="w-full">
+									{getnerating ? (
 										<>
 											<Loader2 className="mr-2 h-4 w-4 animate-spin" />
-											{t('autopost.generating') || "Generando..."}
+											{"Generando..."}
 										</>
 									) : (
 										<>
 											<Sparkles className="mr-2 h-4 w-4" />
-											{t('autopost.generate_button') || "Generar con IA"}
+											{"Generar con IA"}
 										</>
 									)}
 								</Button>
@@ -226,10 +224,10 @@ export default function AutopostGenerator() {
 						<CardHeader>
 							<CardTitle className="flex items-center gap-2">
 								<FileText className="h-5 w-5" />
-								{t('autopost.preview_title') || "Vista Previa"}
+								{"Vista Previa"}
 							</CardTitle>
 							<CardDescription>
-								{t('autopost.preview_description') || "Edita el contenido generado antes de guardar."}
+								{"Edita el contenido generado antes de guardar."}
 							</CardDescription>
 						</CardHeader>
 						<CardContent className="space-y-4">
@@ -240,7 +238,7 @@ export default function AutopostGenerator() {
 										name="title"
 										render={({ field }) => (
 											<FormItem>
-												<FormLabel>{t('articles.title') || "Título"}</FormLabel>
+												<FormLabel>{"Título"}</FormLabel>
 												<FormControl>
 													<Input placeholder="Título del artículo" {...field} />
 												</FormControl>
@@ -255,7 +253,7 @@ export default function AutopostGenerator() {
 											name="category_name"
 											render={({ field }) => (
 												<FormItem>
-													<FormLabel>{t('articles.category') || "Categoría"}</FormLabel>
+													<FormLabel>{"Categoría"}</FormLabel>
 													<FormControl>
 														<Input placeholder="Ej: Tecnología" {...field} />
 													</FormControl>
@@ -269,7 +267,7 @@ export default function AutopostGenerator() {
 											name="tags"
 											render={({ field }) => (
 												<FormItem>
-													<FormLabel>{t('articles.tags') || "Etiquetas (separadas por coma)"}</FormLabel>
+													<FormLabel>{"Etiquetas (separadas por coma)"}</FormLabel>
 													<FormControl>
 														<Input placeholder="Ej: IA, Software, Cloud" {...field} />
 													</FormControl>
@@ -284,7 +282,7 @@ export default function AutopostGenerator() {
 										name="content"
 										render={({ field }) => (
 											<FormItem>
-												<FormLabel>{t('articles.content') || "Contenido"}</FormLabel>
+												<FormLabel>{"Contenido"}</FormLabel>
 												<FormControl>
 													<Textarea
 														placeholder="Contenido del artículo..."
@@ -313,7 +311,7 @@ export default function AutopostGenerator() {
 							) : (
 								<Save className="mr-2 h-4 w-4" />
 							)}
-							{t('autopost.save_draft') || "Guardar como Borrador"}
+							{"Guardar como Borrador"}
 						</Button>
 						<Button
 							onClick={() => handleSave("published")}
@@ -325,7 +323,7 @@ export default function AutopostGenerator() {
 							) : (
 								<Sparkles className="mr-2 h-4 w-4" />
 							)}
-							{t('autopost.publish') || "Publicar"}
+							{"Publicar"}
 						</Button>
 					</div>
 
@@ -337,7 +335,7 @@ export default function AutopostGenerator() {
 						}}
 						className="w-full"
 					>
-						{t('autopost.generate_another') || "Generar otro artículo"}
+						{"Generar otro artículo"}
 					</Button>
 				</div>
 			)}

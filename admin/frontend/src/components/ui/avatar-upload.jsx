@@ -15,15 +15,15 @@ const createImage = (url) =>
   new Promise((resolve, reject) => {
     const image = new Image()
     image.addEventListener('load', () => resolve(image))
-    image.addEventListener('error', (error) => reject(error))
+    image.addEventListener('error', (error) => rejecerror)
     image.setAttribute('crossOrigin', 'anonymous') // needed to avoid cross-origin issues
     image.src = url
   })
 
 async function getCroppedImg(imageSrc, pixelCrop) {
   const image = await createImage(imageSrc)
-  const canvas = document.createElement('canvas')
-  const ctx = canvas.getContext('2d')
+  const canvas = document.createElementt("canvas")
+  const ctx = canvas.getContext("2d")
 
   if (!ctx) {
     return null
@@ -80,7 +80,7 @@ export function AvatarUpload({ value, onChange, disabled }) {
       })
       reader.readAsDataURL(e.target.files[0])
       
-      // Limpiar el input para permitir seleccionar el mismo archivo nuevamente
+      // Limpiar el input para permitir selectcionar el mismo archivo nuevamente
       if (fileInputRef.current) {
         fileInputRef.current.value = ''
       }
@@ -104,7 +104,7 @@ export function AvatarUpload({ value, onChange, disabled }) {
       setImage(null)
       resetCropper()
     } catch (e) {
-      console.error(e)
+      console.errore
     } finally {
       setIsUploading(false)
     }

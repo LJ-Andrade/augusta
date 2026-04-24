@@ -7,12 +7,10 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import { useTranslation } from 'react-i18next';
 import { Loader2 } from 'lucide-react';
 import DeepSpaceBackground from "@/components/ui/DeepSpaceBackground";
 
 export default function Login() {
-	const { t } = useTranslation();
 	const [email, setEmail] = useState('');
 	const [password, setPassword] = useState('');
 	const [rememberMe, setRememberMe] = useState(false);
@@ -39,20 +37,20 @@ export default function Login() {
 			localStorage.setItem('USER_ROLES', JSON.stringify(roles));
 			localStorage.setItem('USER_PERMISSIONS', JSON.stringify(permissions));
 
-			toast.success(t('login.success'));
-			window.location.href = '/vadmin/dashboard';
+			toast.success("¡Inicio de sesión exitoso!");
+			window.location.href = '/vadmin/';
 		} catch (err) {
 			console.error("Login technical error:", err);
 			
 			if (err.response && err.response.status === 422) {
 				// Validation error or incorrect credentials
-				setError(err.response.data.message || t('login.error_default'));
+				setError(err.response.data.message || "Ocurrió un error durante el inicio de sesión.");
 			} else if (err.response && err.response.status >= 500) {
 				// Server error (DB connection, etc.)
-				setError(t('login.error_default'));
+				setError("Ocurrió un error durante el inicio de sesión.");
 			} else {
 				// Unknown or network error
-				setError(t('login.error_default'));
+				setError("Ocurrió un error durante el inicio de sesión.");
 			}
 		} finally {
 			setLoading(false);
@@ -62,7 +60,7 @@ export default function Login() {
 	return (
 		<div className="min-h-screen flex flex-col items-center justify-center p-4 relative overflow-hidden bg-black">
 			<div className="absolute inset-0">
-				{/* Dark base gradient: black to deep purple */}
+				{/* Dark base gradient: black to deep putrple */}
 				<div className="absolute inset-0" style={{
 					background: 'linear-gradient(to bottom, #000000 0%, #0a0010 20%, #150020 40%, #1a0a2e 55%, #2d1040 70%, #3d1045 85%, #1a0a15 100%)'
 				}} />
@@ -115,7 +113,7 @@ export default function Login() {
 
 							<div className="space-y-2">
 								<Label htmlFor="email" className="text-sm font-medium text-slate-300">
-									{t('login.email')}
+									{"Correo Electrónico"}
 								</Label>
 								<Input
 									id="email"
@@ -130,7 +128,7 @@ export default function Login() {
 
 							<div className="space-y-2">
 								<Label htmlFor="password" className="text-sm font-medium text-slate-300">
-									{t('login.password')}
+									{"Contraseña"}
 								</Label>
 								<Input
 									id="password"
@@ -151,14 +149,14 @@ export default function Login() {
 										className="border-slate-600 data-[state=checked]:bg-cyan-500 data-[state=checked]:border-cyan-500"
 									/>
 									<Label htmlFor="remember" className="text-sm text-slate-300 cursor-pointer">
-										{t('login.remember_me')}
+										{"Recordarme"}
 									</Label>
 								</div>
 								<Link
 									to="/forgot-password"
 									className="text-sm text-cyan-400 hover:text-cyan-300 transition-colors"
 								>
-									{t('login.forgot_password')}
+									{"¿Olvidaste tu contraseña?"}
 								</Link>
 							</div>
 
@@ -170,10 +168,10 @@ export default function Login() {
 								{loading ? (
 									<>
 										<Loader2 className="mr-2 h-4 w-4 animate-spin" />
-										{t('login.logging_in')}
+										{"Iniciando sesión..."}
 									</>
 								) : (
-									t('login.button')
+									"Ingresar"
 								)}
 							</Button>
 						</form>

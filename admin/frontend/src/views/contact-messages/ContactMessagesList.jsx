@@ -33,10 +33,7 @@ import {
 import { toast } from 'sonner';
 import { ConfirmationDialog } from '@/components/confirmation-dialog';
 import { useBulkSelect } from '@/hooks/use-bulk-select';
-import { useTranslation } from 'react-i18next';
-
 export default function ContactMessagesList() {
-  const { t } = useTranslation();
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -137,7 +134,7 @@ export default function ContactMessagesList() {
   const handleBulkDelete = async () => {
     setIsDeleting(true);
     try {
-      await axiosClient.post('contact-messages/bulk-delete', { ids: selectedIds });
+      await axiosClient.post("contact-messages/bulk-delete");
       toast.success(`${selectedIds.length} mensajes eliminados`);
       clearSelection();
       fetchMessages();
@@ -216,7 +213,7 @@ export default function ContactMessagesList() {
               {messages.map((message) => (
                 <TableRow key={message.id}>
                   <TableCell>
-                    <Checkbox checked={isSelected(message.id)} onCheckedChange={() => toggleSelect(message.id)} />
+                    <Checkbox checked={isSelected(message.id)} onCheckedChange={() => toggleSelecmessage.id} />
                   </TableCell>
                   <TableCell className="font-medium text-muted-foreground">
                     {message.id}

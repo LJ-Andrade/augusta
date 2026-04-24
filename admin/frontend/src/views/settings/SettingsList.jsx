@@ -5,10 +5,9 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useTranslation } from "react-i18next";
-
+import { PageHeader } from "@/components/page-header";
+import { Save, Loader2 } from "lucide-react";
 export default function SettingsList() {
-	const { t } = useTranslation();
 	const [settings, setSettings] = useState({});
 	const [originalSettings, setOriginalSettings] = useState({});
 	const [loading, setLoading] = useState(true);
@@ -20,7 +19,7 @@ export default function SettingsList() {
 	);
 
 	useEffect(() => {
-		axiosClient.get('/system-settings')
+		axiosClient.get("/system-settings")
 			.then(({ data }) => {
 				const settingsMap = {};
 				data.data.forEach(setting => {
@@ -47,9 +46,9 @@ export default function SettingsList() {
 				}
 			}
 			setOriginalSettings(settings);
-			toast.success(t('settings.save_success'));
+			toast.success("Configuración guardada correctamente");
 		} catch (error) {
-			toast.error(t('common.error_occurred'));
+			toast.error("Ocurrió un error");
 		} finally {
 			setSaving(false);
 		}
@@ -63,18 +62,44 @@ export default function SettingsList() {
 	};
 
 	if (loading) {
-		return <div className="p-8 text-center">{t('common.loading')}</div>;
+		return <div className="p-8 text-center">{"Cargando..."}</div>;
 	}
 
 	return (
 		<div className="space-y-6">
-			<h1 className="text-3xl font-bold tracking-tight">{t('settings.title')}</h1>
+			<PageHeader
+				title={"Configuración del Sistema"}
+				breadcrumbs={[
+					{ label: 'CONFIGURACIÓN' },
+					{ label: "Sistema" },
+				]}
+			/>
 
-			<Card className="pt-6">
-				<form onSubmit={(e) => { e.preventDefault(); handleSave(); }}>
+			<Card>
+				<form id="settings-form" onSubmit={(e) => { e.preventDefault(); handleSave(); }}>
+					<CardHeader className="flex flex-row items-center justify-between">
+						<CardTitle>{"Parámetros del Sistema"}</CardTitle>
+						<Button
+							type="submit"
+							form="settings-form"
+							disabled={saving || !hasChanges}
+						>
+							{saving ? (
+								<>
+									<Loader2 className="mr-2 h-4 w-4 animate-spin" />
+									{"Guardando..."}
+								</>
+							) : (
+								<>
+									<Save className="mr-2 h-4 w-4" />
+									{"Guardar"}
+								</>
+							)}
+						</Button>
+					</CardHeader>
 					<CardContent className="space-y-6">
 						<div className="grid gap-2">
-							<Label htmlFor="site_url">{t('settings.site_url')}</Label>
+							<Label htmlFor="site_url">{"URL del Sitio"}</Label>
 							<Input
 								id="site_url"
 								type="url"
@@ -83,12 +108,12 @@ export default function SettingsList() {
 								placeholder="https://example.com"
 							/>
 							<p className="text-sm text-muted-foreground">
-								{t('settings.site_url_description')}
+								{"URL base del catálogo público de productos (ej: https://mitienda.com)"}
 							</p>
 						</div>
 
 						<div className="grid gap-2">
-							<Label htmlFor="mail_to_address">{t('settings.mail_to_address')}</Label>
+							<Label htmlFor="mail_to_address">{"Email de destino (Contacto)"}</Label>
 							<Input
 								id="mail_to_address"
 								type="email"
@@ -97,12 +122,12 @@ export default function SettingsList() {
 								placeholder="destino@empresa.com"
 							/>
 							<p className="text-sm text-muted-foreground">
-								{t('settings.mail_to_address_description')}
+								{"Email donde se recibirán los mensajes del formulario de contacto"}
 							</p>
 						</div>
 
 						<div className="grid gap-2">
-							<Label htmlFor="business_name">{t('settings.business_name')}</Label>
+							<Label htmlFor="business_name">{"Nombre del Negocio"}</Label>
 							<Input
 								id="business_name"
 								type="text"
@@ -111,18 +136,10 @@ export default function SettingsList() {
 								placeholder="Nombre de tu negocio"
 							/>
 							<p className="text-sm text-muted-foreground">
-								{t('settings.business_name_description')}
+								{"Nombre que se mostrará en el sidebar del administrador"}
 							</p>
 						</div>
 
-						<div className="flex justify-end">
-							<Button
-								type="submit"
-								disabled={saving || !hasChanges}
-							>
-								{saving ? t('common.saving') : t('common.save')}
-							</Button>
-						</div>
 					</CardContent>
 				</form>
 			</Card>

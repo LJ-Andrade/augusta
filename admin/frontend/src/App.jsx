@@ -1,6 +1,6 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Login from './views/Login';
-import Dashboard from './views/Dashboard';
+import Home from './views/Home';
 import UsersList from './views/users/UsersList';
 import UserForm from './views/users/UserForm';
 import CategoriesList from './views/categories/CategoriesList';
@@ -23,6 +23,10 @@ import ProductSizesList from './views/product-sizes/ProductSizesList';
 import ProductSizeForm from './views/product-sizes/ProductSizeForm';
 import CouponsList from './views/coupons/CouponList';
 import CouponForm from './views/coupons/CouponForm';
+import PaymentMethodsList from './views/payment-methods/PaymentMethodsList';
+import PaymentMethodForm from './views/payment-methods/PaymentMethodForm';
+import DeliveryMethodsList from './views/delivery-methods/DeliveryMethodsList';
+import DeliveryMethodForm from './views/delivery-methods/DeliveryMethodForm';
 import AutopostGenerator from './views/autopost/AutopostGenerator';
 import AutopostSettings from './views/autopost/AutopostSettings';
 import ProductsShow from './views/products/ProductsShow';
@@ -45,367 +49,411 @@ import CustomerForm from './views/customers/CustomerForm';
 import OrdersList from './views/orders/OrdersList';
 import OrderDetails from './views/orders/OrderDetails';
 import ContactMessagesList from './views/contact-messages/ContactMessagesList';
+import NotFound from './views/NotFound';
 import DashboardLayout from './components/dashboard-layout';
 import { hasPermission, isSuperAdmin } from './components/can';
 
 const ProtectedRoute = ({ children, permission, superAdminOnly }) => {
-  const isAuthenticated = !!localStorage.getItem('ACCESS_TOKEN');
-  if (!isAuthenticated) return <Navigate to="/login" />;
-  if (superAdminOnly && !isSuperAdmin()) return <Navigate to="/dashboard" />;
-  if (permission && !hasPermission(permission)) return <Navigate to="/dashboard" />;
-  return (
-    <DashboardLayout>
-      {children}
-    </DashboardLayout>
-  );
+	const isAuthenticated = !!localStorage.getItem('ACCESS_TOKEN');
+	if (!isAuthenticated) return <Navigate to="/login" />;
+	if (superAdminOnly && !isSuperAdmin()) return <Navigate to="/" />;
+	if (permission && !hasPermission(permission)) return <Navigate to="/" />;
+	return (
+		<DashboardLayout>
+			{children}
+		</DashboardLayout>
+	);
 };
 
 function App() {
-  const isAuthenticated = !!localStorage.getItem('ACCESS_TOKEN');
+	const isAuthenticated = !!localStorage.getItem('ACCESS_TOKEN');
 
-  return (
-    <Router basename="/vadmin">
-      <Routes>
-<Route path="/login" element={isAuthenticated ? <Navigate to="/dashboard" /> : <Login />} />
-        
-        <Route path="/blog" element={<ArticlesPublicList />} />
-        <Route path="/articles/:slug" element={<ArticlePublicView />} />
-        
-        <Route path="/dashboard" element={
-          <ProtectedRoute>
-            <Dashboard />
-          </ProtectedRoute>
-        } />
+	return (
+		<Router basename="/vadmin">
+			<Routes>
+				<Route path="/login" element={isAuthenticated ? <Navigate to="/" /> : <Login />} />
 
-        <Route path="/users" element={
-          <ProtectedRoute permission="view users">
-            <UsersList />
-          </ProtectedRoute>
-        } />
+				<Route path="/blog" element={<ArticlesPublicList />} />
+				<Route path="/articulos/:slug" element={<ArticlePublicView />} />
 
-        <Route path="/users/create" element={
-          <ProtectedRoute permission="create users">
-            <UserForm />
-          </ProtectedRoute>
-        } />
+				<Route path="/" element={
+					<ProtectedRoute>
+						<Home />
+					</ProtectedRoute>
+				} />
 
-        <Route path="/users/edit/:id" element={
-          <ProtectedRoute permission="edit users">
-            <UserForm />
-          </ProtectedRoute>
-        } />
+				<Route path="/usuarios" element={
+					<ProtectedRoute permission="view users">
+						<UsersList />
+					</ProtectedRoute>
+				} />
 
-        <Route path="/categories" element={
-          <ProtectedRoute permission="view categories">
-            <CategoriesList />
-          </ProtectedRoute>
-        } />
+				<Route path="/usuarios/crear" element={
+					<ProtectedRoute permission="create users">
+						<UserForm />
+					</ProtectedRoute>
+				} />
 
-        <Route path="/categories/create" element={
-          <ProtectedRoute permission="manage categories">
-            <CategoryForm />
-          </ProtectedRoute>
-        } />
+				<Route path="/usuarios/editar/:id" element={
+					<ProtectedRoute permission="edit users">
+						<UserForm />
+					</ProtectedRoute>
+				} />
 
-        <Route path="/categories/edit/:id" element={
-          <ProtectedRoute permission="manage categories">
-            <CategoryForm />
-          </ProtectedRoute>
-        } />
+				<Route path="/categorias" element={
+					<ProtectedRoute permission="view categories">
+						<CategoriesList />
+					</ProtectedRoute>
+				} />
 
-        <Route path="/articles" element={
-          <ProtectedRoute permission="view articles">
-            <ArticlesList />
-          </ProtectedRoute>
-        } />
+				<Route path="/categorias/crear" element={
+					<ProtectedRoute permission="manage categories">
+						<CategoryForm />
+					</ProtectedRoute>
+				} />
 
-        <Route path="/articles/create" element={
-          <ProtectedRoute permission="manage articles">
-            <ArticleForm />
-          </ProtectedRoute>
-        } />
+				<Route path="/categorias/editar/:id" element={
+					<ProtectedRoute permission="manage categories">
+						<CategoryForm />
+					</ProtectedRoute>
+				} />
 
-        <Route path="/articles/edit/:id" element={
-          <ProtectedRoute permission="manage articles">
-            <ArticleForm />
-          </ProtectedRoute>
-        } />
+				<Route path="/articulos" element={
+					<ProtectedRoute permission="view articles">
+						<ArticlesList />
+					</ProtectedRoute>
+				} />
 
-        <Route path="/tags" element={
-          <ProtectedRoute permission="view tags">
-            <TagsList />
-          </ProtectedRoute>
-        } />
+				<Route path="/articulos/crear" element={
+					<ProtectedRoute permission="manage articles">
+						<ArticleForm />
+					</ProtectedRoute>
+				} />
 
-        <Route path="/tags/create" element={
-          <ProtectedRoute permission="manage tags">
-            <TagForm />
-          </ProtectedRoute>
-        } />
+				<Route path="/articulos/editar/:id" element={
+					<ProtectedRoute permission="manage articles">
+						<ArticleForm />
+					</ProtectedRoute>
+				} />
 
-        <Route path="/tags/edit/:id" element={
-          <ProtectedRoute permission="manage tags">
-            <TagForm />
-          </ProtectedRoute>
-        } />
+				<Route path="/etiquetas" element={
+					<ProtectedRoute permission="view tags">
+						<TagsList />
+					</ProtectedRoute>
+				} />
 
-        <Route path="/products" element={
-          <ProtectedRoute permission="view products">
-            <ProductsList />
-          </ProtectedRoute>
-        } />
+				<Route path="/etiquetas/crear" element={
+					<ProtectedRoute permission="manage tags">
+						<TagForm />
+					</ProtectedRoute>
+				} />
 
-        <Route path="/products/create" element={
-          <ProtectedRoute permission="manage products">
-            <ProductForm />
-          </ProtectedRoute>
-        } />
+				<Route path="/etiquetas/editar/:id" element={
+					<ProtectedRoute permission="manage tags">
+						<TagForm />
+					</ProtectedRoute>
+				} />
 
-        <Route path="/products/edit/:id" element={
-          <ProtectedRoute permission="manage products">
-            <ProductForm />
-          </ProtectedRoute>
-        } />
+				<Route path="/productos" element={
+					<ProtectedRoute permission="view products">
+						<ProductsList />
+					</ProtectedRoute>
+				} />
 
-        <Route path="/products/:id" element={
-          <ProtectedRoute permission="view products">
-            <ProductsShow />
-          </ProtectedRoute>
-        } />
+				<Route path="/productos/crear" element={
+					<ProtectedRoute permission="manage products">
+						<ProductForm />
+					</ProtectedRoute>
+				} />
 
-        <Route path="/product-categories" element={
-          <ProtectedRoute permission="view product categories">
-            <ProductCategoriesList />
-          </ProtectedRoute>
-        } />
+				<Route path="/productos/editar/:id" element={
+					<ProtectedRoute permission="manage products">
+						<ProductForm />
+					</ProtectedRoute>
+				} />
 
-        <Route path="/product-categories/create" element={
-          <ProtectedRoute permission="manage product categories">
-            <ProductCategoryForm />
-          </ProtectedRoute>
-        } />
+				<Route path="/productos/:id" element={
+					<ProtectedRoute permission="view products">
+						<ProductsShow />
+					</ProtectedRoute>
+				} />
 
-        <Route path="/product-categories/edit/:id" element={
-          <ProtectedRoute permission="manage product categories">
-            <ProductCategoryForm />
-          </ProtectedRoute>
-        } />
+				<Route path="/productos-categorias" element={
+					<ProtectedRoute permission="view product categories">
+						<ProductCategoriesList />
+					</ProtectedRoute>
+				} />
 
-        <Route path="/product-tags" element={
-          <ProtectedRoute permission="view product tags">
-            <ProductTagsList />
-          </ProtectedRoute>
-        } />
+				<Route path="/productos-categorias/crear" element={
+					<ProtectedRoute permission="manage product categories">
+						<ProductCategoryForm />
+					</ProtectedRoute>
+				} />
 
-        <Route path="/product-tags/create" element={
-          <ProtectedRoute permission="manage product tags">
-            <ProductTagForm />
-          </ProtectedRoute>
-        } />
+				<Route path="/productos-categorias/editar/:id" element={
+					<ProtectedRoute permission="manage product categories">
+						<ProductCategoryForm />
+					</ProtectedRoute>
+				} />
 
-        <Route path="/product-tags/edit/:id" element={
-          <ProtectedRoute permission="manage product tags">
-            <ProductTagForm />
-          </ProtectedRoute>
-        } />
+				<Route path="/productos-etiquetas" element={
+					<ProtectedRoute permission="view product tags">
+						<ProductTagsList />
+					</ProtectedRoute>
+				} />
 
-        <Route path="/roles" element={
+				<Route path="/productos-etiquetas/crear" element={
+					<ProtectedRoute permission="manage product tags">
+						<ProductTagForm />
+					</ProtectedRoute>
+				} />
 
-          <ProtectedRoute permission="view roles">
-            <RolesList />
-          </ProtectedRoute>
-        } />
+				<Route path="/productos-etiquetas/editar/:id" element={
+					<ProtectedRoute permission="manage product tags">
+						<ProductTagForm />
+					</ProtectedRoute>
+				} />
 
-        <Route path="/roles/create" element={
-          <ProtectedRoute permission="create roles">
-            <RoleForm />
-          </ProtectedRoute>
-        } />
+				<Route path="/roles" element={
 
-        <Route path="/roles/edit/:id" element={
-          <ProtectedRoute permission="edit roles">
-            <RoleForm />
-          </ProtectedRoute>
-        } />
+					<ProtectedRoute permission="view roles">
+						<RolesList />
+					</ProtectedRoute>
+				} />
 
-        <Route path="/permissions" element={
-          <ProtectedRoute permission="view permissions">
-            <PermissionsList />
-          </ProtectedRoute>
-        } />
+				<Route path="/roles/crear" element={
+					<ProtectedRoute permission="create roles">
+						<RoleForm />
+					</ProtectedRoute>
+				} />
 
-        <Route path="/permissions/create" element={
-          <ProtectedRoute permission="create permissions">
-            <PermissionForm />
-          </ProtectedRoute>
-        } />
+				<Route path="/roles/editar/:id" element={
+					<ProtectedRoute permission="edit roles">
+						<RoleForm />
+					</ProtectedRoute>
+				} />
 
-        <Route path="/permissions/edit/:id" element={
-          <ProtectedRoute permission="edit permissions">
-            <PermissionForm />
-          </ProtectedRoute>
-        } />
+				<Route path="/permisos" element={
+					<ProtectedRoute permission="view permissions">
+						<PermissionsList />
+					</ProtectedRoute>
+				} />
 
-        <Route path="/profile" element={
-          <ProtectedRoute>
-            <Profile />
-          </ProtectedRoute>
-        } />
+				<Route path="/permisos/crear" element={
+					<ProtectedRoute permission="create permissions">
+						<PermissionForm />
+					</ProtectedRoute>
+				} />
 
-        <Route path="/activity-logs" element={
-          <ProtectedRoute permission="view activity logs">
-            <ActivityLogsList />
-          </ProtectedRoute>
-        } />
+				<Route path="/permisos/editar/:id" element={
+					<ProtectedRoute permission="edit permissions">
+						<PermissionForm />
+					</ProtectedRoute>
+				} />
 
-        <Route path="/customers" element={
-          <ProtectedRoute permission="manage customers">
-            <CustomersList />
-          </ProtectedRoute>
-        } />
+				<Route path="/perfil" element={
+					<ProtectedRoute>
+						<Profile />
+					</ProtectedRoute>
+				} />
 
-        <Route path="/customers/create" element={
-          <ProtectedRoute permission="manage customers">
-            <CustomerForm />
-          </ProtectedRoute>
-        } />
+				<Route path="/registros-actividad" element={
+					<ProtectedRoute permission="view activity logs">
+						<ActivityLogsList />
+					</ProtectedRoute>
+				} />
 
-        <Route path="/customers/edit/:id" element={
-          <ProtectedRoute permission="manage customers">
-            <CustomerForm />
-          </ProtectedRoute>
-        } />
+				<Route path="/clientes" element={
+					<ProtectedRoute permission="manage customers">
+						<CustomersList />
+					</ProtectedRoute>
+				} />
 
-        <Route path="/orders" element={
-          <ProtectedRoute permission="view orders">
-            <OrdersList />
-          </ProtectedRoute>
-        } />
+				<Route path="/clientes/crear" element={
+					<ProtectedRoute permission="manage customers">
+						<CustomerForm />
+					</ProtectedRoute>
+				} />
 
-        <Route path="/orders/:id" element={
-          <ProtectedRoute permission="view orders">
-            <OrderDetails />
-          </ProtectedRoute>
-        } />
+				<Route path="/clientes/editar/:id" element={
+					<ProtectedRoute permission="manage customers">
+						<CustomerForm />
+					</ProtectedRoute>
+				} />
 
-        <Route path="/contact-messages" element={
-          <ProtectedRoute permission="view blog">
-            <ContactMessagesList />
-          </ProtectedRoute>
-        } />
+				<Route path="/pedidos" element={
+					<ProtectedRoute permission="view orders">
+						<OrdersList />
+					</ProtectedRoute>
+				} />
 
-        <Route path="/autopost" element={
-          <ProtectedRoute permission="manage articles">
-            <AutopostGenerator />
-          </ProtectedRoute>
-        } />
+				<Route path="/pedidos/:id" element={
+					<ProtectedRoute permission="view orders">
+						<OrderDetails />
+					</ProtectedRoute>
+				} />
 
-        <Route path="/autopost-settings" element={
-          <ProtectedRoute permission="manage articles">
-            <AutopostSettings />
-          </ProtectedRoute>
-        } />
+				<Route path="/mensajes-contacto" element={
+					<ProtectedRoute permission="view blog">
+						<ContactMessagesList />
+					</ProtectedRoute>
+				} />
 
-        <Route path="/product-colors" element={
-          <ProtectedRoute permission="view product colors">
-            <ProductColorsList />
-          </ProtectedRoute>
-        } />
+				<Route path="/autopost" element={
+					<ProtectedRoute permission="manage articles">
+						<AutopostGenerator />
+					</ProtectedRoute>
+				} />
 
-        <Route path="/product-colors/create" element={
-          <ProtectedRoute permission="manage product colors">
-            <ProductColorForm />
-          </ProtectedRoute>
-        } />
+				<Route path="/autopost-configuracion" element={
+					<ProtectedRoute permission="manage articles">
+						<AutopostSettings />
+					</ProtectedRoute>
+				} />
 
-        <Route path="/product-colors/edit/:id" element={
-          <ProtectedRoute permission="manage product colors">
-            <ProductColorForm />
-          </ProtectedRoute>
-        } />
+				<Route path="/productos-colores" element={
+					<ProtectedRoute permission="view product colors">
+						<ProductColorsList />
+					</ProtectedRoute>
+				} />
 
-        <Route path="/product-sizes" element={
-          <ProtectedRoute permission="view product sizes">
-            <ProductSizesList />
-          </ProtectedRoute>
-        } />
+				<Route path="/productos-colores/crear" element={
+					<ProtectedRoute permission="manage product colors">
+						<ProductColorForm />
+					</ProtectedRoute>
+				} />
 
-        <Route path="/product-sizes/create" element={
-          <ProtectedRoute permission="manage product sizes">
-            <ProductSizeForm />
-          </ProtectedRoute>
-        } />
+				<Route path="/productos-colores/editar/:id" element={
+					<ProtectedRoute permission="manage product colors">
+						<ProductColorForm />
+					</ProtectedRoute>
+				} />
 
-        <Route path="/product-sizes/edit/:id" element={
-          <ProtectedRoute permission="manage product sizes">
-            <ProductSizeForm />
-          </ProtectedRoute>
-        } />
+				<Route path="/productos-talles" element={
+					<ProtectedRoute permission="view product sizes">
+						<ProductSizesList />
+					</ProtectedRoute>
+				} />
 
-        <Route path="/coupons" element={
-          <ProtectedRoute permission="view coupons">
-            <CouponsList />
-          </ProtectedRoute>
-        } />
+				<Route path="/productos-talles/crear" element={
+					<ProtectedRoute permission="manage product sizes">
+						<ProductSizeForm />
+					</ProtectedRoute>
+				} />
 
-        <Route path="/coupons/create" element={
-          <ProtectedRoute permission="manage coupons">
-            <CouponForm />
-          </ProtectedRoute>
-        } />
+				<Route path="/productos-talles/editar/:id" element={
+					<ProtectedRoute permission="manage product sizes">
+						<ProductSizeForm />
+					</ProtectedRoute>
+				} />
 
-        <Route path="/coupons/edit/:id" element={
-          <ProtectedRoute permission="manage coupons">
-            <CouponForm />
-          </ProtectedRoute>
-        } />
+				<Route path="/cupones" element={
+					<ProtectedRoute permission="view coupons">
+						<CouponsList />
+					</ProtectedRoute>
+				} />
 
-        <Route path="/settings" element={
-          <ProtectedRoute>
-            <SettingsList />
-          </ProtectedRoute>
-        } />
+				<Route path="/cupones/crear" element={
+					<ProtectedRoute permission="manage coupons">
+						<CouponForm />
+					</ProtectedRoute>
+				} />
 
-        <Route path="/business-info" element={
-          <ProtectedRoute>
-            <BusinessInfoSettings />
-          </ProtectedRoute>
-        } />
+				<Route path="/cupones/editar/:id" element={
+					<ProtectedRoute permission="manage coupons">
+						<CouponForm />
+					</ProtectedRoute>
+				} />
 
-        <Route path="/image-settings" element={
-          <ProtectedRoute permission="manage articles">
-            <ImageSettings />
-          </ProtectedRoute>
-        } />
+				<Route path="/metodos-pago" element={
+					<ProtectedRoute permission="manage payment methods">
+						<PaymentMethodsList />
+					</ProtectedRoute>
+				} />
 
-        <Route path="/blog-settings" element={
-          <ProtectedRoute permission="view blog">
-            <BlogSettings />
-          </ProtectedRoute>
-        } />
+				<Route path="/metodos-pago/crear" element={
+					<ProtectedRoute permission="manage payment methods">
+						<PaymentMethodForm />
+					</ProtectedRoute>
+				} />
 
-        <Route path="/product-settings" element={
-          <ProtectedRoute permission="view products">
-            <ProductSettings />
-          </ProtectedRoute>
-        } />
+				<Route path="/metodos-pago/editar/:id" element={
+					<ProtectedRoute permission="manage payment methods">
+						<PaymentMethodForm />
+					</ProtectedRoute>
+				} />
 
-        <Route path="/system-configurations" element={
-          <ProtectedRoute superAdminOnly={true}>
-            <SystemConfigurations />
-          </ProtectedRoute>
-        } />
+				<Route path="/metodos-envio" element={
+					<ProtectedRoute permission="manage delivery methods">
+						<DeliveryMethodsList />
+					</ProtectedRoute>
+				} />
 
-        <Route path="/skin-settings" element={
-          <ProtectedRoute superAdminOnly={true}>
-            <SkinSettings />
-          </ProtectedRoute>
-        } />
+				<Route path="/metodos-envio/crear" element={
+					<ProtectedRoute permission="manage delivery methods">
+						<DeliveryMethodForm />
+					</ProtectedRoute>
+				} />
 
-        <Route path="/" element={<Navigate to={isAuthenticated ? "/dashboard" : "/login"} />} />
-      </Routes>
-    </Router>
-  );
+				<Route path="/metodos-envio/editar/:id" element={
+					<ProtectedRoute permission="manage delivery methods">
+						<DeliveryMethodForm />
+					</ProtectedRoute>
+				} />
+
+				<Route path="/configuracion" element={
+					<ProtectedRoute>
+						<SettingsList />
+					</ProtectedRoute>
+				} />
+
+				<Route path="/info-negocio" element={
+					<ProtectedRoute>
+						<BusinessInfoSettings />
+					</ProtectedRoute>
+				} />
+
+				<Route path="/imagenes-configuracion" element={
+					<ProtectedRoute permission="manage articles">
+						<ImageSettings />
+					</ProtectedRoute>
+				} />
+
+				<Route path="/blog-configuracion" element={
+					<ProtectedRoute permission="view blog">
+						<BlogSettings />
+					</ProtectedRoute>
+				} />
+
+				<Route path="/productos-configuracion" element={
+					<ProtectedRoute permission="view products">
+						<ProductSettings />
+					</ProtectedRoute>
+				} />
+
+				<Route path="/configuracion-del-sistema" element={
+					<ProtectedRoute superAdminOnly={true}>
+						<SystemConfigurations />
+					</ProtectedRoute>
+				} />
+
+				<Route path="/apariencia-configuracion" element={
+					<ProtectedRoute superAdminOnly={true}>
+						<SkinSettings />
+					</ProtectedRoute>
+				} />
+
+				<Route path="/dashboard" element={<Navigate to="/" />} />
+
+				{/* Catch-all 404 Route */}
+				<Route path="*" element={
+					<DashboardLayout>
+						<NotFound />
+					</DashboardLayout>
+				} />
+			</Routes>
+		</Router>
+	);
 }
 
 export default App;

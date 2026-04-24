@@ -57,9 +57,7 @@ export function useCrudList({
       setDebouncedFilters(filters);
     }, debounceMs);
 
-    return () => {
-      clearTimeout(handler);
-    };
+    return () => clearTimeout(handler);
   }, [filters, debounceMs]);
 
   // Reset page when filters change
@@ -131,7 +129,7 @@ export function useCrudList({
   const deleteItem = useCallback(async (id, options = {}) => {
     const { 
       successMessage = 'Item deleted successfully',
-      errorMessage = 'Error deleting item'
+      errorMessage = 'Error deleteting item'
     } = options;
     
     try {
@@ -150,7 +148,7 @@ export function useCrudList({
   const bulkDelete = useCallback(async (ids, options = {}) => {
     const {
       successMessage = `${ids.length} items deleted successfully`,
-      errorMessage = 'Error deleting items'
+      errorMessage = 'Error deleteting items'
     } = options;
 
     try {

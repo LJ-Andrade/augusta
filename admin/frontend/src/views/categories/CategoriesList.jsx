@@ -21,7 +21,6 @@ import {
   DropdownMenuItem,
 } from '@/components/ui/dropdown-menu';
 import Can from '@/components/can';
-import { useTranslation } from 'react-i18next';
 import { useCrudList } from '@/hooks/use-crud-list';
 import { CrudTable } from '@/components/crud-table';
 import { CrudPagination } from '@/components/crud-pagination';
@@ -30,7 +29,6 @@ import { ConfirmationDialog } from '@/components/confirmation-dialog';
 import { PageHeader } from '@/components/page-header';
 
 export default function CategoriesList() {
-  const { t } = useTranslation();
   const navigate = useNavigate();
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -63,9 +61,9 @@ export default function CategoriesList() {
   });
 
   const columns = [
-    { key: 'id', label: t('categories.id'), sortable: true, width: 'w-[60px]' },
-    { key: 'name', label: t('categories.name'), sortable: true },
-    { key: 'created_at', label: t('categories.created_at') || 'Creado', sortable: true, align: 'right', width: 'w-[130px]', format: 'date' },
+    { key: 'id', label: "ID", sortable: true, width: 'w-[60px]' },
+    { key: 'name', label: "Nombre", sortable: true },
+    { key: 'created_at', label: "Creado el" || 'Creado', sortable: true, align: 'right', width: 'w-[130px]', format: 'date' },
   ];
 
   const handleDeleteClick = (category) => {
@@ -77,8 +75,8 @@ export default function CategoriesList() {
     if (!categoryToDelete) return;
     
     const success = await deleteItem(categoryToDelete.id, {
-      successMessage: t('categories.delete_success'),
-      errorMessage: t('categories.delete_error'),
+      successMessage: "Categoría eliminada correctamente",
+      errorMessage: "Error al eliminar la categoría",
     });
     
     if (success) {
@@ -89,8 +87,8 @@ export default function CategoriesList() {
 
   const handleBulkDeleteClick = async () => {
     const success = await bulkDelete(selectedIds, {
-      successMessage: t('common.bulk_delete_success'),
-      errorMessage: t('common.bulk_delete_error'),
+      successMessage: "Elementos eliminados exitosamente",
+      errorMessage: "Error al eliminar elementos",
     });
     
     if (success) {
@@ -102,11 +100,11 @@ export default function CategoriesList() {
     <Can permission="manage categories">
       {isDropdown ? (
         <>
-          <DropdownMenuItem onClick={() => navigate(`/categories/edit/${category.id}`)}>
-            <Edit className="mr-2 h-4 w-4" /> {t('common.edit')}
+          <DropdownMenuItem onClick={() => navigate(`/categorias/editar/${category.id}`)}>
+            <Edit className="mr-2 h-4 w-4" /> {"Editar"}
           </DropdownMenuItem>
           <DropdownMenuItem onClick={() => handleDeleteClick(category)} className="text-red-500">
-            <Trash2 className="mr-2 h-4 w-4" /> {t('common.delete')}
+            <Trash2 className="mr-2 h-4 w-4" /> {"Eliminar"}
           </DropdownMenuItem>
         </>
       ) : (
@@ -115,7 +113,7 @@ export default function CategoriesList() {
             variant="ghost"
             size="icon"
             className="h-8 w-8"
-            onClick={() => navigate(`/categories/edit/${category.id}`)}
+            onClick={() => navigate(`/categorias/editar/${category.id}`)}
           >
             <Edit className="h-4 w-4" />
           </Button>
@@ -135,10 +133,10 @@ export default function CategoriesList() {
   return (
     <div className="space-y-6">
       <PageHeader
-        title={t('categories.title') || 'Categorías'}
+        title={"Categorías"}
         breadcrumbs={[
           { label: 'BLOG' },
-          { label: t('categories.title') || 'Categorías' },
+          { label: "Categorías" },
         ]}
       />
 
@@ -146,8 +144,8 @@ export default function CategoriesList() {
         <CardHeader className="flex flex-row items-center justify-start gap-2">
           <Can permission="manage categories">
             <Button asChild>
-              <Link to="/categories/create">
-                <Plus className="mr-2 h-4 w-4" /> {t('categories.create')}
+              <Link to="/categorias/crear">
+                <Plus className="mr-2 h-4 w-4" /> {"Crear Categoría"}
               </Link>
             </Button>
           </Can>
@@ -164,7 +162,7 @@ export default function CategoriesList() {
                 <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                 <Input
                   type="search"
-                  placeholder={t('categories.search_placeholder')}
+                  placeholder={"Buscar categorías..."}
                   className="pl-8"
                   value={filters.search}
                   onChange={(e) => setFilter('search', e.target.value)}
@@ -173,7 +171,7 @@ export default function CategoriesList() {
               <CollapsibleTrigger asChild>
                 <Button variant="outline" size="sm">
                   <Filter className="mr-2 h-4 w-4" />
-                  {t('products.advanced_search')}
+                  {"Búsqueda Avanzada"}
                   <ChevronDown
                     className={`ml-2 h-4 w-4 transition-transform ${
                       isFiltersOpen ? 'rotate-180' : ''
@@ -187,22 +185,22 @@ export default function CategoriesList() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 border rounded-lg bg-muted/50">
                 <div className="space-y-2">
                   <label htmlFor="filterId" className="text-sm font-medium">
-                    {t('categories.id') || 'ID'}
+                    {"ID"}
                   </label>
                   <Input
                     id="filterId"
-                    placeholder={t('categories.id') || 'ID'}
+                    placeholder={"ID"}
                     value={filters.filter_id}
                     onChange={(e) => setFilter('filter_id', e.target.value)}
                   />
                 </div>
                 <div className="space-y-2">
                   <label htmlFor="filterName" className="text-sm font-medium">
-                    {t('categories.name') || 'Nombre'}
+                    {"Nombre"}
                   </label>
                   <Input
                     id="filterName"
-                    placeholder={t('categories.name') || 'Nombre'}
+                    placeholder={"Nombre"}
                     value={filters.filter_name}
                     onChange={(e) => setFilter('filter_name', e.target.value)}
                   />
@@ -211,7 +209,7 @@ export default function CategoriesList() {
               <div className="flex justify-end">
                 <Button variant="ghost" size="sm" onClick={clearFilters}>
                   <X className="mr-2 h-4 w-4" />
-                  {t('products.clear_filters')}
+                  {"Limpiar Filtros"}
                 </Button>
               </div>
             </CollapsibleContent>
@@ -224,31 +222,31 @@ export default function CategoriesList() {
             selectable={true}
             selectedIds={selectedIds}
             isAllSelected={isAllSelected}
-            onSelect={toggleSelect}
-            onSelectAll={toggleSelectAll}
+            onSelectt={toggleSelect}
+            onSelecttAll={toggleSelectAll}
             sortBy={sortBy}
             sortDir={sortDir}
-            onSort={handleSort}
+            onSortt={handleSort}
             actions={renderActions}
-            emptyMessage={t('common.no_data')}
-            loadingMessage={t('common.loading')}
+            emptyMessage={"No se encontraron datos."}
+            loadingMessage={"Cargando..."}
           />
 
           <CrudPagination
             meta={meta}
             page={page}
             onPageChange={setPage}
-            prevLabel={t('common.previous')}
-            nextLabel={t('common.next')}
+            prevLabel={"Anterior"}
+            nextLabel={"Siguiente"}
           />
 
           <ConfirmationDialog
             open={deleteDialogOpen}
             onOpenChange={setDeleteDialogOpen}
-            title={t('common.confirm_delete')}
-            description={t('common.confirm_delete_description')}
-            confirmText={t('common.confirm')}
-            cancelText={t('common.cancel')}
+            title={"Confirmar eliminación"}
+            description={"Esta acción no se puede deshacer."}
+            confirmText={"Confirmar"}
+            cancelText={"Cancelar"}
             onConfirm={handleConfirmDelete}
           />
         </CardContent>

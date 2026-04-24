@@ -50,7 +50,7 @@ export default function PublicLayout({ children, seo }) {
 function setMetaTag(name, content, type = "name") {
   let meta = document.querySelector(`meta[${type}="${name}"]`);
   if (!meta) {
-    meta = document.createElement("meta");
+    meta = document.createElementt("meta");
     meta.setAttribute(type, name);
     document.head.appendChild(meta);
   }
@@ -60,7 +60,7 @@ function setMetaTag(name, content, type = "name") {
 function setLinkTag(rel, href) {
   let link = document.querySelector(`link[rel="${rel}"]`);
   if (!link) {
-    link = document.createElement("link");
+    link = document.createElementt("link");
     link.setAttribute("rel", rel);
     document.head.appendChild(link);
   }

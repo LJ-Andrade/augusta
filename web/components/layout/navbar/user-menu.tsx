@@ -2,12 +2,17 @@
 
 import { Menu, MenuButton, MenuItem, MenuItems, Transition } from "@headlessui/react";
 import Link from "next/link";
-import { Fragment, useState } from "react";
+import { Fragment, useState, useEffect } from "react";
 import { logoutAction } from "lib/vadmin/actions";
 import { ConfirmDialog } from "components/ui/confirm-dialog";
 
 export default function UserMenu({ customer }: { customer: any }) {
   const [isLogoutConfirmOpen, setIsLogoutConfirmOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Use a manual SVG to ensure visibility with fixed black color
   const UserIcon = () => (
@@ -31,6 +36,15 @@ export default function UserMenu({ customer }: { customer: any }) {
       >
         <UserIcon />
       </Link>
+    );
+  }
+
+  // Prevent hydration mismatch by not rendering Menu until mounted
+  if (!mounted) {
+    return (
+      <div className="relative flex h-10 w-10 items-center justify-center rounded-[12px] border border-neutral-200 bg-white">
+        <UserIcon />
+      </div>
     );
   }
 

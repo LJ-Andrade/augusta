@@ -100,7 +100,7 @@ export async function updateCart(
   return lastCart;
 }
 
-export async function checkout(): Promise<{ success: boolean; message: string }> {
+export async function checkout(data?: any): Promise<{ success: boolean; message: string }> {
   const token = (await cookies()).get("auth_token")?.value;
   if (!token) return { success: false, message: "Not authenticated" };
 
@@ -111,6 +111,7 @@ export async function checkout(): Promise<{ success: boolean; message: string }>
       headers: {
         Authorization: `Bearer ${token}`,
       },
+      body: data,
     });
     return { success: true, message: "Checkout successful" };
   } catch (e: any) {

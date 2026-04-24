@@ -5,10 +5,11 @@ import clsx from "clsx";
 import { addItem } from "components/cart/actions";
 import { Product, ProductVariant } from "lib/vadmin/types";
 import { useSearchParams } from "next/navigation";
-import { useActionState } from "react";
+import { useActionState, useEffect } from "react";
 import { useCart } from "./cart-context";
 import LoadingDots from "components/loading-dots";
 import { useFormStatus } from "react-dom";
+import { toast } from "sonner";
 
 function SubmitButton({
 	availableForSale,
@@ -26,7 +27,7 @@ function SubmitButton({
 		return (
 			<button 
         disabled 
-        className={clsx(buttonClasses, "bg-neutral-100 text-neutral-400 cursor-not-allowed dark:bg-neutral-900 dark:text-neutral-600")}
+        className={clsx(buttonClasses, "bg-bone/50 text-stone-brown/40 cursor-not-allowed")}
       >
 				Sin Stock
 			</button>
@@ -39,7 +40,7 @@ function SubmitButton({
 			<button
 				aria-label="Por favor selecciona una opción"
 				disabled
-				className={clsx(buttonClasses, "bg-neutral-50 text-neutral-400 border border-neutral-200 cursor-not-allowed dark:bg-neutral-950 dark:border-neutral-800")}
+				className={clsx(buttonClasses, "bg-bone/20 text-stone-brown/60 border border-bone/50 cursor-not-allowed")}
 			>
 				Seleccionar Opciones
 			</button>
@@ -50,10 +51,10 @@ function SubmitButton({
 		<button
 			aria-label="Agregar al carrito"
       disabled={pending}
-			className={clsx(buttonClasses, "bg-black text-white hover:opacity-90 dark:bg-white dark:text-black")}
+			className={clsx(buttonClasses, "bg-graphite text-parchment hover:opacity-90")}
 		>
 			<div className="absolute left-0 ml-6">
-				{pending ? <LoadingDots className="bg-white dark:bg-black" /> : <PlusIcon className="h-4 w-4" />}
+				{pending ? <LoadingDots className="bg-parchment" /> : <PlusIcon className="h-4 w-4" />}
 			</div>
 			Agregar al carrito
 		</button>
@@ -65,6 +66,12 @@ export function AddToCart({ product }: { product: Product }) {
 	const { addCartItem } = useCart();
 	const searchParams = useSearchParams();
 	const [message, formAction] = useActionState(addItem, null);
+
+  useEffect(() => {
+    if (message) {
+      toast.error(message);
+    }
+  }, [message]);
 
 	const variant = variants.find((variant: ProductVariant) =>
 		variant.selectedOptions.every(
@@ -87,7 +94,7 @@ export function AddToCart({ product }: { product: Product }) {
 		<form
 			action={async () => {
 				addCartItem(finalVariant, product);
-				addItemAction();
+				await addItemAction();
 			}}
 		>
 			<SubmitButton

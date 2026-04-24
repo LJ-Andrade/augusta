@@ -16,13 +16,11 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2, KeyRound, User, Mail, Shield } from "lucide-react";
-import { useTranslation } from "react-i18next";
 import { AvatarUpload } from "@/components/ui/avatar-upload";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 
 export default function Profile() {
-  const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(true);
   const [avatarUrl, setAvatarUrl] = useState(null);
@@ -30,8 +28,8 @@ export default function Profile() {
   const [userRoles, setUserRoles] = useState([]);
 
   const formSchema = z.object({
-    name: z.string().min(2, t('validation.name_min') || "Name must be at least 2 characters."),
-    email: z.string().email(t('validation.email_invalid') || "Invalid email address."),
+    name: z.string().min(2, "El nombre debe tener al menos 2 caracteres." || "Name must be at least 2 characters."),
+    email: z.string().email("Correo electrónico no válido." || "Invalid email address."),
     password: z.string().optional().or(z.literal("")),
     password_confirmation: z.string().optional().or(z.literal("")),
   }).refine((data) => {
@@ -40,7 +38,7 @@ export default function Profile() {
     }
     return true;
   }, {
-    message: t('validation.passwords_mismatch') || "Passwords do not match",
+    message: "Las contraseñas no coinciden" || "Passwords do not match",
     path: ["password_confirmation"],
   });
 
@@ -85,10 +83,10 @@ export default function Profile() {
         },
       });
       setAvatarUrl(`${data.data.avatar_url}?t=${new Date().getTime()}`);
-      toast.success(t('profile.avatar_update_success') || "Avatar updated successfully");
+      toast.success("Avatar actualizado correctamente" || "Avatar updated successfully");
     } catch (error) {
       console.error("Error uploading avatar:", error);
-      toast.error(t('profile.avatar_update_error') || "Failed to update avatar");
+      toast.error("Error al actualizar el avatar" || "Failed to update avatar");
     }
   };
 
@@ -104,7 +102,7 @@ export default function Profile() {
     axiosClient.put('profile', payload)
 
       .then(() => {
-        toast.success(t('profile.update_success') || "Profile updated successfully");
+        toast.success("Perfil actualizado correctamente" || "Profile updated successfully");
         setLoading(false);
         if (showPassword) {
           setShowPassword(false);
@@ -141,10 +139,10 @@ export default function Profile() {
         <CardHeader className="pb-4 text-center">
           <CardTitle className="text-2xl font-bold flex items-center justify-center gap-2">
             <User className="h-6 w-6 text-primary" />
-            {t('profile.title') || "My Profile"}
+            {"My Profile"}
           </CardTitle>
           <p className="text-muted-foreground text-sm">
-            {t('profile.subtitle') || "Manage your account information and security settings."}
+            {"Manage your account information and security settings."}
           </p>
         </CardHeader>
         <Separator className="mb-6" />
@@ -186,11 +184,11 @@ export default function Profile() {
                         <FormItem>
                           <FormLabel className="flex items-center gap-2">
                             <User className="h-4 w-4" />
-                            {t('profile.name') || "Name"}
+                            {"Name"}
                           </FormLabel>
                           <FormControl>
                             <Input 
-                              placeholder={t('profile.name_placeholder') || "Your Name"} 
+                              placeholder={"Your Name"} 
                               className="bg-background/50 border-muted-foreground/20 focus:border-primary/50 transition-all"
                               {...field} 
                             />
@@ -206,12 +204,12 @@ export default function Profile() {
                         <FormItem>
                           <FormLabel className="flex items-center gap-2">
                             <Mail className="h-4 w-4" />
-                            {t('profile.email') || "Email"}
+                            {"Email"}
                           </FormLabel>
                           <FormControl>
                             <Input 
                               type="email" 
-                              placeholder={t('profile.email_placeholder') || "Your Email"} 
+                              placeholder={"Your Email"} 
                               className="bg-background/50 border-muted-foreground/20 focus:border-primary/50 transition-all"
                               {...field} 
                             />
@@ -226,7 +224,7 @@ export default function Profile() {
                     <div className="flex items-center justify-between mb-4">
                       <div className="flex items-center gap-2">
                         <KeyRound className="h-5 w-5 text-primary" />
-                        <h4 className="font-semibold">{t('profile.security') || "Security"}</h4>
+                        <h4 className="font-semibold">{"Security"}</h4>
                       </div>
                       <Button 
                         type="button" 
@@ -235,7 +233,7 @@ export default function Profile() {
                         onClick={togglePassword}
                         className="transition-all hover:bg-primary/10"
                       >
-                        {showPassword ? t('common.cancel') : t('profile.change_password')}
+                        {showPassword ? "Cancelar" : "Cambiar Contraseña"}
                       </Button>
                     </div>
                     
@@ -246,11 +244,11 @@ export default function Profile() {
                           name="password"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel>{t('profile.password') || "New Password"}</FormLabel>
+                              <FormLabel>{"New Password"}</FormLabel>
                               <FormControl>
                                 <Input 
                                   type="password" 
-                                  placeholder={t('profile.password_placeholder') || "Enter new password"} 
+                                  placeholder={"Enter new password"} 
                                   className="bg-background/50"
                                   {...field} 
                                 />
@@ -264,11 +262,11 @@ export default function Profile() {
                           name="password_confirmation"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel>{t('profile.password_confirmation') || "Confirm New Password"}</FormLabel>
+                              <FormLabel>{"Confirm New Password"}</FormLabel>
                               <FormControl>
                                 <Input 
                                   type="password" 
-                                  placeholder={t('profile.password_confirmation_placeholder') || "Confirm new password"} 
+                                  placeholder={"Confirm new password"} 
                                   className="bg-background/50"
                                   {...field} 
                                 />
@@ -284,7 +282,7 @@ export default function Profile() {
                   <div className="flex justify-end pt-6">
                     <Button type="submit" disabled={loading} className="px-8 shadow-md hover:shadow-lg transition-all">
                       {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                      {t('profile.update_button') || "Update Profile"}
+                      {"Update Profile"}
                     </Button>
                   </div>
                 </form>

@@ -31,12 +31,12 @@ const DEFAULT_SKIN_VALUES = {
   skin_light_sidebar_border: "#d1d5db",
   skin_light_gradient_start: "#e0e7ff",
   skin_light_gradient_end: "#f5f5f5",
-  skin_dark_sidebar_bg: "#1a1a2b",
+  skin_dark_sidebar_bg: "#0d0d14",
   skin_dark_sidebar_foreground: "#f5f5f5",
   skin_dark_sidebar_accent: "#1e1e2a",
   skin_dark_sidebar_border: "#1e1e2a",
-  skin_dark_gradient_start: "#21214e",
-  skin_dark_gradient_end: "#181835",
+  skin_dark_gradient_start: "#313159",
+  skin_dark_gradient_end: "#232334",
 }
 
 function getResolvedTheme(theme) {

@@ -61,7 +61,7 @@ export function EditItemQuantityButton({
       disabled={isPending || isPlusDisabled}
       aria-label={type === "plus" ? "Aumentar cantidad" : "Reducir cantidad"}
       className={clsx(
-        "ease flex h-full min-w-[36px] max-w-[36px] flex-none items-center justify-center rounded-full p-2 transition-all duration-200 hover:bg-neutral-100 dark:hover:bg-neutral-800",
+        "ease flex h-full min-w-[36px] max-w-[36px] flex-none items-center justify-center rounded-full p-2 transition-all duration-200 hover:bg-bone",
         {
           "ml-auto": type === "minus",
           "opacity-30 cursor-not-allowed": isPending || isPlusDisabled,

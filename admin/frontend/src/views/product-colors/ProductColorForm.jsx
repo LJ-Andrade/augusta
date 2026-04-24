@@ -14,18 +14,16 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Loader2, Save, X } from 'lucide-react';
-import { useTranslation } from 'react-i18next';
 import { PageHeader } from '@/components/page-header';
 import { useCrudForm } from '@/hooks/use-crud-form';
 
 export default function ProductColorForm() {
-  const { t } = useTranslation();
   const navigate = useNavigate();
   const { id } = useParams();
 
   const formSchema = z.object({
-    name: z.string().min(1, t('validation.name_min') || 'El nombre es requerido'),
-    hex_color: z.string().regex(/^#[a-fA-F0-9]{6}$/, t('product_colors.invalid_hex') || 'Formato de color inválido (use #RRGGBB)'),
+    name: z.string().min(1, "El nombre debe tener al menos 2 caracteres." || 'El nombre es requerido'),
+    hex_color: z.string().regex(/^#[a-fA-F0-9]{6}$/, "Formato de color inválido (use #RRGGBB)" || 'Formato de color inválido (use #RRGGBB)'),
   });
 
   const { form, loading, fetching, entityName, onSubmit } = useCrudForm({
@@ -36,12 +34,12 @@ export default function ProductColorForm() {
       name: '',
       hex_color: '#000000',
     },
-    onSuccess: () => navigate('/product-colors'),
+    onSuccess: () => navigate('/productos-colores'),
     messages: {
-      createSuccess: t('product_colors.create_success') || 'Color creado correctamente',
-      updateSuccess: t('product_colors.update_success') || 'Color actualizado correctamente',
-      createError: t('product_colors.create_error') || 'Error al crear el color',
-      updateError: t('product_colors.update_error') || 'Error al actualizar el color',
+      createSuccess: "Color creado correctamente" || 'Color creado correctamente',
+      updateSuccess: "Color actualizado correctamente" || 'Color actualizado correctamente',
+      createError: "Error al crear el color" || 'Error al crear el color',
+      updateError: "Error al actualizar el color" || 'Error al actualizar el color',
     },
   });
 
@@ -58,13 +56,13 @@ export default function ProductColorForm() {
       <PageHeader
         title={
           id
-            ? `${t('product_colors.editing') || 'Editando color'} "${entityName}"`
-            : t('product_colors.create_title') || 'Crear Color'
+            ? `${"Editando color"} "${entityName}"`
+            : "product_colors.create_title" || 'Crear Color'
         }
         breadcrumbs={[
           { label: 'PRODUCTOS' },
-          { label: t('product_colors.title') || 'Colores', href: '/product-colors' },
-          { label: id ? t('common.edit') : t('common.create') },
+          { label: "Colores" || 'Colores', href: '/product-colors' },
+          { label: id ? "Editar" : "Crear" },
         ]}
       />
 
@@ -75,8 +73,8 @@ export default function ProductColorForm() {
               <CardHeader>
                 <CardTitle>
                   {id
-                    ? `${t('product_colors.editing') || 'Editando color'} "${entityName}"`
-                    : t('product_colors.create_title') || 'Crear Color'}
+                    ? `${"Editando color"} "${entityName}"`
+                    : "product_colors.create_title" || 'Crear Color'}
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -85,9 +83,9 @@ export default function ProductColorForm() {
                   name="name"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>{t('product_colors.name') || 'Nombre'}</FormLabel>
+                      <FormLabel>{"Nombre"}</FormLabel>
                       <FormControl>
-                        <Input {...field} placeholder={t('product_colors.name_placeholder') || 'Ej: Rojo'} />
+                        <Input {...field} placeholder={"Ej: Rojo"} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -99,7 +97,7 @@ export default function ProductColorForm() {
                   name="hex_color"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>{t('product_colors.hex_color') || 'Color'}</FormLabel>
+                      <FormLabel>{"Color"}</FormLabel>
                       <FormControl>
                         <div className="flex items-center gap-4">
                           <input
@@ -121,14 +119,14 @@ export default function ProductColorForm() {
                 />
 
                 <div className="flex gap-2 justify-end">
-                  <Button type="button" variant="outline" onClick={() => navigate('/product-colors')}>
+                  <Button type="button" variant="outline" onClick={() => navigate('/productos-colores')}>
                     <X className="mr-2 h-4 w-4" />
-                    {t('common.cancel')}
+                    {"Cancelar"}
                   </Button>
                   <Button type="submit" disabled={loading}>
                     {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                     <Save className="mr-2 h-4 w-4" />
-                    {id ? t('common.save') : t('common.create')}
+                    {id ? "Guardar" : "Crear"}
                   </Button>
                 </div>
               </CardContent>

@@ -76,8 +76,8 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
 
         {/* Hover overlay — "Ver producto" */}
         <div
-          className="absolute inset-0 flex items-end justify-center pb-4 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
-          style={{ background: "linear-gradient(to top, rgba(0,0,0,0.35) 0%, transparent 60%)" }}
+          className="absolute inset-0 flex items-center justify-center opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+          style={{ background: "rgba(0,0,0,0.1)" }}
         >
           <span className="rounded-none border border-white px-6 py-2 text-xs font-medium uppercase tracking-[0.15em] text-white backdrop-blur-sm transition-colors hover:bg-white hover:text-black">
             Ver producto
@@ -95,6 +95,55 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
           >
             {product.tags[0]}
           </span>
+        )}
+
+        {/* Color swatches — Moved above Title */}
+        {colors.length > 0 && (
+          <div className="mb-0.5 flex items-center gap-1.5">
+            {colors.map((color) => {
+              const hex = getColorHex(color);
+              const colorImage = product.colorImages?.find(
+                (ci) => ci.color.toLowerCase() === color.toLowerCase()
+              );
+
+              return (
+                <button
+                  key={color}
+                  title={color}
+                  type="button"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    if (colorImage?.url) {
+                      setCurrentImage(colorImage.url);
+                    } else {
+                      setCurrentImage(defaultImageUrl);
+                    }
+                  }}
+                  className={`h-4 w-4 cursor-pointer rounded-full border border-white ring-1 transition-transform hover:scale-125 ${
+                    currentImage === colorImage?.url && colorImage?.url
+                      ? "ring-black scale-125"
+                      : "ring-gray-300"
+                  }`}
+                  style={{ backgroundColor: hex }}
+                />
+              );
+            })}
+
+            {/* Reset button */}
+            {currentImage !== defaultImageUrl && (
+              <button
+                type="button"
+                title="Restablecer vista"
+                onClick={(e) => {
+                  e.preventDefault();
+                  setCurrentImage(defaultImageUrl);
+                }}
+                className="ml-0.5 flex h-4 w-4 cursor-pointer items-center justify-center rounded-full bg-black/5 text-[8px] text-black/40 transition-colors hover:bg-black/10 hover:text-black/60"
+              >
+                ✕
+              </button>
+            )}
+          </div>
         )}
 
         {/* Product name — Serif */}
@@ -117,55 +166,6 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
             minimumFractionDigits: 0,
           }).format(parseFloat(price.amount))}
         </p>
-
-        {/* Color swatches */}
-        {colors.length > 0 && (
-          <div className="mt-1 flex items-center gap-1.5">
-            {colors.map((color) => {
-              const hex = getColorHex(color);
-              const colorImage = product.colorImages?.find(
-                (ci) => ci.color.toLowerCase() === color.toLowerCase()
-              );
-
-              return (
-                <button
-                  key={color}
-                  title={color}
-                  type="button"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    if (colorImage?.url) {
-                      setCurrentImage(colorImage.url);
-                    } else {
-                      setCurrentImage(defaultImageUrl);
-                    }
-                  }}
-                  className={`h-3.5 w-3.5 cursor-pointer rounded-full border border-white ring-1 transition-transform hover:scale-125 ${
-                    currentImage === colorImage?.url && colorImage?.url
-                      ? "ring-black scale-125"
-                      : "ring-gray-300"
-                  }`}
-                  style={{ backgroundColor: hex }}
-                />
-              );
-            })}
-
-            {/* Reset button */}
-            {currentImage !== defaultImageUrl && (
-              <button
-                type="button"
-                title="Restablecer vista"
-                onClick={(e) => {
-                  e.preventDefault();
-                  setCurrentImage(defaultImageUrl);
-                }}
-                className="ml-0.5 flex h-3.5 w-3.5 cursor-pointer items-center justify-center rounded-full bg-black/5 text-[8px] text-black/40 transition-colors hover:bg-black/10 hover:text-black/60"
-              >
-                ✕
-              </button>
-            )}
-          </div>
-        )}
       </div>
     </article>
   );

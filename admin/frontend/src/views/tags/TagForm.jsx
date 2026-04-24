@@ -12,17 +12,15 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Loader2, Save, X } from 'lucide-react';
-import { useTranslation } from 'react-i18next';
 import { PageHeader } from '@/components/page-header';
 import { useCrudForm } from '@/hooks/use-crud-form';
 
 export default function TagForm() {
-  const { t } = useTranslation();
   const navigate = useNavigate();
   const { id } = useParams();
 
   const formSchema = z.object({
-    name: z.string().min(1, t('validation.name_min')),
+    name: z.string().min(1, "El nombre debe tener al menos 2 caracteres."),
   });
 
   const { form, loading, fetching, entityName, onSubmit } = useCrudForm({
@@ -32,12 +30,12 @@ export default function TagForm() {
     defaultValues: {
       name: '',
     },
-    onSuccess: () => navigate('/tags'),
+    onSuccess: () => navigate('/etiquetas'),
     messages: {
-      createSuccess: t('tags.create_success'),
-      updateSuccess: t('tags.update_success'),
-      createError: t('tags.create_error'),
-      updateError: t('tags.update_error'),
+      createSuccess: "Etiqueta creada correctamente",
+      updateSuccess: "Etiqueta actualizada correctamente",
+      createError: "Error al crear la etiqueta",
+      updateError: "Error al actualizar la etiqueta",
     },
   });
 
@@ -54,13 +52,13 @@ export default function TagForm() {
       <PageHeader
         title={
           id
-            ? `${t('tags.editing') || 'Editando etiqueta'} "${entityName}"`
-            : t('tags.create_title')
+            ? `${"Editando etiqueta"} "${entityName}"`
+            : "Crear Nueva Etiqueta"
         }
         breadcrumbs={[
           { label: 'BLOG' },
-          { label: t('tags.title') || 'Etiquetas', href: '/tags' },
-          { label: id ? t('common.edit') : t('common.create') },
+          { label: "Etiquetas" || 'Etiquetas', href: '/tags' },
+          { label: id ? "Editar" : "Crear" },
         ]}
       />
 
@@ -71,8 +69,8 @@ export default function TagForm() {
               <CardHeader>
                 <CardTitle>
                   {id
-                    ? `${t('tags.editing') || 'Editando etiqueta'} "${entityName}"`
-                    : t('tags.create_title')}
+                    ? `${"Editando etiqueta"} "${entityName}"`
+                    : "Crear Nueva Etiqueta"}
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -81,9 +79,9 @@ export default function TagForm() {
                   name="name"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>{t('tags.name')}</FormLabel>
+                      <FormLabel>{"Nombre"}</FormLabel>
                       <FormControl>
-                        <Input placeholder={t('tags.name_placeholder')} {...field} />
+                        <Input placeholder={"Nombre de la Etiqueta"} {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -91,14 +89,14 @@ export default function TagForm() {
                 />
 
                 <div className="flex gap-2 justify-end">
-                  <Button type="button" variant="outline" onClick={() => navigate('/tags')}>
+                  <Button type="button" variant="outline" onClick={() => navigate('/etiquetas')}>
                     <X className="mr-2 h-4 w-4" />
-                    {t('common.cancel')}
+                    {"Cancelar"}
                   </Button>
                   <Button type="submit" disabled={loading}>
                     {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                     <Save className="mr-2 h-4 w-4" />
-                    {id ? t('tags.update_button') : t('tags.create_button')}
+                    {id ? "Actualizar Etiqueta" : "Crear Etiqueta"}
                   </Button>
                 </div>
               </CardContent>

@@ -89,7 +89,7 @@ const ColorPicker = ({ onColorSelect, currentColor }) => {
                   key={color}
                   type="button"
                   onClick={() => {
-                    onColorSelect(color)
+                    onColorSeleccolor
                     setIsOpen(false)
                   }}
                   className="w-5 h-5 rounded-sm border border-gray-200 hover:scale-110 transition-transform"
@@ -187,7 +187,7 @@ export function RichTextEditor({ value, onChange, placeholder }) {
 
   useEffect(() => {
     if (editor && value !== editor.getHTML()) {
-      editor.commands.setContent(value)
+      editor.commands.setContenvalue
     }
   }, [value, editor])
 
@@ -200,7 +200,7 @@ export function RichTextEditor({ value, onChange, placeholder }) {
   return (
     <div className="w-full rounded-lg border border-input bg-white overflow-hidden focus-within:ring-1 focus-within:ring-primary focus-within:border-primary transition-all duration-200">
       <div className="flex flex-wrap items-center gap-1 p-1 border-b border-border bg-muted/20">
-        {/* Text formatting */}
+        {/* Text formattting */}
         <ToolbarButton
           onClick={() => editor.chain().focus().toggleBold().run()}
           isActive={editor.isActive('bold')}

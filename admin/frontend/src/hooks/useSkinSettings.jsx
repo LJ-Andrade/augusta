@@ -2,16 +2,54 @@ import { useState, useEffect, useCallback } from 'react';
 import axiosClient from '@/lib/axios';
 import { useTheme } from '@/components/theme-provider';
 
+/**
+ * Reads the default skin values directly from the loaded CSS stylesheets.
+ * This bypasses any inline styles set by the DB and returns the true CSS defaults.
+ * Light vars are in :root, dark vars are in .dark selector.
+ */
+function readSkinDefaultsFromCSS() {
+  const defaults = {};
+
+  for (const sheet of document.styleSheets) {
+    try {
+      for (const rule of sheet.cssRules) {
+        if (!(rule instanceof CSSStyleRule)) continue;
+
+        const selector = rule.selectorText;
+
+        // :root → light skin vars
+        // .dark → dark skin vars
+        if (selector === ':root' || selector === '.dark') {
+          for (let i = 0; i < rule.style.length; i++) {
+            const prop = rule.style[i]; // e.g. "--skin-light-sidebar-bg"
+            if (!prop.startsWith('--skin-')) continue;
+
+            // "--skin-light-sidebar-bg" → "skin_light_sidebar_bg"
+            const key = prop.slice(2).replace(/-/g, '_');
+            const value = rule.style.getPropertyValue(prop).trim();
+            if (value) defaults[key] = value;
+          }
+        }
+      }
+    } catch {
+      // Skip cross-origin stylesheets
+    }
+  }
+
+  return defaults;
+}
+
 export function useSkinSettings() {
   const [settings, setSettings] = useState({});
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [defaultValues, setDefaultValues] = useState({});
   const { reloadSkinSettings } = useTheme();
 
   const loadSettings = useCallback(() => {
     setLoading(true);
     axiosClient
-      .get('/system-settings')
+      .get("/system-settings")
       .then(({ data }) => {
         const skinSettings = {};
         data.data.forEach((setting) => {
@@ -27,13 +65,18 @@ export function useSkinSettings() {
       });
   }, []);
 
+  // Read CSS defaults once on mount
+  useEffect(() => {
+    setDefaultValues(readSkinDefaultsFromCSS());
+  }, []);
+
   useEffect(() => {
     loadSettings();
   }, [loadSettings]);
 
   const updateSetting = useCallback((key, value) => {
-    const cssVarName = "--" + key.replace(/_/g, "-")
-    document.documentElement.style.setProperty(cssVarName, value)
+    const cssVarName = "--" + key.replace(/_/g, "-");
+    document.documentElement.style.setProperty(cssVarName, value);
     setSettings((prev) => ({
       ...prev,
       [key]: { ...prev[key], value },
@@ -57,30 +100,13 @@ export function useSkinSettings() {
   }, [reloadSkinSettings]);
 
   const resetToDefaults = useCallback(async () => {
-    const DEFAULT_SKIN_VALUES = {
-      skin_light_sidebar_bg: '#f0f0f0',
-      skin_light_sidebar_foreground: '#333333',
-      skin_light_sidebar_accent: '#d9d9d9',
-      skin_light_sidebar_border: '#d1d5db',
-      skin_light_gradient_start: '#e0e7ff',
-      skin_light_gradient_end: '#f5f5f5',
-      skin_dark_sidebar_bg: '#1a1a2b',
-      skin_dark_sidebar_foreground: '#f5f5f5',
-      skin_dark_sidebar_accent: '#1e1e2a',
-      skin_dark_sidebar_border: '#1e1e2a',
-      skin_dark_gradient_start: '#21214e',
-      skin_dark_gradient_end: '#181835',
-    };
-
-    const resetData = {};
-    Object.keys(DEFAULT_SKIN_VALUES).forEach((key) => {
-      resetData[key] = DEFAULT_SKIN_VALUES[key];
-    });
+    // Read fresh defaults from the CSS at reset time
+    const cssDefaults = readSkinDefaultsFromCSS();
 
     setSaving(true);
     try {
       await axiosClient.put('/system-settings', {
-        settings: resetData,
+        settings: cssDefaults,
       });
       reloadSkinSettings();
       return true;
@@ -96,6 +122,7 @@ export function useSkinSettings() {
     settings,
     loading,
     saving,
+    defaultValues,
     updateSetting,
     saveSkinSettings,
     resetToDefaults,

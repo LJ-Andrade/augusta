@@ -10,7 +10,6 @@ const hmrHost = process.env.VITE_HMR_HOST;
 
 export default defineConfig({
 	base: '/vadmin/',
-	plugins: [react()],
 	resolve: {
 		alias: {
 			"@": path.resolve(__dirname, "./src"),
@@ -24,5 +23,20 @@ export default defineConfig({
 			? { host: hmrHost, protocol: "wss", clientPort: 443 }
 			: true, // default: connect to localhost (local dev)
 	},
+	plugins: [
+		react(),
+		// Redirect /vadmin (no trailing slash) → /vadmin/ so both URLs work
+		{
+			name: 'redirect-base',
+			configureServer(server) {
+				server.middlewares.use((req, _res, next) => {
+					if (req.url === '/vadmin') {
+						req.url = '/vadmin/';
+					}
+					next();
+				});
+			},
+		},
+	],
 })
 

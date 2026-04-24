@@ -19,14 +19,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2, Save, X } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { MultiSelect } from "@/components/ui/multi-select";
-import { useTranslation } from "react-i18next";
 import { ImageUpload } from "@/components/ui/image-upload";
 import { RichTextEditor } from "@/components/ui/rich-text-editor";
 import { ImageGallery } from "@/components/ui/image-gallery";
 import { PageHeader } from "@/components/page-header";
 
 export default function ArticleForm() {
-	const { t } = useTranslation();
 	const { id } = useParams();
 	const navigate = useNavigate();
 	const [loading, setLoading] = useState(false);
@@ -38,12 +36,12 @@ export default function ArticleForm() {
 	const [gallery, setGallery] = useState([]);
 
 	const formSchema = z.object({
-		title: z.string().min(3, t('articles.validation.title_min')),
+		title: z.string().min(3, "El título debe tener al menos 3 caracteres."),
 		slug: z.string().nullable(),
-		category_id: z.string().min(1, t('articles.validation.category_required')),
+		category_id: z.string().min(1, "Por favor selectciona una categoría."),
 		tag_ids: z.array(z.number()).default([]),
 		status: z.enum(["draft", "published", "archived"]),
-		content: z.string().min(10, t('articles.validation.content_min')),
+		content: z.string().min(10, "El contenido debe tener al menos 10 caracteres."),
 		order: z.number().optional(),
 		featured: z.boolean().default(false),
 	});
@@ -112,9 +110,9 @@ export default function ArticleForm() {
 		try {
 			await axiosClient.delete(`articles/${id}/gallery/${mediaId}`);
 			setGallery(prev => prev.filter(img => img.id !== mediaId));
-			toast.success(t('articles.image_deleted'));
+			toast.success("Imagen eliminada correctamente");
 		} catch {
-			toast.error(t('common.error_occurred'));
+			toast.error("Ocurrió un error");
 		}
 	};
 
@@ -161,8 +159,8 @@ export default function ArticleForm() {
 
 		request
 			.then(() => {
-				toast.success(id ? t('articles.update_success') : t('articles.create_success'));
-				navigate("/articles");
+				toast.success(id ? "Artículo actualizado correctamente" : "Artículo creado correctamente");
+				navigate('/articulos');
 			})
 			.catch((error) => {
 				if (error.response && error.response.status === 422) {
@@ -174,7 +172,7 @@ export default function ArticleForm() {
 						});
 					});
 				} else {
-					toast.error(t('common.error_occurred'))
+					toast.error("Ocurrió un error")
 				}
 				setLoading(false);
 			});
@@ -185,13 +183,13 @@ export default function ArticleForm() {
 			<PageHeader
 				title={
 					id
-						? `${t('articles.editing') || 'Editando artículo'} "${entityName}"`
-						: t('articles.create_title')
+						? `Editando artículo "${entityName}"`
+						: "Crear Nuevo Artículo"
 				}
 				breadcrumbs={[
 					{ label: 'BLOG' },
-					{ label: t('articles.title') || 'Artículos', href: '/articles' },
-					{ label: id ? t('common.edit') : t('common.create') },
+					{ label: "Artículos" || 'Artículos', href: '/articles' },
+					{ label: id ? "Editar" : "Crear" },
 				]}
 			/>
 
@@ -199,7 +197,7 @@ export default function ArticleForm() {
 				<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
 					<Card>
 						<CardHeader>
-							<CardTitle>{t('articles.title')}, {t('articles.category')} & {t('articles.tags')}</CardTitle>
+							<CardTitle>{"Artículos"}, {"Categoría"} & {"Etiquetas"}</CardTitle>
 						</CardHeader>
 						<CardContent className="space-y-4">
 							<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -208,10 +206,10 @@ export default function ArticleForm() {
 									name="title"
 									render={({ field }) => (
 										<FormItem>
-											<FormLabel>{t('articles.title')}</FormLabel>
+											<FormLabel>{"Artículos"}</FormLabel>
 											<FormControl>
 												<Input
-													placeholder={t('articles.title_placeholder')}
+													placeholder={"Título del artículo"}
 													className="bg-muted/30 focus-visible:ring-primary"
 													{...field}
 												/>
@@ -228,10 +226,10 @@ export default function ArticleForm() {
 										<FormItem>
 											<FormLabel>Slug</FormLabel>
 											<FormControl>
-												<Input 
-													placeholder="Slug (auto-generated on create)" 
+												<Input
+													placeholder="Slug (auto-generated on create)"
 													value={field.value || ''}
-													{...field} 
+													{...field}
 												/>
 											</FormControl>
 											<FormMessage />
@@ -246,13 +244,13 @@ export default function ArticleForm() {
 									name="category_id"
 									render={({ field }) => (
 										<FormItem>
-											<FormLabel>{t('articles.category')}</FormLabel>
+											<FormLabel>{"Categoría"}</FormLabel>
 											<FormControl>
 												<select
 													className="flex h-10 w-full rounded-md border border-input bg-muted/30 px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
 													{...field}
 												>
-													<option value="">{t('articles.select_category')}</option>
+													<option value="">{"Seleccionar categoría..."}</option>
 													{categories.map((cat) => (
 														<option key={cat.id} value={cat.id}>
 															{cat.name}
@@ -270,13 +268,13 @@ export default function ArticleForm() {
 									name="tag_ids"
 									render={({ field }) => (
 										<FormItem>
-											<FormLabel>{t('articles.tags')}</FormLabel>
+											<FormLabel>{"Etiquetas"}</FormLabel>
 											<FormControl>
 												<MultiSelect
 													value={field.value || []}
 													onValueChange={field.onChange}
 													options={tags}
-													placeholder={t('articles.select_tags')}
+													placeholder={"Seleccionar etiquetas..."}
 												/>
 											</FormControl>
 											<FormMessage />
@@ -294,7 +292,7 @@ export default function ArticleForm() {
 											<RichTextEditor
 												value={field.value}
 												onChange={field.onChange}
-												placeholder={t('articles.content_placeholder')}
+												placeholder={"Escribe el contenido del artículo aquí..."}
 											/>
 										</FormControl>
 										<FormMessage />
@@ -312,7 +310,7 @@ export default function ArticleForm() {
 							<div className="grid grid-cols-1 md:grid-cols-3 gap-6">
 								<div className="md:col-span-1">
 									<label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 mb-2 block">
-										{t('articles.cover')}
+										{"Imagen de Portada"}
 									</label>
 									<ImageUpload
 										value={coverUrl}
@@ -322,7 +320,7 @@ export default function ArticleForm() {
 								</div>
 								<div className="md:col-span-2">
 									<label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 mb-2 block">
-										{t('articles.gallery')}
+										{"Galería de Imágenes"}
 									</label>
 									<ImageGallery
 										value={gallery}
@@ -342,15 +340,15 @@ export default function ArticleForm() {
 									name="status"
 									render={({ field }) => (
 										<FormItem>
-											<FormLabel>{t('articles.status')}</FormLabel>
+											<FormLabel>{"Estado"}</FormLabel>
 											<FormControl>
 												<select
 													className="flex h-10 w-full rounded-md border border-input bg-muted/30 px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
 													{...field}
 												>
-													<option value="draft">{t('articles.status_draft')}</option>
-													<option value="published">{t('articles.status_published')}</option>
-													<option value="archived">{t('articles.status_archived')}</option>
+													<option value="draft">{"Borrador"}</option>
+													<option value="published">{"Publicado"}</option>
+													<option value="archived">{"Archivado"}</option>
 												</select>
 											</FormControl>
 											<FormMessage />
@@ -363,7 +361,7 @@ export default function ArticleForm() {
 									name="order"
 									render={({ field }) => (
 										<FormItem>
-											<FormLabel>{t('articles.order')}</FormLabel>
+											<FormLabel>{"Orden"}</FormLabel>
 											<FormControl>
 												<Input
 													type="number"
@@ -391,7 +389,7 @@ export default function ArticleForm() {
 											</FormControl>
 											<div className="space-y-1 leading-none">
 												<FormLabel className="text-sm font-medium">
-													{t('articles.featured')}
+													{"Destacado"}
 												</FormLabel>
 											</div>
 										</FormItem>
@@ -405,15 +403,15 @@ export default function ArticleForm() {
 						<Button
 							type="button"
 							variant="outline"
-							onClick={() => navigate("/articles")}
+							onClick={() => navigate('/articulos')}
 						>
 							<X className="mr-2 h-4 w-4" />
-							{t('common.cancel')}
+							{"Cancelar"}
 						</Button>
 						<Button type="submit" disabled={loading} className="w-40 bg-primary hover:bg-primary/90">
 							{loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
 							<Save className="mr-2 h-4 w-4" />
-							{id ? t('articles.update_button') : t('articles.create_button')}
+							{id ? "Actualizar Artículo" : "Crear Artículo"}
 						</Button>
 					</div>
 				</form>

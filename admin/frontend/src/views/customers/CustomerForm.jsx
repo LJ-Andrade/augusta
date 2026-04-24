@@ -17,13 +17,12 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2 } from "lucide-react";
-import { useTranslation } from "react-i18next";
 import { AvatarUpload } from "@/components/ui/avatar-upload";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
+import { PageHeader } from "@/components/page-header";
 
 export default function CustomerForm() {
-  const { t } = useTranslation();
   const { id } = useParams();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
@@ -32,8 +31,8 @@ export default function CustomerForm() {
   const [pendingAvatar, setPendingAvatar] = useState(null);
 
   const formSchema = z.object({
-    name: z.string().min(2, t('validation.name_min')),
-    email: z.string().email(t('validation.email_invalid')),
+    name: z.string().min(2, "El nombre debe tener al menos 2 caracteres."),
+    email: z.string().email("Correo electrónico no válido."),
     password: id 
       ? z.string().optional().or(z.literal(""))
       : z.string().min(8, "Password must be at least 8 characters."),
@@ -73,10 +72,10 @@ export default function CustomerForm() {
         })
         .catch(() => {
           setFetching(false);
-          toast.error(t('customers.load_error') || "Error loading customer");
+          toast.error("Error al cargar el cliente");
         });
     }
-  }, [id, form, t]);
+  }, [id, form]);
 
   const handleAvatarChange = async (file) => {
     if (!id) {
@@ -95,10 +94,10 @@ export default function CustomerForm() {
         },
       });
       setAvatarUrl(`${data.data.avatar_url}?t=${new Date().getTime()}`);
-      toast.success(t('profile.avatar_update_success'));
+      toast.success("Avatar actualizado correctamente");
     } catch (error) {
       console.error("Error uploading avatar:", error);
-      toast.error(t('profile.avatar_update_error'));
+      toast.error("Error al actualizar el avatar");
     }
   };
 
@@ -134,8 +133,8 @@ export default function CustomerForm() {
 
     request
       .then(() => {
-        toast.success(id ? t('common.save_success') : t('customers.create_success'));
-        navigate("/customers");
+        toast.success(id ? "Guardado correctamente" : "Cliente creado correctamente");
+        navigate('/clientes');
       })
       .catch((error) => {
         if (error.response && error.response.status === 422) {
@@ -147,18 +146,26 @@ export default function CustomerForm() {
             });
           });
         } else {
-            toast.error(error.response?.data?.message || t('common.error_occurred'));
+            toast.error(error.response?.data?.message || "Ocurrió un error");
         }
         setLoading(false);
       });
   };
 
   return (
-    <div className="max-w-2xl mx-auto pb-10">
+    <div className="space-y-6">
+      <PageHeader
+        title={id ? "Editar Cliente" : "Nuevo Cliente"}
+        breadcrumbs={[
+          { label: 'CLIENTES' },
+          { label: id ? "Editar" : "Crear" },
+        ]}
+      />
+      <div className="max-w-2xl mx-auto pb-10">
       <Card>
         <CardHeader>
           <CardTitle>
-            {id ? t('customers.edit') : t('customers.create')}
+            {id ? "Editar Cliente" : "Nuevo Cliente"}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -182,7 +189,7 @@ export default function CustomerForm() {
                     name="name"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>{t('customers.name')}</FormLabel>
+                        <FormLabel>{"Nombre"}</FormLabel>
                         <FormControl>
                           <Input placeholder="John Doe" {...field} />
                         </FormControl>
@@ -197,7 +204,7 @@ export default function CustomerForm() {
                       name="email"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>{t('customers.email')}</FormLabel>
+                          <FormLabel>{"Correo"}</FormLabel>
                           <FormControl>
                             <Input type="email" placeholder="john@example.com" {...field} />
                           </FormControl>
@@ -211,7 +218,7 @@ export default function CustomerForm() {
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>
-                            {t('customers.password')} {id && t('users.password_help')}
+                            {"Contraseña"} {id && "(dejar en blanco para mantener la actual)"}
                           </FormLabel>
                           <FormControl>
                             <Input type="password" placeholder="********" {...field} />
@@ -227,7 +234,7 @@ export default function CustomerForm() {
                     name="phone"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>{t('customers.phone')}</FormLabel>
+                        <FormLabel>{"Teléfono"}</FormLabel>
                         <FormControl>
                           <Input placeholder="+1 234 567 890" {...field} />
                         </FormControl>
@@ -241,10 +248,10 @@ export default function CustomerForm() {
                     name="address"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>{t('customers.address')}</FormLabel>
+                        <FormLabel>{"Dirección"}</FormLabel>
                         <FormControl>
                           <Textarea 
-                            placeholder="Street, City, Country" 
+                            placeholder="Calle, Ciudad, País" 
                             className="resize-none" 
                             {...field} 
                           />
@@ -261,7 +268,7 @@ export default function CustomerForm() {
                       <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
                         <div className="space-y-0.5">
                           <FormLabel className="text-base">
-                            {t('customers.is_active')}
+                            {"Estado Activo"}
                           </FormLabel>
                         </div>
                         <FormControl>
@@ -278,13 +285,13 @@ export default function CustomerForm() {
                     <Button
                       type="button"
                       variant="outline"
-                      onClick={() => navigate("/customers")}
+                      onClick={() => navigate('/clientes')}
                     >
-                      {t('common.cancel')}
+                      {"Cancelar"}
                     </Button>
                     <Button type="submit" disabled={loading}>
                       {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                      {t('common.save')}
+                      {"Guardar"}
                     </Button>
                   </div>
                 </form>
@@ -294,5 +301,6 @@ export default function CustomerForm() {
         </CardContent>
       </Card>
     </div>
-  );
+  </div>
+);
 }

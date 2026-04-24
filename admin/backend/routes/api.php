@@ -13,6 +13,8 @@ use App\Http\Controllers\ProductCategoryController;
 use App\Http\Controllers\ProductTagController;
 use App\Http\Controllers\ProductColorController;
 use App\Http\Controllers\ProductSizeController;
+use App\Http\Controllers\PaymentMethodController;
+use App\Http\Controllers\DeliveryMethodController;
 use App\Http\Controllers\CouponController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ActivityLogController;
@@ -38,6 +40,12 @@ Route::post('/public/contact', [ContactController::class, 'store']);
 
 Route::get('/system-settings', [SystemSettingsController::class, 'index']);
 Route::get('/system-settings/{key}', [SystemSettingsController::class, 'show']);
+
+// Public routes for checkout
+Route::get('/payment-methods', [PaymentMethodController::class, 'index']);
+Route::get('/payment-methods/{paymentMethod}', [PaymentMethodController::class, 'show']);
+Route::get('/delivery-methods', [DeliveryMethodController::class, 'index']);
+Route::get('/delivery-methods/{deliveryMethod}', [DeliveryMethodController::class, 'show']);
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/dashboard', [AuthController::class, 'dashboard']);
@@ -149,6 +157,18 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('admin/orders/bulk-delete', [\App\Http\Controllers\Api\Admin\OrderController::class, 'bulkDelete'])->middleware('permission:manage orders');
     Route::apiResource('admin/orders', \App\Http\Controllers\Api\Admin\OrderController::class)->middleware('permission:view orders');
 
+    // Payment Methods (CRUD - auth required for write operations)
+    Route::post('payment-methods', [PaymentMethodController::class, 'store'])->middleware('permission:manage payment methods');
+    Route::put('payment-methods/{paymentMethod}', [PaymentMethodController::class, 'update'])->middleware('permission:manage payment methods');
+    Route::delete('payment-methods/{paymentMethod}', [PaymentMethodController::class, 'destroy'])->middleware('permission:manage payment methods');
+    Route::post('payment-methods/bulk-delete', [PaymentMethodController::class, 'bulkDelete'])->middleware('permission:manage payment methods');
+
+    // Delivery Methods (CRUD - auth required for write operations)
+    Route::post('delivery-methods', [DeliveryMethodController::class, 'store'])->middleware('permission:manage delivery methods');
+    Route::put('delivery-methods/{deliveryMethod}', [DeliveryMethodController::class, 'update'])->middleware('permission:manage delivery methods');
+    Route::delete('delivery-methods/{deliveryMethod}', [DeliveryMethodController::class, 'destroy'])->middleware('permission:manage delivery methods');
+    Route::post('delivery-methods/bulk-delete', [DeliveryMethodController::class, 'bulkDelete'])->middleware('permission:manage delivery methods');
+
     // Contact Messages
     Route::apiResource('contact-messages', ContactController::class)->middleware('permission:view blog');
     Route::post('contact-messages/bulk-delete', [ContactController::class, 'bulkDelete'])->middleware('permission:view blog');
@@ -160,6 +180,8 @@ Route::prefix('catalog')->group(function () {
     Route::get('products', [App\Http\Controllers\Api\CatalogController::class, 'products']);
     Route::get('products/{slug}', [App\Http\Controllers\Api\CatalogController::class, 'product']);
     Route::get('categories', [App\Http\Controllers\Api\CatalogController::class, 'categories']);
+    Route::get('delivery-methods', [DeliveryMethodController::class, 'index']);
+    Route::get('payment-methods', [PaymentMethodController::class, 'index']);
 });
 
 // --- Customer Auth & Orders ---
@@ -167,7 +189,7 @@ Route::prefix('customer')->group(function () {
     Route::post('register', [App\Http\Controllers\Api\CustomerAuthController::class, 'register']);
     Route::post('login', [App\Http\Controllers\Api\CustomerAuthController::class, 'login']);
     
-    Route::middleware('auth:sanctum')->group(function () {
+    Route::middleware('auth:customer')->group(function () {
         Route::post('logout', [App\Http\Controllers\Api\CustomerAuthController::class, 'logout']);
         Route::get('me', [App\Http\Controllers\Api\CustomerAuthController::class, 'me']);
         

@@ -15,15 +15,15 @@ const createImage = (url) =>
   new Promise((resolve, reject) => {
     const image = new Image()
     image.addEventListener('load', () => resolve(image))
-    image.addEventListener('error', (error) => reject(error))
+    image.addEventListener('error', (error) => rejecerror)
     image.setAttribute('crossOrigin', 'anonymous')
     image.src = url
   })
 
 async function getCroppedImg(imageSrc, pixelCrop) {
   const image = await createImage(imageSrc)
-  const canvas = document.createElement('canvas')
-  const ctx = canvas.getContext('2d')
+  const canvas = document.createElementt("canvas")
+  const ctx = canvas.getContext("2d")
 
   if (!ctx) {
     return null
@@ -59,7 +59,7 @@ export function ImageUpload({
   cropShape = 'rect',
   className 
 }) {
-  const inputId = useId()
+  const inputtId = useId()
   const [image, setImage] = useState(null)
   const [crop, setCrop] = useState({ x: 0, y: 0 })
   const [zoom, setZoom] = useState(1)
@@ -98,7 +98,7 @@ export function ImageUpload({
       setIsDialogOpen(false)
       setImage(null)
     } catch (e) {
-      console.error(e)
+      console.errore
     } finally {
       setIsUploading(false)
     }
@@ -136,7 +136,7 @@ export function ImageUpload({
                 <X className="h-5 w-5" />
               </button>
               <label
-                htmlFor={inputId}
+                htmlFor={inputtId}
                 className="p-2 bg-primary rounded-full text-primary-foreground hover:bg-primary/90 transition-colors cursor-pointer"
               >
                 <Camera className="h-5 w-5" />
@@ -145,13 +145,13 @@ export function ImageUpload({
           </>
         ) : (
           <label
-            htmlFor={inputId}
+            htmlFor={inputtId}
             className="absolute inset-0 flex flex-col items-center justify-center cursor-pointer"
           >
             <ImageIcon className="h-10 w-10 text-muted-foreground mb-2" />
             <span className="text-sm text-muted-foreground font-medium">Click to upload</span>
             <input
-              id={inputId}
+              id={inputtId}
               type="file"
               accept="image/*"
               className="hidden"
@@ -161,7 +161,7 @@ export function ImageUpload({
           </label>
         )}
         <input
-          id={inputId}
+          id={inputtId}
           type="file"
           accept="image/*"
           className="hidden"
@@ -197,7 +197,7 @@ export function ImageUpload({
               max={3}
               step={0.1}
               aria-labelledby="Zoom"
-              onChange={(e) => setZoom(parseFloat(e.target.value))}
+              onChange={(e) => setZoom(parseFloae.target.value)}
               className="w-full h-2 bg-muted rounded-lg appearance-none cursor-pointer accent-primary"
             />
           </div>

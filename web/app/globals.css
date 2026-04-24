@@ -3,23 +3,31 @@
 @plugin "@tailwindcss/container-queries";
 @plugin "@tailwindcss/typography";
 
+@theme {
+  --color-graphite: #2F2922;
+  --color-stone-brown: #6F6052;
+  --color-khaki-beige: #B1A495;
+  --color-bone: #E5DFD3;
+  --color-parchment: #FBF7F4;
+}
+
 /* ─── Brand Design Tokens ──────────────────────────────────────────── */
 :root {
   /* Colors */
-  --pb-bg:             #FFFFFF;
-  --pb-surface:        #F7F7F5;
-  --pb-surface-2:      #EEECEA;
-  --pb-border:         #E5E5E0;
-  --pb-text:           #1A1A1A;
-  --pb-text-secondary: #6B6B6B;
-  --pb-text-muted:     #9E9E9E;
-  --pb-accent:         #1A1A1A;
-  --pb-accent-hover:   #333333;
-  --pb-badge-bg:       #1A1A1A;
-  --pb-badge-text:     #FFFFFF;
-  --pb-announce-bg:    #000000;
-  --pb-announce-text:  #FFFFFF;
-  --pb-card-hover-shadow: 0 8px 32px rgba(0,0,0,0.10);
+  --pb-bg:             #FBF7F4; /* Parchment */
+  --pb-surface:        #E5DFD3; /* Bone */
+  --pb-surface-2:      #B1A495; /* Khaki Beige */
+  --pb-border:         #E5DFD3; /* Bone */
+  --pb-text:           #000000; /* Black */
+  --pb-text-secondary: #6F6052; /* Stone Brown */
+  --pb-text-muted:     #B1A495; /* Khaki Beige */
+  --pb-accent:         #2F2922; /* Graphite */
+  --pb-accent-hover:   #6F6052; /* Stone Brown */
+  --pb-badge-bg:       #2F2922; /* Graphite */
+  --pb-badge-text:     #FBF7F4; /* Parchment */
+  --pb-announce-bg:    #2F2922; /* Graphite */
+  --pb-announce-text:  #FBF7F4; /* Parchment */
+  --pb-card-hover-shadow: 0 8px 32px rgba(47, 41, 34, 0.15);
 
   /* Radius */
   --pb-radius:         12px;
@@ -66,7 +74,11 @@
   }
 
   img {
-    border-radius: var(--pb-radius) !important;
+    border-radius: var(--pb-radius);
+  }
+
+  .no-radius {
+    border-radius: 0 !important;
   }
 }
 

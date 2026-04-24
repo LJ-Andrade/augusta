@@ -23,6 +23,9 @@ class DatabaseSeeder extends Seeder
             ProductAttributeSeeder::class,
             RoleSeeder::class,
             PermissionSeeder::class,
+            PaymentMethodSeeder::class,
+            DeliveryMethodSeeder::class,
+            CustomerSeeder::class,
         ]);
 
         $permissions = Permission::all();

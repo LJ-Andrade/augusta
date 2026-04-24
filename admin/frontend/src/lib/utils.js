@@ -11,8 +11,8 @@ export function formatDate(dateString) {
   let date;
   // If it's a simple YYYY-MM-DD string, parse it manually to avoid timezone shift (restar un día)
   if (typeof dateString === 'string' && /^\d{4}-\d{2}-\d{2}/.test(dateString)) {
-    const datePart = dateString.split('T')[0];
-    const [year, month, day] = datePart.split('-').map(Number);
+    const datePart = dateString.split("T")[0];
+    const [year, month, day] = datePart.split("-").map(Number);
     date = new Date(year, month - 1, day);
   } else {
     date = new Date(dateString);

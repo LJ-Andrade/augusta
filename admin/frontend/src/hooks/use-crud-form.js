@@ -6,14 +6,14 @@ import { toast } from 'sonner';
 
 /**
  * Hook for CRUD form operations
- * Handles form state, validation, submission, and error handling
+ * Handles form state, validation, submitssion, and error handling
  * 
  * @param {Object} config - Configuration object
  * @param {string} config.endpoint - API endpoint (e.g., 'product-categories')
  * @param {string|number} config.id - Entity ID for edit mode (undefined for create)
  * @param {Object} config.schema - Zod validation schema
  * @param {Object} config.defaultValues - Default form values
- * @param {Function} config.onSuccess - Callback on successful submission
+ * @param {Function} config.onSuccess - Callback on successful submitssion
  * @param {Object} config.messages - Custom success/error messages
  * @returns {Object} Form operations and state
  */
@@ -136,7 +136,7 @@ export function useCrudForm({
     setEntityName,
     
     // Actions
-    onSubmit: form.handleSubmit(onSubmit),
+    onSubmit,
     setServerErrors
   };
 }

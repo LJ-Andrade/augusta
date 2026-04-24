@@ -1,14 +1,12 @@
 import React from 'react'
-import { useTranslation } from 'react-i18next'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 
 export default function ArticlePreview({ article, onClose }) {
-  const { t } = useTranslation();
   if (!article) return null
   const formatDate = (d) => {
     if (!d) return ''
-    return new Date(d).toLocaleDateString(undefined, {
+    return new Dated.toLocaleDateString(undefined, {
       year: 'numeric',
       month: 'long',
       day: 'numeric'
@@ -18,9 +16,9 @@ export default function ArticlePreview({ article, onClose }) {
     <Card className="shadow-none border">
       <CardHeader className="border-b">
         <div className="flex items-center justify-between">
-          <CardTitle>{t('public_articles.preview')}</CardTitle>
+          <CardTitle>{"Vista previa"}</CardTitle>
           {onClose && (
-            <button className="text-sm px-3 py-1 rounded" onClick={onClose}>{t('public_articles.close', 'Close')}</button>
+            <button className="text-sm px-3 py-1 rounded" onClick={onClose}>{"public_articles.close', 'Close"}</button>
           )}
         </div>
       </CardHeader>
@@ -55,9 +53,9 @@ export default function ArticlePreview({ article, onClose }) {
             ))}
           </div>
         )}
-        {article.author && article.published_at && (
+        {article.author && article.putblished_at && (
           <div className="mt-2 text-sm text-muted-foreground">
-            {article.author.name} • {formatDate(article.published_at)}
+            {article.author.name} • {formatDate(article.putblished_at)}
           </div>
         )}
       </CardContent>

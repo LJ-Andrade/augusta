@@ -40,7 +40,7 @@ export default function OrderDetails() {
       setOrder(response.data);
     } catch (error) {
       toast.error('Error al cargar la orden');
-      navigate('/orders');
+      navigate('/pedidos');
     } finally {
       setLoading(false);
     }
@@ -75,7 +75,7 @@ export default function OrderDetails() {
     <div className="space-y-6 max-w-5xl mx-auto">
       <div className="flex items-center gap-4">
         <Button variant="outline" size="icon" asChild>
-          <Link to="/orders">
+          <Link to="/pedidos">
             <ArrowLeft className="h-4 w-4" />
           </Link>
         </Button>
@@ -116,14 +116,14 @@ export default function OrderDetails() {
                   <div key={item.id} className="flex justify-between items-center py-2 border-b last:border-0">
                     <div className="flex flex-col">
                       <span className="font-medium">{item.product_name}</span>
-                      <span className="text-sm text-muted-foreground">Cant: {item.quantity} x ${parseFloat(item.unit_price).toFixed(2)}</span>
+                      <span className="text-sm text-muted-foreground">Cant: {item.quantity} x ${parseFloaitem.unit_price.toFixed(2)}</span>
                     </div>
-                    <span className="font-semibold">${parseFloat(item.subtotal).toFixed(2)}</span>
+                    <span className="font-semibold">${parseFloaitem.subtotal.toFixed(2)}</span>
                   </div>
                 ))}
                 <div className="flex justify-between items-center pt-4 border-t border-dashed">
                   <span className="font-bold text-lg">Total</span>
-                  <span className="font-bold text-lg">${parseFloat(order.total_amount).toFixed(2)} {order.currency}</span>
+                  <span className="font-bold text-lg">${parseFloaorder.total_amount.toFixed(2)} {order.currency}</span>
                 </div>
               </div>
             </CardContent>

@@ -41,7 +41,6 @@ import {
 	CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import Can from "@/components/can";
-import { useTranslation } from "react-i18next";
 import { useCrudList } from "@/hooks/use-crud-list";
 import { CrudPagination } from "@/components/crud-pagination";
 import { BulkActionsBar } from "@/components/bulk-actions-bar";
@@ -49,7 +48,6 @@ import { ConfirmationDialog } from "@/components/confirmation-dialog";
 import { PageHeader } from "@/components/page-header";
 
 export default function ArticlesList() {
-	const { t } = useTranslation();
 	const navigate = useNavigate();
 	const [categories, setCategories] = useState([]);
 	const [isFiltersOpen, setIsFiltersOpen] = useState(false);
@@ -93,13 +91,13 @@ export default function ArticlesList() {
 	const quickUpdate = useCallback((id, field, value) => {
 		axiosClient.patch(`/articles/${id}`, { [field]: value })
 			.then(() => {
-				toast.success(t('articles.update_success'));
+				toast.success("Artículo actualizado correctamente");
 			})
 			.catch((error) => {
-				toast.error(t('common.error_occurred'));
+				toast.error("Ocurrió un error");
 				console.error(error);
 			});
-	}, [t]);
+	}, []);
 
 	const handleToggleFeatured = (article) => {
 		quickUpdate(article.id, 'featured', !article.featured);
@@ -122,8 +120,8 @@ export default function ArticlesList() {
 		if (!articleToDelete) return;
 		
 		const success = await deleteItem(articleToDelete.id, {
-			successMessage: t('articles.delete_success'),
-			errorMessage: t('articles.delete_error'),
+			successMessage: "Artículo eliminado correctamente",
+			errorMessage: "Error al eliminar el artículo",
 		});
 		
 		if (success) {
@@ -134,8 +132,8 @@ export default function ArticlesList() {
 
 	const handleBulkDeleteClick = async () => {
 		const success = await bulkDelete(selectedIds, {
-			successMessage: t('common.bulk_delete_success'),
-			errorMessage: t('common.bulk_delete_error'),
+			successMessage: "Elementos eliminados exitosamente",
+			errorMessage: "Error al eliminar elementos",
 		});
 		
 		if (success) {
@@ -146,11 +144,11 @@ export default function ArticlesList() {
 	const getStatusBadge = (status) => {
 		switch (status) {
 			case 'published':
-				return <Badge className="bg-green-500">{t('articles.status_published')}</Badge>;
+				return <Badge className="bg-green-500">{"Publicado"}</Badge>;
 			case 'draft':
-				return <Badge variant="secondary">{t('articles.status_draft')}</Badge>;
+				return <Badge variant="secondary">{"Borrador"}</Badge>;
 			case 'archived':
-				return <Badge variant="destructive">{t('articles.status_archived')}</Badge>;
+				return <Badge variant="destructive">{"Archivado"}</Badge>;
 			default:
 				return <Badge variant="outline">{status}</Badge>;
 		}
@@ -160,12 +158,12 @@ export default function ArticlesList() {
 		<Can permission="edit articles">
 			{isDropdown ? (
 				<>
-					<DropdownMenuItem onClick={() => navigate(`/articles/edit/${article.id}`)}>
-						<Edit className="mr-2 h-4 w-4" /> {t('common.edit')}
+					<DropdownMenuItem onClick={() => navigate(`/articulos/editar/${article.id}`)}>
+						<Edit className="mr-2 h-4 w-4" /> {"Editar"}
 					</DropdownMenuItem>
 					<Can permission="delete articles">
 						<DropdownMenuItem onClick={() => handleDeleteClick(article)} className="text-red-500">
-							<Trash2 className="mr-2 h-4 w-4" /> {t('common.delete')}
+							<Trash2 className="mr-2 h-4 w-4" /> {"Eliminar"}
 						</DropdownMenuItem>
 					</Can>
 				</>
@@ -187,7 +185,7 @@ export default function ArticlesList() {
 							variant="ghost"
 							size="icon"
 							className="h-8 w-8"
-							onClick={() => navigate(`/articles/edit/${article.id}`)}
+							onClick={() => navigate(`/articulos/editar/${article.id}`)}
 						>
 							<Edit className="h-4 w-4" />
 						</Button>
@@ -210,10 +208,10 @@ export default function ArticlesList() {
 	return (
 		<div className="space-y-6">
 			<PageHeader
-				title={t('articles.title') || 'Artículos'}
+				title={"Artículos"}
 				breadcrumbs={[
 					{ label: 'BLOG' },
-					{ label: t('articles.title') || 'Artículos' },
+					{ label: "Artículos" },
 				]}
 			/>
 
@@ -221,8 +219,8 @@ export default function ArticlesList() {
 				<CardHeader className="flex flex-row items-center justify-start gap-2">
 					<Can permission="create articles">
 						<Button asChild>
-							<Link to="/articles/create">
-								<Plus className="mr-2 h-4 w-4" /> {t('articles.create')}
+							<Link to="/articulos/crear">
+								<Plus className="mr-2 h-4 w-4" /> {"Crear Artículo"}
 							</Link>
 						</Button>
 					</Can>
@@ -239,7 +237,7 @@ export default function ArticlesList() {
 								<Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
 								<Input
 									type="search"
-									placeholder={t('articles.search_placeholder')}
+									placeholder={"Buscar artículos..."}
 									className="pl-8"
 									value={filters.search}
 									onChange={(e) => setFilter('search', e.target.value)}
@@ -248,7 +246,7 @@ export default function ArticlesList() {
 							<CollapsibleTrigger asChild>
 								<Button variant="outline" size="sm">
 									<Filter className="mr-2 h-4 w-4" />
-									{t('articles.advanced_search')}
+									{"Búsqueda Avanzada"}
 									<ChevronDown className={`ml-2 h-4 w-4 transition-transform ${isFiltersOpen ? "rotate-180" : ""}`} />
 								</Button>
 							</CollapsibleTrigger>
@@ -257,14 +255,14 @@ export default function ArticlesList() {
 						<CollapsibleContent className="space-y-4">
 							<div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 border rounded-lg bg-muted/50">
 								<div className="space-y-2">
-									<label htmlFor="filterCategory" className="text-sm font-medium">{t('articles.category')}</label>
+									<label htmlFor="filterCategory" className="text-sm font-medium">{"Categoría"}</label>
 									<select
 										id="filterCategory"
 										className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
 										value={filters.category_id}
 										onChange={(e) => setFilter('category_id', e.target.value)}
 									>
-										<option value="">{t('articles.all_categories')}</option>
+										<option value="">{"Todas las Categorías"}</option>
 										{categories.map((category) => (
 											<option key={category.id} value={category.id}>
 												{category.name}
@@ -273,17 +271,17 @@ export default function ArticlesList() {
 									</select>
 								</div>
 								<div className="space-y-2">
-									<label htmlFor="filterStatus" className="text-sm font-medium">{t('articles.status')}</label>
+									<label htmlFor="filterStatus" className="text-sm font-medium">{"Estado"}</label>
 									<select
 										id="filterStatus"
 										className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
 										value={filters.status}
 										onChange={(e) => setFilter('status', e.target.value)}
 									>
-										<option value="">{t('articles.all_statuses')}</option>
-										<option value="draft">{t('articles.status_draft')}</option>
-										<option value="published">{t('articles.status_published')}</option>
-										<option value="archived">{t('articles.status_archived')}</option>
+										<option value="">{"Todos los Estados"}</option>
+										<option value="draft">{"Borrador"}</option>
+										<option value="published">{"Publicado"}</option>
+										<option value="archived">{"Archivado"}</option>
 									</select>
 								</div>
 							</div>
@@ -294,7 +292,7 @@ export default function ArticlesList() {
 									onClick={clearFilters}
 								>
 									<X className="mr-2 h-4 w-4" />
-									{t('articles.clear_filters')}
+									{"Limpiar Filtros"}
 								</Button>
 							</div>
 						</CollapsibleContent>
@@ -314,29 +312,29 @@ export default function ArticlesList() {
 									onClick={() => handleSort("id")}
 								>
 									<div className="flex items-center">
-										{t('articles.id')} 
+										{"ID"} 
 										{sortBy === 'id' ? (
 											sortDir === 'asc' ? <ChevronDown className="ml-2 h-4 w-4 rotate-180" /> : <ChevronDown className="ml-2 h-4 w-4" />
 										) : <ChevronDown className="ml-2 h-4 w-4 opacity-50" />}
 									</div>
 								</TableHead>
-								<TableHead>{t('articles.cover')}</TableHead>
+								<TableHead>{"Imagen de Portada"}</TableHead>
 								<TableHead
 									className="cursor-pointer select-none"
 									onClick={() => handleSort("title")}
 								>
 									<div className="flex items-center">
-										{t('articles.title_label')}
+										{"Título"}
 										{sortBy === 'title' ? (
 											sortDir === 'asc' ? <ChevronDown className="ml-2 h-4 w-4 rotate-180" /> : <ChevronDown className="ml-2 h-4 w-4" />
 										) : <ChevronDown className="ml-2 h-4 w-4 opacity-50" />}
 									</div>
 								</TableHead>
-								<TableHead>{t('articles.category')}</TableHead>
-								<TableHead>{t('articles.status')}</TableHead>
+								<TableHead>{"Categoría"}</TableHead>
+								<TableHead>{"Estado"}</TableHead>
 								<TableHead className="cursor-pointer select-none w-[120px]" onClick={() => handleSort("featured")}>
 									<div className="flex items-center">
-										{t('articles.featured_order')}
+										{"Dest/Ord"}
 										{sortBy === 'featured' ? (
 											sortDir === 'asc' ? <ChevronDown className="ml-2 h-4 w-4 rotate-180" /> : <ChevronDown className="ml-2 h-4 w-4" />
 										) : <ChevronDown className="ml-2 h-4 w-4 opacity-50" />}
@@ -347,27 +345,27 @@ export default function ArticlesList() {
 									onClick={() => handleSort("created_at")}
 								>
 									<div className="flex items-center justify-end">
-										{t('articles.created_at')}
+										{"Creado el"}
 										{sortBy === 'created_at' ? (
 											sortDir === 'asc' ? <ChevronDown className="ml-2 h-4 w-4 rotate-180" /> : <ChevronDown className="ml-2 h-4 w-4" />
 										) : <ChevronDown className="ml-2 h-4 w-4 opacity-50" />}
 									</div>
 								</TableHead>
-								<TableHead className="text-right w-[150px]">{t('common.actions')}</TableHead>
+								<TableHead className="text-right w-[150px]">{"Acciones"}</TableHead>
 							</TableRow>
 						</TableHeader>
 						<TableBody className={loading ? "opacity-50 pointer-events-none" : ""}>
 							{loading && articles.length === 0 && (
 								<TableRow>
 									<TableCell colSpan={9} className="text-center">
-										{t('common.loading')}
+										{"Cargando..."}
 									</TableCell>
 								</TableRow>
 							)}
 							{!loading && articles.length === 0 && (
 								<TableRow>
 									<TableCell colSpan={9} className="text-center py-8 text-muted-foreground">
-										{t('common.no_data')}
+										{"No se encontraron datos."}
 									</TableCell>
 								</TableRow>
 							)}
@@ -404,13 +402,13 @@ export default function ArticlesList() {
 											</DropdownMenuTrigger>
 											<DropdownMenuContent align="start">
 												<DropdownMenuItem onClick={() => handleStatusChange(article, 'draft')}>
-													{t('articles.status_draft')}
+													{"Borrador"}
 												</DropdownMenuItem>
 												<DropdownMenuItem onClick={() => handleStatusChange(article, 'published')}>
-													{t('articles.status_published')}
+													{"Publicado"}
 												</DropdownMenuItem>
 												<DropdownMenuItem onClick={() => handleStatusChange(article, 'archived')}>
-													{t('articles.status_archived')}
+													{"Archivado"}
 												</DropdownMenuItem>
 											</DropdownMenuContent>
 										</DropdownMenu>
@@ -446,7 +444,7 @@ export default function ArticlesList() {
 												</DropdownMenuTrigger>
 												<DropdownMenuContent align="end">
 													<DropdownMenuItem onClick={() => { setPreviewArticle(article); setPreviewOpen(true); }}>
-														<Eye className="mr-2 h-4 w-4" /> {t('common.view')}
+														<Eye className="mr-2 h-4 w-4" /> {"Ver"}
 													</DropdownMenuItem>
 													{renderActions(article, true)}
 												</DropdownMenuContent>
@@ -465,8 +463,8 @@ export default function ArticlesList() {
 						meta={meta}
 						page={page}
 						onPageChange={setPage}
-						prevLabel={t('common.previous')}
-						nextLabel={t('common.next')}
+						prevLabel={"Anterior"}
+						nextLabel={"Siguiente"}
 					/>
 
 					{previewOpen && previewArticle && (
@@ -480,10 +478,10 @@ export default function ArticlesList() {
 					<ConfirmationDialog
 						open={deleteDialogOpen}
 						onOpenChange={setDeleteDialogOpen}
-						title={t('common.confirm_delete')}
-						description={t('common.confirm_delete_description')}
-						confirmText={t('common.confirm')}
-						cancelText={t('common.cancel')}
+						title={"Confirmar eliminación"}
+						description={"Esta acción no se puede deshacer."}
+						confirmText={"Confirmar"}
+						cancelText={"Cancelar"}
 						onConfirm={handleConfirmDelete}
 					/>
 				</CardContent>

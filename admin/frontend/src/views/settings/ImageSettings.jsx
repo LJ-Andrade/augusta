@@ -18,7 +18,6 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Loader2, Image, Save, Plus, Trash2 } from "lucide-react";
-import { useTranslation } from "react-i18next";
 import { Separator } from "@/components/ui/separator";
 
 const ALL_SECTIONS = [
@@ -49,13 +48,12 @@ const MAX_SIZES = [
 ];
 
 export default function ImageSettings() {
-	const { t } = useTranslation();
 	const [searchParams] = useSearchParams();
 	const [loading, setLoading] = useState(true);
 	const [saving, setSaving] = useState(false);
 	const [settings, setSettings] = useState({});
 	
-	const sectionParam = searchParams.get('section');
+	const sectionParam = searchParams.get("section");
 	const currentSection = sectionParam === 'products' ? 'products' : 'blog';
 	const SECTION_TYPES = ALL_SECTIONS.filter(s => s.section === currentSection);
 	
@@ -154,7 +152,7 @@ export default function ImageSettings() {
 			});
 			setSettings(settingsMap);
 
-			toast.success(t('image_settings.save_success') || "Configuración guardada correctamente");
+			toast.success("Configuración guardada correctamente" || "Configuración guardada correctamente");
 		} catch (error) {
 			toast.error(error.response?.data?.message || "Error al guardar");
 		} finally {
@@ -193,18 +191,33 @@ export default function ImageSettings() {
 
 			<div className="flex-1">
 				<Card>
-						<CardHeader>
-							<CardTitle className="flex items-center gap-2">
-								<Image className="h-5 w-5" />
-								{t('image_settings.config') || "Configuración"}: {SECTION_TYPES.find(s => s.value === selectedSection)?.label}
-							</CardTitle>
-							<CardDescription>
-								{t('image_settings.config_description') || "Parámetros de validación para esta sección"}
-							</CardDescription>
+						<CardHeader className="flex flex-row items-center justify-between space-y-0">
+							<div>
+								<CardTitle className="flex items-center gap-2">
+									<Image className="h-5 w-5" />
+									{"Configuración"}: {SECTION_TYPES.find(s => s.value === selectedSection)?.label}
+								</CardTitle>
+								<CardDescription>
+									{"Parámetros de validación para esta sección"}
+								</CardDescription>
+							</div>
+							<Button type="submit" form="image-settings-form" disabled={saving}>
+								{saving ? (
+									<>
+										<Loader2 className="mr-2 h-4 w-4 animate-spin" />
+										{"Guardando..."}
+									</>
+								) : (
+									<>
+										<Save className="mr-2 h-4 w-4" />
+										{"Guardar"}
+									</>
+								)}
+							</Button>
 						</CardHeader>
 						<CardContent>
 							<Form {...form}>
-								<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+								<form id="image-settings-form" onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
 									<div className="grid grid-cols-2 gap-4">
 										<FormField
 											control={form.control}
@@ -212,7 +225,7 @@ export default function ImageSettings() {
 											render={({ field }) => (
 												<FormItem>
 													<FormLabel>
-														{t('image_settings.max_size') || "Tamaño máximo"}
+														{"Tamaño máximo"}
 													</FormLabel>
 													<FormControl>
 														<select
@@ -238,7 +251,7 @@ export default function ImageSettings() {
 											render={({ field }) => (
 												<FormItem>
 													<FormLabel>
-														{t('image_settings.extensions') || "Extensiones permitidas"}
+														{"Extensiones permitidas"}
 													</FormLabel>
 													<FormControl>
 														<Input placeholder="jpg,jpeg,png,webp" {...field} />
@@ -253,7 +266,7 @@ export default function ImageSettings() {
 
 									<div>
 										<h3 className="text-sm font-medium mb-4">
-											{t('image_settings.dimensions') || "Restricciones de dimensiones"}
+											{"Restricciones de dimensiones"}
 										</h3>
 										<div className="grid grid-cols-2 gap-4">
 											<FormField
@@ -261,7 +274,7 @@ export default function ImageSettings() {
 												name="min_width"
 												render={({ field }) => (
 													<FormItem>
-														<FormLabel>{t('image_settings.min_width') || "Ancho mínimo (px)"}</FormLabel>
+														<FormLabel>{"Ancho mínimo (px)"}</FormLabel>
 														<FormControl>
 															<Input 
 																type="number" 
@@ -280,7 +293,7 @@ export default function ImageSettings() {
 												name="min_height"
 												render={({ field }) => (
 													<FormItem>
-														<FormLabel>{t('image_settings.min_height') || "Alto mínimo (px)"}</FormLabel>
+														<FormLabel>{"Alto mínimo (px)"}</FormLabel>
 														<FormControl>
 															<Input 
 																type="number" 
@@ -299,7 +312,7 @@ export default function ImageSettings() {
 												name="max_width"
 												render={({ field }) => (
 													<FormItem>
-														<FormLabel>{t('image_settings.max_width') || "Ancho máximo (px)"}</FormLabel>
+														<FormLabel>{"Ancho máximo (px)"}</FormLabel>
 														<FormControl>
 															<Input 
 																type="number" 
@@ -318,7 +331,7 @@ export default function ImageSettings() {
 												name="max_height"
 												render={({ field }) => (
 													<FormItem>
-														<FormLabel>{t('image_settings.max_height') || "Alto máximo (px)"}</FormLabel>
+														<FormLabel>{"Alto máximo (px)"}</FormLabel>
 														<FormControl>
 															<Input 
 																type="number" 
@@ -339,7 +352,7 @@ export default function ImageSettings() {
 												name="aspect_ratio"
 												render={({ field }) => (
 													<FormItem>
-														<FormLabel>{t('image_settings.aspect_ratio') || "Aspect ratio"}</FormLabel>
+														<FormLabel>{"Aspect ratio"}</FormLabel>
 														<FormControl>
 															<select
 																className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
@@ -371,23 +384,9 @@ export default function ImageSettings() {
 											onChange={(e) => form.setValue("active", e.target.checked)}
 										/>
 										<Label htmlFor="active" className="cursor-pointer">
-											{t('image_settings.active') || "Activar validaciones"}
+											{"Activar validaciones"}
 										</Label>
 									</div>
-
-									<Button type="submit" disabled={saving} className="w-full">
-										{saving ? (
-											<>
-												<Loader2 className="mr-2 h-4 w-4 animate-spin" />
-												{t('common.saving') || "Guardando..."}
-											</>
-										) : (
-											<>
-												<Save className="mr-2 h-4 w-4" />
-												{t('common.save') || "Guardar"}
-											</>
-										)}
-									</Button>
 								</form>
 							</Form>
 						</CardContent>

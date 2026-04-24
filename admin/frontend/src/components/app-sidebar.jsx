@@ -25,6 +25,8 @@ import {
 	Ruler,
 	Ticket,
 	ShoppingBag,
+	Wallet,
+	Truck,
 } from "lucide-react"
 
 
@@ -56,170 +58,181 @@ import {
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { hasPermission, isSuperAdmin } from "@/components/can"
-import { useTranslation } from "react-i18next"
 import { useTheme } from "@/components/theme-provider"
 import { useState, useEffect } from "react"
 import axiosClient from "@/lib/axios"
 
 const items = [
 	{
-		title: "sidebar.dashboard",
-		url: "/dashboard",
+		title: "Inicio",
+		url: "/",
 		icon: LayoutDashboard,
 	},
 	{
-		title: "sidebar.user_management",
+		title: "Usuarios y Roles",
 		icon: Users,
 		children: [
 			{
-				title: "sidebar.users",
-				url: "/users",
+				title: "Usuarios",
+				url: "/usuarios",
 				icon: UserCircle,
 				permission: "view users",
 			},
 			{
-				title: "sidebar.roles",
+				title: "Roles",
 				url: "/roles",
 				icon: ShieldCheck,
 				permission: "view roles",
 			},
 			{
-				title: "sidebar.permissions",
-				url: "/permissions",
+				title: "Permisos",
+				url: "/permisos",
 				icon: ShieldCheck,
 				permission: "view permissions",
 			},
 		],
 	},
 	{
-		title: "sidebar.blog",
+		title: "Blog",
 		icon: FileText,
 		children: [
 			{
-				title: "sidebar.articles",
-				url: "/articles",
+				title: "Artículos",
+				url: "/articulos",
 				icon: FileText,
 				permission: "view blog",
 			},
 			{
-				title: "sidebar.autopost",
+				title: "AutoPost (IA)",
 				url: "/autopost",
 				icon: Sparkles,
 				permission: "manage articles",
 			},
 			{
-				title: "sidebar.categories",
-				url: "/categories",
+				title: "Categorías",
+				url: "/categorias",
 				icon: Folder,
 				permission: "view blog",
 			},
 			{
-				title: "sidebar.tags",
-				url: "/tags",
+				title: "Etiquetas",
+				url: "/etiquetas",
 				icon: Tags,
 				permission: "view blog",
 			},
 			{
-				title: "sidebar.blog_settings",
-				url: "/blog-settings",
+				title: "Configuración Blog",
+				url: "/blog-configuracion",
 				icon: Settings,
 			},
 		],
 	},
 	{
-		title: "sidebar.products",
+		title: "Tienda",
 		icon: Box,
 		children: [
 			{
-				title: "sidebar.products",
-				url: "/products",
+				title: "Productos",
+				url: "/productos",
 				icon: Box,
 			},
 			{
-				title: "sidebar.product_categories",
-				url: "/product-categories",
+				title: "Categorías",
+				url: "/productos-categorias",
 				icon: Layers,
 			},
 			{
-				title: "sidebar.product_tags",
-				url: "/product-tags",
+				title: "Etiquetas",
+				url: "/productos-etiquetas",
 				icon: Tags,
 			},
 			{
-				title: "sidebar.product_colors",
-				url: "/product-colors",
+				title: "Colores",
+				url: "/productos-colores",
 				icon: Palette,
 			},
 			{
-				title: "sidebar.product_sizes",
-				url: "/product-sizes",
+				title: "Talles",
+				url: "/productos-talles",
 				icon: Ruler,
 			},
 			{
-				title: "sidebar.coupons",
-				url: "/coupons",
+				title: "Cupones",
+				url: "/cupones",
 				icon: Ticket,
 			},
 			{
-				title: "sidebar.products_settings",
-				url: "/product-settings",
+				title: "Métodos de Pago",
+				url: "/metodos-pago",
+				icon: Wallet,
+				permission: "manage payment methods",
+			},
+			{
+				title: "Métodos de Envío",
+				url: "/metodos-envio",
+				icon: Truck,
+				permission: "manage delivery methods",
+			},
+			{
+				title: "Configuración",
+				url: "/productos-configuracion",
 				icon: Settings,
 			},
 		],
 	},
 	{
-		title: "sidebar.orders",
-		url: "/orders",
+		title: "Pedidos",
+		url: "/pedidos",
 		icon: ShoppingBag,
 		permission: "view orders",
 	},
 	{
-		title: "sidebar.customers",
-		url: "/customers",
+		title: "Clientes",
+		url: "/clientes",
 		icon: Building2,
 		permission: "manage customers",
 	},
 	{
-		title: "sidebar.contact_messages",
-		url: "/contact-messages",
+		title: "Mensajes Contacto",
+		url: "/mensajes-contacto",
 		icon: MessageSquare,
 		permission: "view blog",
 	},
 	{
-		title: "sidebar.system",
+		title: "Sistema",
 		icon: Monitor,
 		children: [
 			{
-				title: "sidebar.activity_logs",
-				url: "/activity-logs",
+				title: "Registros de Actividad",
+				url: "/registros-actividad",
 				icon: History,
 				permission: "view activity logs",
 			},
 		],
 	},
 	{
-		title: "sidebar.configurations",
+		title: "Configuraciones",
 		icon: Settings,
 		children: [
 			{
-				title: "sidebar.general",
-				url: "/settings",
+				title: "General",
+				url: "/configuracion",
 				icon: Settings,
 			},
 			{
-				title: "sidebar.business_info",
-				url: "/business-info",
+				title: "Info de Negocio",
+				url: "/info-negocio",
 				icon: Phone,
 			},
 			{
-				title: "sidebar.system_features",
-				url: "/system-configurations",
+				title: "Configuración del Sistema",
+				url: "/configuracion-del-sistema",
 				icon: Settings,
 				superAdminOnly: true,
 			},
 			{
-				title: "sidebar.skin",
-				url: "/skin-settings",
+				title: "Apariencia",
+				url: "/apariencia-configuracion",
 				icon: Palette,
 				superAdminOnly: true,
 			},
@@ -236,7 +249,6 @@ const getUserRole = () => {
 };
 
 export function AppSidebar() {
-	const { t } = useTranslation();
 	const location = useLocation();
 	const { state, isMobile, setOpenMobile } = useSidebar();
 	const { theme, setTheme } = useTheme();
@@ -250,7 +262,7 @@ export function AppSidebar() {
 
 	useEffect(() => {
 		// Fetch business name from settings
-		axiosClient.get('/system-settings/business_name')
+		axiosClient.get("/system-settings/business_name")
 			.then(({ data }) => {
 				if (data.data?.value) {
 					setBusinessName(data.data.value);
@@ -308,7 +320,7 @@ export function AppSidebar() {
 			</SidebarHeader>
 			<SidebarContent>
 				<SidebarGroup>
-					<SidebarGroupLabel className="px-2 mb-2 text-xs uppercase tracking-widest font-bold opacity-50">{t('sidebar.main_menu')}</SidebarGroupLabel>
+					<SidebarGroupLabel className="px-2 mb-2 text-xs uppercase tracking-widest font-bold opacity-50">{"Menú Principal"}</SidebarGroupLabel>
 					<SidebarMenu className="gap-1">
 						{filteredItems.map((item) => {
 							const active = isGroupActive(item);
@@ -319,7 +331,7 @@ export function AppSidebar() {
 											<DropdownMenu>
 												<DropdownMenuTrigger asChild>
 													<SidebarMenuButton
-														tooltip={t(item.title)}
+														tooltip={item.title}
 														isActive={active}
 														className={`group h-10 transition-all duration-200 group-data-[collapsible=icon]:justify-center ${active ? "bg-linear-to-r from-primary/20 to-transparent" : "hover:bg-primary/5"}`}
 													>
@@ -328,7 +340,7 @@ export function AppSidebar() {
 																<item.icon className="h-4 w-4 text-primary" />
 															</div>
 														)}
-														<span className="font-medium text-sm transition-colors duration-200 group-data-[collapsible=icon]:hidden">{t(item.title)}</span>
+														<span className="font-medium text-sm transition-colors duration-200 group-data-[collapsible=icon]:hidden">{item.title}</span>
 													</SidebarMenuButton>
 												</DropdownMenuTrigger>
 												<DropdownMenuContent side="right" align="start" className="min-w-48">
@@ -346,7 +358,7 @@ export function AppSidebar() {
 																		<div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary/10">
 																			<ThemeIcon className="h-3.5 w-3.5 text-primary" />
 																		</div>
-																		<span className="text-sm">{t(subItem.title)}</span>
+																		<span className="text-sm">{subItem.title}</span>
 																	</DropdownMenuItem>
 																);
 															}
@@ -358,7 +370,7 @@ export function AppSidebar() {
 																				<subItem.icon className="h-3.5 w-3.5 text-primary" />
 																			</div>
 																		)}
-																		<span className="text-sm">{t(subItem.title)}</span>
+																		<span className="text-sm">{subItem.title}</span>
 																	</Link>
 																</DropdownMenuItem>
 															);
@@ -369,7 +381,7 @@ export function AppSidebar() {
 											<Collapsible className="group/collapsible" defaultOpen={active}>
 												<CollapsibleTrigger asChild>
 													<SidebarMenuButton
-														tooltip={t(item.title)}
+														tooltip={item.title}
 														isActive={active}
 														className={`group h-10 transition-all duration-200 group-data-[collapsible=icon]:justify-center ${active ? "bg-linear-to-r from-primary/20 to-transparent" : "hover:bg-primary/5"}`}
 													>
@@ -378,7 +390,7 @@ export function AppSidebar() {
 																<item.icon className="h-4 w-4 text-primary" />
 															</div>
 														)}
-														<span className="font-medium text-sm transition-colors duration-200 group-data-[collapsible=icon]:hidden">{t(item.title)}</span>
+														<span className="font-medium text-sm transition-colors duration-200 group-data-[collapsible=icon]:hidden">{item.title}</span>
 														<ChevronRight className="ml-auto h-3.5 w-3.5 opacity-40 transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90 group-data-[collapsible=icon]:hidden" />
 													</SidebarMenuButton>
 												</CollapsibleTrigger>
@@ -398,7 +410,7 @@ export function AppSidebar() {
 																			<div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary/10">
 																				<ThemeIcon className="h-3.5 w-3.5 text-primary" />
 																			</div>
-																			<span className="text-sm opacity-80">{t(subItem.title)}</span>
+																			<span className="text-sm opacity-80">{subItem.title}</span>
 																		</SidebarMenuSubButton>
 																	</SidebarMenuSubItem>
 																);
@@ -416,7 +428,7 @@ export function AppSidebar() {
 																					<subItem.icon className="h-3.5 w-3.5 text-primary" />
 																				</div>
 																			)}
-																			<span className="text-sm opacity-80">{t(subItem.title)}</span>
+																			<span className="text-sm opacity-80">{subItem.title}</span>
 																		</Link>
 																	</SidebarMenuSubButton>
 																</SidebarMenuSubItem>
@@ -429,7 +441,7 @@ export function AppSidebar() {
 									) : (
 										<SidebarMenuButton
 											asChild
-											tooltip={t(item.title)}
+											tooltip={item.title}
 											isActive={isActive(item.url)}
 											className={`group h-10 transition-all duration-200 group-data-[collapsible=icon]:justify-center ${isActive(item.url) ? "bg-linear-to-r from-primary/20 to-transparent" : "hover:bg-primary/5"}`}
 										>
@@ -439,7 +451,7 @@ export function AppSidebar() {
 														<item.icon className="h-4 w-4 text-primary" />
 													</div>
 												)}
-												<span className="font-medium text-sm transition-colors duration-200 group-data-[collapsible=icon]:hidden">{t(item.title)}</span>
+												<span className="font-medium text-sm transition-colors duration-200 group-data-[collapsible=icon]:hidden">{item.title}</span>
 											</Link>
 										</SidebarMenuButton>
 									)}
@@ -455,7 +467,7 @@ export function AppSidebar() {
 						<UserCircle className="h-5 w-5 text-primary" />
 					</div>
 					<div className="flex flex-col group-data-[collapsible=icon]:hidden overflow-hidden text-left">
-						<span className="text-sm font-semibold truncate text-primary">{t('sidebar.role')}</span>
+						<span className="text-sm font-semibold truncate text-primary">{"Rol"}</span>
 						<span className="text-[10px] tracking-wider text-muted-foreground truncate">{getUserRole()}</span>
 					</div>
 				</div>

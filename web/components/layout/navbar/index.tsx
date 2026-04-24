@@ -1,11 +1,11 @@
 import CartModal from "components/cart/modal";
 import CartTrigger from "components/cart/trigger";
-import LogoSquare from "components/logo-square";
 import { getMenu } from "lib/vadmin";
 import { getSession } from "lib/vadmin/auth";
 import { Menu } from "lib/vadmin/types";
 import Link from "next/link";
 import { Suspense } from "react";
+import Image from "next/image";
 import MobileMenu from "./mobile-menu";
 import UserMenu from "./user-menu";
 
@@ -41,14 +41,23 @@ export async function Navbar() {
 
         {/* Center: Logo */}
         <div className="flex justify-center">
-          <Link href="/" prefetch={true} className="flex items-center gap-2">
-            <LogoSquare />
-            <span
-              className="text-sm font-semibold uppercase tracking-[0.2em]"
-              style={{ fontFamily: "var(--font-sans)", color: "var(--pb-text)" }}
-            >
-              {SITE_NAME}
-            </span>
+          <Link href="/" prefetch={true} className="flex items-center gap-3">
+            <Image
+              src="/iso-black.svg"
+              alt={SITE_NAME || "Plan B"}
+              width={36}
+              height={32}
+              className="h-8 w-auto no-radius"
+              priority
+            />
+            <Image
+              src="/logo-black.svg"
+              alt={SITE_NAME || "Plan B"}
+              width={180}
+              height={24}
+              className="h-6 w-auto no-radius"
+              priority
+            />
           </Link>
         </div>
 
@@ -65,13 +74,20 @@ export async function Navbar() {
           <MobileMenu menu={menu} customer={session} />
         </Suspense>
         <Link href="/" prefetch={true} className="flex items-center gap-2">
-          <LogoSquare />
-          <span
-            className="text-sm font-semibold uppercase tracking-[0.15em]"
-            style={{ color: "var(--pb-text)" }}
-          >
-            {SITE_NAME}
-          </span>
+          <Image
+            src="/iso-black.svg"
+            alt={SITE_NAME || "Plan B"}
+            width={32}
+            height={28}
+            className="h-7 w-auto no-radius"
+          />
+          <Image
+            src="/logo-black.svg"
+            alt={SITE_NAME || "Plan B"}
+            width={140}
+            height={20}
+            className="h-5 w-auto no-radius"
+          />
         </Link>
         <CartTrigger />
       </div>

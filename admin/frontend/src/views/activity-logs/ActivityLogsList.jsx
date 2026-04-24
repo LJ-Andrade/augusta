@@ -15,10 +15,7 @@ import {
 	ChevronRight,
 	Loader2,
 } from "lucide-react";
-import { useTranslation } from "react-i18next";
-
 export default function ActivityLogsList() {
-	const { t } = useTranslation();
 	const [logs, setLogs] = useState([]);
 	const [loading, setLoading] = useState(false);
 	const [meta, setMeta] = useState({});
@@ -72,21 +69,21 @@ export default function ActivityLogsList() {
 	return (
 		<div className="space-y-6">
 			<div className="flex justify-between items-center">
-				<h1 className="text-3xl font-bold tracking-tight">{t('activity_logs.title') || "Activity Logs"}</h1>
+				<h1 className="text-3xl font-bold tracking-tight">{"Activity Logs"}</h1>
 			</div>
 
 			<Card>
 				<CardHeader>
-					<CardTitle>{t('activity_logs.subtitle') || "System Activity History"}</CardTitle>
+					<CardTitle>{"System Activity History"}</CardTitle>
 				</CardHeader>
 				<CardContent>
 					<Table>
 						<TableHeader>
 							<TableRow>
-								<TableHead>{t('activity_logs.description') || "Description"}</TableHead>
-								<TableHead>{t('activity_logs.causer') || "Causer"}</TableHead>
-								<TableHead>{t('activity_logs.subject_type') || "Subject Type"}</TableHead>
-								<TableHead className="text-right w-[130px]">{t('activity_logs.date') || "Date"}</TableHead>
+								<TableHead>{"Description"}</TableHead>
+								<TableHead>{"Causer"}</TableHead>
+								<TableHead>{"Subject Type"}</TableHead>
+								<TableHead className="text-right w-[130px]">{"Date"}</TableHead>
 							</TableRow>
 						</TableHeader>
 						<TableBody className={loading ? "opacity-50 pointer-events-none" : ""}>
@@ -100,16 +97,16 @@ export default function ActivityLogsList() {
 							{!loading && logs.length === 0 && (
 								<TableRow>
 									<TableCell colSpan={4} className="text-center py-10 text-muted-foreground">
-										{t('common.no_data') || "No activity logs found."}
+										{"No activity logs found."}
 									</TableCell>
 								</TableRow>
 							)}
 							{logs.map((log) => (
 								<TableRow key={log.id}>
 									<TableCell className="font-medium">{log.description}</TableCell>
-									<TableCell>{log.causer?.name || t('common.system') || "System"}</TableCell>
+									<TableCell>{log.causer?.name || "Sistema" || "System"}</TableCell>
 									<TableCell>
-										<span className="capitalize">{log.subject_type?.split('\\').pop() || "N/A"}</span>
+										<span className="capitalize">{log.subject_type?.split("\\").pop() || ")N/A"}</span>
 									</TableCell>
 									<TableCell className="text-right w-[130px]">{new Date(log.created_at).toLocaleString()}</TableCell>
 								</TableRow>
@@ -126,7 +123,7 @@ export default function ActivityLogsList() {
 								disabled={page === 1}
 							>
 								<ChevronLeft className="h-4 w-4 mr-2" />
-								{t('common.previous')}
+								{"Anterior"}
 							</Button>
 							<div className="flex items-center space-x-1">
 								{renderPagination()}
@@ -137,7 +134,7 @@ export default function ActivityLogsList() {
 								onClick={() => setPage(page + 1)}
 								disabled={page === meta.last_page}
 							>
-								{t('common.next')}
+								{"Siguiente"}
 								<ChevronRight className="h-4 w-4 ml-2" />
 							</Button>
 						</div>

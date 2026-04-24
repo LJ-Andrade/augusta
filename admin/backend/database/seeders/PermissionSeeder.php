@@ -44,6 +44,8 @@ class PermissionSeeder extends Seeder
             'view coupons',
             'manage coupons',
             'manage customers',
+            'manage payment methods',
+            'manage delivery methods',
             'view activity logs',
             'system.manage',
         ];

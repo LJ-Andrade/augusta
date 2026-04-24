@@ -18,11 +18,10 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2 } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
-import { useTranslation } from "react-i18next";
 import { AvatarUpload } from "@/components/ui/avatar-upload";
+import { PageHeader } from "@/components/page-header";
 
 export default function UserForm() {
-  const { t } = useTranslation();
   const { id } = useParams();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
@@ -95,10 +94,10 @@ export default function UserForm() {
         },
       });
       setAvatarUrl(`${data.data.avatar_url}?t=${new Date().getTime()}`);
-      toast.success(t('users.avatar_update_success') || "Avatar updated successfully");
+      toast.success("Avatar actualizado correctamente" || "Avatar updated successfully");
     } catch (error) {
       console.error("Error uploading avatar:", error);
-      toast.error(t('users.avatar_update_error') || "Failed to update avatar");
+      toast.error("Error al actualizar el avatar" || "Failed to update avatar");
     }
   };
 
@@ -133,8 +132,8 @@ export default function UserForm() {
 
     request
       .then(() => {
-        toast.success(id ? t('users.update_success') : t('users.create_success'));
-        navigate("/users");
+        toast.success(id ? "Usuario actualizado correctamente" : "Usuario creado correctamente");
+        navigate('/usuarios');
       })
       .catch((error) => {
         if (error.response && error.response.status === 422) {
@@ -151,10 +150,18 @@ export default function UserForm() {
   };
 
   return (
-    <div className="max-w-2xl mx-auto">
+    <div className="space-y-6">
+      <PageHeader
+        title={id ? "Editar Usuario" : "Nuevo Usuario"}
+        breadcrumbs={[
+          { label: 'USUARIOS' },
+          { label: id ? "Editar" : "Crear" },
+        ]}
+      />
+      <div className="max-w-2xl mx-auto pb-10">
       <Card>
         <CardHeader>
-          <CardTitle>{id ? t('users.edit_title', { name: form.getValues("name") }) : t('users.create_title')}</CardTitle>
+          <CardTitle>{id ? "Editar Usuario" : "Nuevo Usuario"}</CardTitle>
         </CardHeader>
         <CardContent>
           {fetching ? (
@@ -177,9 +184,9 @@ export default function UserForm() {
                   name="name"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>{t('users.name')}</FormLabel>
+                      <FormLabel>{"Nombre"}</FormLabel>
                       <FormControl>
-                        <Input placeholder={t('users.name_placeholder')} {...field} />
+                        <Input placeholder={"Nombre Completo"} {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -190,9 +197,9 @@ export default function UserForm() {
                   name="email"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>{t('users.email')}</FormLabel>
+                      <FormLabel>{"Correo"}</FormLabel>
                       <FormControl>
-                        <Input type="email" placeholder={t('users.email_placeholder')} {...field} />
+                        <Input type="email" placeholder={"Correo electrónico"} {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -203,9 +210,9 @@ export default function UserForm() {
                   name="password"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>{t('users.password_placeholder')} {id && t('users.password_help')}</FormLabel>
+                      <FormLabel>{"Contraseña"} {id && "(dejar en blanco para mantener la actual)"}</FormLabel>
                       <FormControl>
-                        <Input type="password" placeholder={t('users.password_placeholder')} {...field} />
+                        <Input type="password" placeholder={"Contraseña"} {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -217,7 +224,7 @@ export default function UserForm() {
                   name="role_ids"
                   render={() => (
                     <FormItem className="pt-4 border-t">
-                      <FormLabel className="text-sm font-medium mb-3 block">{t('users.roles')}</FormLabel>
+                      <FormLabel className="text-sm font-medium mb-3 block">{"Roles"}</FormLabel>
                       <div className="grid grid-cols-2 gap-4">
                         {roles.map((role) => (
                           <FormField
@@ -259,13 +266,13 @@ export default function UserForm() {
                   <Button
                     type="button"
                     variant="outline"
-                    onClick={() => navigate("/users")}
+                    onClick={() => navigate('/usuarios')}
                   >
-                    {t('common.cancel')}
+                    {"Cancelar"}
                   </Button>
                   <Button type="submit" disabled={loading}>
                     {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                    {id ? t('users.update_button') : t('users.create_button')}
+                    {id ? "Actualizar Usuario" : "Crear Usuario"}
                   </Button>
                 </div>
               </form>
@@ -275,5 +282,6 @@ export default function UserForm() {
         </CardContent>
       </Card>
     </div>
-  );
+  </div>
+);
 }

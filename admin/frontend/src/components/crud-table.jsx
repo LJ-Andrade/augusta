@@ -28,11 +28,11 @@ import { formatDate } from '@/lib/utils';
  * @param {boolean} props.selectable - Enable row selection
  * @param {Array} props.selectedIds - Currently selected IDs
  * @param {boolean} props.isAllSelected - Whether all items are selected
- * @param {Function} props.onSelect - Handler for row selection (id) => void
- * @param {Function} props.onSelectAll - Handler for select all () => void
+ * @param {Function} props.onSelectt - Handler for row selection (id) => void
+ * @param {Function} props.onSelecttAll - Handler for select all () => void
  * @param {string} props.sortBy - Current sort column
  * @param {string} props.sortDir - Current sort direction ('asc' | 'desc')
- * @param {Function} props.onSort - Handler for sort (column) => void
+ * @param {Function} props.onSortt - Handler for sort (column) => void
  * @param {Function} props.actions - Render function for row actions (item) => ReactNode
  * @param {string} props.emptyMessage - Message when no data
  * @param {string} props.loadingMessage - Message when loading
@@ -44,11 +44,11 @@ export function CrudTable({
   selectable = true,
   selectedIds = [],
   isAllSelected = false,
-  onSelect,
-  onSelectAll,
+  onSelectt,
+  onSelecttAll,
   sortBy,
   sortDir,
-  onSort,
+  onSortt,
   actions,
   emptyMessage = 'No data available',
   loadingMessage = 'Loading...'
@@ -88,7 +88,7 @@ export function CrudTable({
             <TableHead className="w-10">
               <Checkbox
                 checked={isAllSelected}
-                onCheckedChange={onSelectAll}
+                onCheckedChange={onSelecttAll}
               />
             </TableHead>
           )}
@@ -100,7 +100,7 @@ export function CrudTable({
                 ${column.width ? column.width : ''}
                 ${column.align === 'right' ? 'text-right' : ''}
               `}
-              onClick={() => column.sortable && onSort && onSort(column.key)}
+              onClick={() => column.sortable && onSortt && onSortt(column.key)}
             >
               <div className={`flex items-center ${column.align === 'right' ? 'justify-end' : ''}`}>
                 {column.label}
@@ -132,7 +132,7 @@ export function CrudTable({
               <TableCell className="py-2">
                 <Checkbox
                   checked={selectedIds.includes(item.id)}
-                  onCheckedChange={() => onSelect && onSelect(item.id)}
+                  onCheckedChange={() => onSelectt && onSelectt(item.id)}
                 />
               </TableCell>
             )}

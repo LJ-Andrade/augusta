@@ -15,8 +15,9 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->string('email')->unique()->nullable();
+            $table->string('password')->nullable();
             $table->string('phone')->nullable();
-            $table->string('official_domain')->nullable();
+            $table->text('address')->nullable();
             $table->boolean('is_active')->default(true);
             $table->timestamps();
         });

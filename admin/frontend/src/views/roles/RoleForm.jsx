@@ -17,10 +17,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2 } from "lucide-react";
-import { useTranslation } from "react-i18next";
-
 export default function RoleForm() {
-  const { t } = useTranslation();
   const { id } = useParams();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
@@ -83,8 +80,8 @@ export default function RoleForm() {
 
     request
       .then(() => {
-        toast.success(id ? t('roles.update_success') : t('roles.create_success'));
-        navigate("/roles");
+        toast.success(id ? "Rol actualizado correctamente" : "Rol creado correctamente");
+        navigate('/roles');
       })
       .catch((error) => {
         if (error.response && error.response.status === 422) {
@@ -104,7 +101,7 @@ export default function RoleForm() {
     <div className="max-w-2xl mx-auto">
       <Card>
         <CardHeader>
-          <CardTitle>{id ? t('roles.edit_title', { name: form.getValues("name") }) : t('roles.create_title')}</CardTitle>
+          <CardTitle>{id ? `Editando Rol ${name}` : "Crear Nuevo Rol"}</CardTitle>
         </CardHeader>
         <CardContent>
           {fetching ? (
@@ -119,9 +116,9 @@ export default function RoleForm() {
                   name="name"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>{t('users.name')}</FormLabel>
+                      <FormLabel>{"Nombre"}</FormLabel>
                       <FormControl>
-                        <Input placeholder={t('roles.name_placeholder')} {...field} />
+                        <Input placeholder={"Nombre del Rol"} {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -129,10 +126,10 @@ export default function RoleForm() {
                 />
 
                 <div className="space-y-2">
-                  <h3 className="text-lg font-medium">{t('roles.permissions')}</h3>
+                  <h3 className="text-lg font-medium">{"Permisos"}</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 border rounded-md p-4 bg-muted/30 max-h-[400px] overflow-y-auto">
                     {permissions.length === 0 ? (
-                      <p className="text-muted-foreground italic col-span-full">{t('roles.no_permissions')}</p>
+                      <p className="text-muted-foreground italic col-span-full">{"No se encontraron permisos."}</p>
                     ) : (
                       permissions.map((permission) => (
                         <div key={permission.id} className="flex items-center space-x-2">
@@ -159,13 +156,13 @@ export default function RoleForm() {
                   <Button
                     type="button"
                     variant="outline"
-                    onClick={() => navigate("/roles")}
+                    onClick={() => navigate('/roles')}
                   >
-                    {t('common.cancel')}
+                    {"Cancelar"}
                   </Button>
                   <Button type="submit" disabled={loading}>
                     {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                    {id ? t('roles.update_button') : t('roles.create_button')}
+                    {id ? "Actualizar Rol" : "Crear Rol"}
                   </Button>
                 </div>
               </form>

@@ -25,21 +25,19 @@ import {
 import { Switch } from '@/components/ui/switch';
 import { DatePicker } from '@/components/ui/date-picker';
 import { Loader2, Save, X } from 'lucide-react';
-import { useTranslation } from 'react-i18next';
 import { PageHeader } from '@/components/page-header';
 import { useCrudForm } from '@/hooks/use-crud-form';
 import axiosClient from '@/lib/axios';
 import { toast } from 'sonner';
 
 export default function CouponForm() {
-  const { t } = useTranslation();
   const navigate = useNavigate();
   const { id } = useParams();
 
   const formSchema = z.object({
-    code: z.string().min(1, t('validation.required') || 'El código es requerido').toUpperCase(),
-    discount_type: z.string().min(1, t('validation.required') || 'El tipo de descuento es requerido'),
-    amount: z.number({ invalid_type_error: t('validation.required') || 'El monto es requerido' }).min(0, t('validation.amount_min') || 'El monto debe ser mayor o igual a 0'),
+    code: z.string().min(1, "Este campo es requerido" || 'El código es requerido').toUpperCase(),
+    discount_type: z.string().min(1, "Este campo es requerido" || 'El tipo de descuento es requerido'),
+    amount: z.number({ invalid_type_error: "Este campo es requerido" || 'El monto es requerido' }).min(0, "El monto debe ser mayor o igual a 0" || 'El monto debe ser mayor o igual a 0'),
     expires_at: z.date().optional().nullable(),
     active: z.boolean().default(true),
   });
@@ -57,10 +55,10 @@ export default function CouponForm() {
     },
     onSuccess: () => navigate('/product-coupons'),
     messages: {
-      createSuccess: t('coupons.create_success') || 'Cupón creado correctamente',
-      updateSuccess: t('coupons.update_success') || 'Cupón actualizado correctamente',
-      createError: t('coupons.create_error') || 'Error al crear el cupón',
-      updateError: t('coupons.update_error') || 'Error al actualizar el cupón',
+      createSuccess: "Cupón creado correctamente" || 'Cupón creado correctamente',
+      updateSuccess: "Cupón actualizado correctamente" || 'Cupón actualizado correctamente',
+      createError: "Error al crear el cupón" || 'Error al crear el cupón',
+      updateError: "Error al actualizar el cupón" || 'Error al actualizar el cupón',
     },
   });
 
@@ -73,8 +71,8 @@ export default function CouponForm() {
       }
       if (currentValues.expires_at && typeof currentValues.expires_at === 'string') {
         // Parse YYYY-MM-DD manually to avoid timezone offset issues (restar un día)
-        const dateStr = currentValues.expires_at.split('T')[0];
-        const [year, month, day] = dateStr.split('-').map(Number);
+        const dateStr = currentValues.expires_at.split("T")[0];
+        const [year, month, day] = dateStr.split("-").map(Number);
         form.setValue('expires_at', new Date(year, month - 1, day));
       }
       setEntityName(currentValues.code || '');
@@ -111,11 +109,11 @@ export default function CouponForm() {
       
       console.log('=== BACKEND: Response ===', response.data);
       
-      toast.success(id ? t('coupons.update_success') : t('coupons.create_success'));
-      navigate('/coupons');
+      toast.success(id ? "Cupón actualizado correctamente" : "Cupón creado correctamente");
+      navigate('/cupones');
       
       // Force reload by setting a timestamp
-      window.dispatchEvent(new CustomEvent('refresh-coupons'));
+      window.dispatchEvent(new CustomEventt("refresh-coupons"));
       
       return response;
     } catch (error) {
@@ -124,7 +122,7 @@ export default function CouponForm() {
       if (serverErrors) {
         setServerErrors(serverErrors);
       } else {
-        toast.error(id ? t('coupons.update_error') : t('coupons.create_error'));
+        toast.error(id ? "Error al actualizar el cupón" : "Error al crear el cupón");
       }
       throw error;
     }
@@ -143,13 +141,13 @@ export default function CouponForm() {
       <PageHeader
         title={
           id
-            ? `${t('coupons.editing') || 'Editando cupón'} "${entityName}"`
-            : t('coupons.create_title') || 'Crear Cupón'
+            ? `${"Editando cupón"} "${entityName}"`
+            : "Crear Cupón" || 'Crear Cupón'
         }
         breadcrumbs={[
           { label: 'PRODUCTOS' },
-          { label: t('coupons.title') || 'Cupones', href: '/coupons' },
-          { label: id ? t('common.edit') : t('common.create') },
+          { label: "Cupones" || 'Cupones', href: '/coupons' },
+          { label: id ? "Editar" : "Crear" },
         ]}
       />
 
@@ -160,8 +158,8 @@ export default function CouponForm() {
               <CardHeader>
                 <CardTitle>
                   {id
-                    ? `${t('coupons.editing') || 'Editando cupón'} "${entityName}"`
-                    : t('coupons.create_title') || 'Crear Cupón'}
+                    ? `${"Editando cupón"} "${entityName}"`
+                    : "Crear Cupón" || 'Crear Cupón'}
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -170,11 +168,11 @@ export default function CouponForm() {
                   name="code"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>{t('coupons.code') || 'Código'}</FormLabel>
+                      <FormLabel>{"Código"}</FormLabel>
                       <FormControl>
                         <Input 
                           {...field} 
-                          placeholder={t('coupons.code_placeholder') || 'Ej: DESCUENTO20'} 
+                          placeholder={"Ej: DESCUENTO20"} 
                           onChange={(e) => field.onChange(e.target.value.toUpperCase())}
                         />
                       </FormControl>
@@ -188,16 +186,16 @@ export default function CouponForm() {
                   name="discount_type"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>{t('coupons.discount_type') || 'Tipo de descuento'}</FormLabel>
+                      <FormLabel>{"Tipo de descuento"}</FormLabel>
                       <Select onValueChange={field.onChange} defaultValue={field.value}>
                         <FormControl>
                           <SelectTrigger>
-                            <SelectValue placeholder={t('coupons.select_discount_type') || 'Seleccionar tipo'} />
+                            <SelectValue placeholder={"Seleccionar tipo"} />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="percentage">{t('coupons.percentage') || 'Porcentaje'}</SelectItem>
-                          <SelectItem value="fixed">{t('coupons.fixed') || 'Fijo'}</SelectItem>
+                          <SelectItem value="percentage">{"Porcentaje"}</SelectItem>
+                          <SelectItem value="fixed">{"Fijo"}</SelectItem>
                         </SelectContent>
                       </Select>
                       <FormMessage />
@@ -210,11 +208,11 @@ export default function CouponForm() {
                   name="amount"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>{t('coupons.amount') || 'Monto'}</FormLabel>
+                      <FormLabel>{"Monto"}</FormLabel>
                       <FormControl>
                         <Input 
                           type="number"
-                          placeholder={t('coupons.amount_placeholder') || 'Ej: 20'}
+                          placeholder={"Ej: 20"}
                           {...field}
                           onChange={(e) => field.onChange(Number(e.target.value))}
                         />
@@ -229,11 +227,11 @@ export default function CouponForm() {
                   name="expires_at"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>{t('coupons.expires_at') || 'Fecha de expiración'}</FormLabel>
+                      <FormLabel>{"Fecha de expiración"}</FormLabel>
                       <FormControl>
                         <DatePicker
                           value={field.value}
-                          onSelect={field.onChange}
+                          onSelectt={field.onChange}
                         />
                       </FormControl>
                       <FormMessage />
@@ -248,7 +246,7 @@ export default function CouponForm() {
                     <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
                       <div className="space-y-0.5">
                         <FormLabel className="text-base">
-                          {t('coupons.active') || 'Activo'}
+                          {"Activo"}
                         </FormLabel>
                       </div>
                       <FormControl>
@@ -262,14 +260,14 @@ export default function CouponForm() {
                 />
 
                 <div className="flex gap-2 justify-end">
-                  <Button type="button" variant="outline" onClick={() => navigate('/coupons')}>
+                  <Button type="button" variant="outline" onClick={() => navigate('/cupones')}>
                     <X className="mr-2 h-4 w-4" />
-                    {t('common.cancel')}
+                    {"Cancelar"}
                   </Button>
                   <Button type="submit" disabled={loading}>
                     {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                     <Save className="mr-2 h-4 w-4" />
-                    {id ? t('common.save') : t('common.create')}
+                    {id ? "Guardar" : "Crear"}
                   </Button>
                 </div>
               </CardContent>

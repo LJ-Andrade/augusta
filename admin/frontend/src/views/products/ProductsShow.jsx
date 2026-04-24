@@ -15,11 +15,9 @@ import {
 	TableRow,
 } from "@/components/ui/table";
 import { Separator } from "@/components/ui/separator";
-import { useTranslation } from "react-i18next";
 import { ImageLightbox, useImageLightbox } from "@/components/ui/image-lightbox";
 
 export default function ProductsShow() {
-	const { t } = useTranslation();
 	const { id } = useParams();
 	const [product, setProduct] = useState(null);
 	const [loading, setLoading] = useState(true);
@@ -40,10 +38,10 @@ export default function ProductsShow() {
 				setLoading(false);
 			})
 			.catch(() => {
-				toast.error(t("common.error_occurred"));
+				toast.error("Ocurrió un error");
 				setLoading(false);
 			});
-	}, [id, t]);
+	}, [id]);
 
 	if (loading) {
 		return (
@@ -54,7 +52,7 @@ export default function ProductsShow() {
 	}
 
 	if (!product) {
-		return <div className="p-8 text-center">{t("common.not_found")}</div>;
+		return <div className="p-8 text-center">{"No encontrado"}</div>;
 	}
 
 	const formatPrice = (price) => {
@@ -103,7 +101,7 @@ export default function ProductsShow() {
 			<div className="flex items-center justify-between">
 				<div className="flex items-center gap-4">
 					<Button variant="outline" size="icon" asChild>
-						<Link to="/products">
+						<Link to="/productos">
 							<ArrowLeft className="h-4 w-4" />
 						</Link>
 					</Button>
@@ -118,9 +116,9 @@ export default function ProductsShow() {
 					</div>
 				</div>
 				<Button asChild>
-					<Link to={`/products/edit/${product.id}`}>
+					<Link to={`/productos/editar/${product.id}`}>
 						<Edit className="h-4 w-4 mr-2" />
-						{t("common.edit")}
+						{"Editar"}
 					</Link>
 				</Button>
 			</div>
@@ -402,8 +400,8 @@ export default function ProductsShow() {
 						<Card>
 							<CardHeader>
 								<CardTitle className="flex items-center gap-2">
-									<Palette className="h-5 w-5" />
-									Imágenes por Color
+								<Palette className="h-5 w-5" />
+								Imágenes por Color
 								</CardTitle>
 							</CardHeader>
 							<CardContent className="space-y-3">

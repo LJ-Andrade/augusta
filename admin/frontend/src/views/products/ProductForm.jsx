@@ -18,7 +18,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2, Save, X, Plus, Trash2, List, Wand2, Check, Image } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
-import { useTranslation } from "react-i18next";
 import { ImageUpload } from "@/components/ui/image-upload";
 import { RichTextEditor } from "@/components/ui/rich-text-editor";
 import { ImageGallery } from "@/components/ui/image-gallery";
@@ -34,7 +33,6 @@ import {
 } from "@/components/ui/table";
 
 export default function ProductForm() {
-	const { t } = useTranslation();
 	const { id } = useParams();
 	const navigate = useNavigate();
 	const [loading, setLoading] = useState(false);
@@ -58,25 +56,25 @@ export default function ProductForm() {
 	});
 
 	const formSchema = z.object({
-		name: z.string().min(3, t('products.validation.name_min')),
-		code: z.string().min(1, t('products.validation.required') || 'Campo requerido'),
+		name: z.string().min(3, "El nombre debe tener al menos 3 caracteres"),
+		code: z.string().min(1, "Este campo es requerido" || 'Campo requerido'),
 		slug: z.string().nullable(),
 		description: z.string().nullable(),
 		cost_price: z.coerce.number({
-			invalid_type_error: t('products.validation.number'),
-			required_error: t('products.validation.cost_price_required')
-		}).min(0, t('products.validation.min_zero')),
+			invalid_type_error: "Debe ser un número válido",
+			required_error: "El precio de costo es requerido"
+		}).min(0, "El valor no puede ser menor a 0"),
 		sale_price: z.coerce.number({
-			invalid_type_error: t('products.validation.number'),
-			required_error: t('products.validation.sale_price_required')
-		}).min(0, t('products.validation.min_zero')),
+			invalid_type_error: "Debe ser un número válido",
+			required_error: "El precio de venta es requerido"
+		}).min(0, "El valor no puede ser menor a 0"),
 		wholesale_price: z.coerce.number({
-			invalid_type_error: t('products.validation.number')
-		}).min(0, t('products.validation.min_zero')).optional().nullable().default(0),
+			invalid_type_error: "Debe ser un número válido"
+		}).min(0, "El valor no puede ser menor a 0").optional().nullable().default(0),
 		discount: z.coerce.number({
-			invalid_type_error: t('products.validation.number')
-		}).min(0, t('products.validation.min_zero')).max(100).optional().nullable().default(0),
-		category_id: z.string().min(1, t('products.validation.category_required')),
+			invalid_type_error: "Debe ser un número válido"
+		}).min(0, "El valor no puede ser menor a 0").max(100).optional().nullable().default(0),
+		category_id: z.string().min(1, "La categoría es requerida"),
 		tag_ids: z.array(z.number()).default([]),
 		size_ids: z.array(z.number()).default([]),
 		color_ids: z.array(z.number()).default([]),
@@ -206,7 +204,7 @@ export default function ProductForm() {
 
 	const fillFakeData = async () => {
 		if (id) {
-			toast.error(t('common.error_occurred') || "No válido en modo edición");
+			toast.error("Ocurrió un error" || "No válido en modo edición");
 			return;
 		}
 
@@ -302,7 +300,7 @@ export default function ProductForm() {
 
 			setPendingColorImages(newPendingColorImages);
 			setColorImageUrls(newColorImageUrls);
-			toast.success("Imágenes de color cargadas");
+			toast.success("Imágetnes de color cargadas");
 		} catch (error) {
 			console.error(error);
 			toast.error("Error al cargar imágenes de color");
@@ -343,9 +341,9 @@ export default function ProductForm() {
 
 		const newVariants = [];
 
-		// Both colors AND sizes are required to generate variants
+		// Both colors AND sizes are required to getnerate variants
 		if (selectedSizeIds.length === 0 || selectedColorIds.length === 0) {
-			toast.error(t('products.select_sizes_and_colors'));
+			toast.error("Debes seleccionar al menos un talle y un color para generar variantes");
 			return;
 		}
 
@@ -390,7 +388,7 @@ export default function ProductForm() {
 	const applyToAllMinStock = (value) => {
 		const variants = form.getValues('variants').map(v => ({ ...v, min_stock: parseInt(value) || 0 }));
 		form.setValue('variants', variants);
-		toast.info(t('products.apply_to_all_stock_info'));
+		toast.info("Stock aplicado a todas las variantes");
 	};
 
 
@@ -398,9 +396,9 @@ export default function ProductForm() {
 		try {
 			await axiosClient.delete(`products/${id}/gallery/${mediaId}`);
 			setGallery(prev => prev.filter(img => img.id !== mediaId));
-			toast.success(t('products.image_deleted'));
+			toast.success("Imagen eliminada correctamente");
 		} catch {
-			toast.error(t('common.error_occurred'));
+			toast.error("Ocurrió un error");
 		}
 	};
 
@@ -488,8 +486,8 @@ export default function ProductForm() {
 
 		request
 			.then(() => {
-				toast.success(id ? t('products.update_success') : t('products.create_success'));
-				navigate("/products");
+				toast.success(id ? "Producto actualizado correctamente" : "Producto creado correctamente");
+				navigate('/productos');
 			})
 			.catch((error) => {
 				if (error.response?.data?.errors) {
@@ -497,7 +495,7 @@ export default function ProductForm() {
 						form.setError(key, { message: messages[0] });
 					});
 				}
-				toast.error(t('common.error_occurred'));
+				toast.error("Ocurrió un error");
 			})
 			.finally(() => {
 				setLoading(false);
@@ -518,16 +516,16 @@ export default function ProductForm() {
 				<PageHeader
 					title={`Editando producto "${productName}"`}
 					breadcrumbs={[
-						{ label: t('products.title'), href: "/products" },
-						{ label: t('common.edit') },
+						{ label: "Productos", href: "/products" },
+						{ label: "Editar" },
 					]}
 				/>
 			) : (
 				<PageHeader
-					title={t('products.create_title')}
+					title={"Crear Nuevo Producto"}
 					breadcrumbs={[
-						{ label: t('products.title'), href: "/products" },
-						{ label: t('common.create') },
+						{ label: "Productos", href: "/products" },
+						{ label: "Crear" },
 					]}
 				/>
 			)}
@@ -540,8 +538,8 @@ export default function ProductForm() {
 						<CardHeader>
 							<CardTitle>
 								{id
-									? `${t('products.editing')} "${productName}"`
-									: t('products.create_title')}
+									? `${"Editando Producto"} "${productName}"`
+									: "Crear Nuevo Producto"}
 							</CardTitle>
 						</CardHeader>
 						<CardContent className="space-y-4">
@@ -552,9 +550,9 @@ export default function ProductForm() {
 									name="code"
 									render={({ field }) => (
 										<FormItem>
-											<FormLabel>{t('products.code')}</FormLabel>
+											<FormLabel>{"Código"}</FormLabel>
 											<FormControl>
-												<Input {...field} placeholder={t('products.code_placeholder')} className="w-full" />
+												<Input {...field} placeholder={"Ej: REM-001"} className="w-full" />
 											</FormControl>
 											<FormMessage />
 										</FormItem>
@@ -566,9 +564,9 @@ export default function ProductForm() {
 									name="name"
 									render={({ field }) => (
 										<FormItem className="md:col-span-3">
-											<FormLabel>{t('products.name')}</FormLabel>
+											<FormLabel>{"Nombre"}</FormLabel>
 											<FormControl>
-												<Input {...field} placeholder={t('products.name_placeholder')} />
+												<Input {...field} placeholder={"Nombre del producto"} />
 											</FormControl>
 											<FormMessage />
 										</FormItem>
@@ -580,9 +578,9 @@ export default function ProductForm() {
 									name="slug"
 									render={({ field }) => (
 										<FormItem className="md:col-span-2">
-											<FormLabel>{t('products.slug')}</FormLabel>
+											<FormLabel>{"Slug"}</FormLabel>
 											<FormControl>
-												<Input {...field} placeholder={t('products.slug_placeholder')} value={field.value || ''} />
+												<Input {...field} placeholder={"URL amigable (autogenerado)"} value={field.value || ''} />
 											</FormControl>
 											<FormMessage />
 										</FormItem>
@@ -597,7 +595,7 @@ export default function ProductForm() {
 									name="cost_price"
 									render={({ field }) => (
 										<FormItem>
-											<FormLabel>{t('products.cost_price')}</FormLabel>
+											<FormLabel>{"Precio de Costo"}</FormLabel>
 											<FormControl>
 												<Input type="number" step="0.01" {...field} placeholder="0.00" />
 											</FormControl>
@@ -611,7 +609,7 @@ export default function ProductForm() {
 									name="sale_price"
 									render={({ field }) => (
 										<FormItem>
-											<FormLabel>{t('products.sale_price')}</FormLabel>
+											<FormLabel>{"Precio de Venta"}</FormLabel>
 											<FormControl>
 												<Input type="number" step="0.01" {...field} placeholder="0.00" />
 											</FormControl>
@@ -625,7 +623,7 @@ export default function ProductForm() {
 									name="wholesale_price"
 									render={({ field }) => (
 										<FormItem>
-											<FormLabel>{t('products.wholesale_price')}</FormLabel>
+											<FormLabel>{"Precio Mayorista"}</FormLabel>
 											<FormControl>
 												<Input type="number" step="0.01" {...field} placeholder="0.00" />
 											</FormControl>
@@ -639,7 +637,7 @@ export default function ProductForm() {
 									name="discount"
 									render={({ field }) => (
 										<FormItem>
-											<FormLabel>{t('products.discount')}</FormLabel>
+											<FormLabel>{"Descuento"}</FormLabel>
 											<FormControl>
 												<Input type="number" step="0.01" {...field} placeholder="0%" />
 											</FormControl>
@@ -650,13 +648,13 @@ export default function ProductForm() {
 							</div>
 
 							{/* Row 3b: Stock | Min | Category | Tags */}
-<div className="grid grid-cols-2 md:grid-cols-8 gap-4">
+							<div className="grid grid-cols-2 md:grid-cols-8 gap-4">
 								<FormField
 									control={form.control}
 									name="stock"
 									render={({ field }) => (
 										<FormItem>
-											<FormLabel>{t('products.stock')}</FormLabel>
+											<FormLabel>{"Stock"}</FormLabel>
 											<FormControl>
 												<Input type="number" {...field} placeholder="0" className="w-full" />
 											</FormControl>
@@ -670,7 +668,7 @@ export default function ProductForm() {
 									name="min_stock"
 									render={({ field }) => (
 										<FormItem>
-											<FormLabel>{t('products.min_stock')}</FormLabel>
+											<FormLabel>{"Stock Mínimo"}</FormLabel>
 											<FormControl>
 												<Input type="number" {...field} placeholder="0" className="w-full" />
 											</FormControl>
@@ -684,14 +682,14 @@ export default function ProductForm() {
 									name="category_id"
 									render={({ field }) => (
 										<FormItem className="md:col-span-3">
-											<FormLabel>{t('products.category')}</FormLabel>
+											<FormLabel>{"Categoría"}</FormLabel>
 											<FormControl>
 												<select
 													className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background"
 													{...field}
 													value={field.value || ''}
 												>
-													<option value="">{t('products.all_categories')}</option>
+													<option value="">{"Todas las Categorías"}</option>
 													{categories.map((cat) => (
 														<option key={cat.id} value={cat.id}>
 															{cat.name}
@@ -709,13 +707,13 @@ export default function ProductForm() {
 									name="tag_ids"
 									render={({ field }) => (
 										<FormItem className="md:col-span-3">
-											<FormLabel>{t('products.tags')}</FormLabel>
+											<FormLabel>{"Etiquetas"}</FormLabel>
 											<FormControl>
 												<MultiSelect
 													value={field.value || []}
 													onValueChange={field.onChange}
 													options={tags}
-													placeholder={t('products.select_tags')}
+													placeholder={"Seleccionar etiquetas..."}
 												/>
 											</FormControl>
 											<FormMessage />
@@ -733,7 +731,7 @@ export default function ProductForm() {
 					{/* Variants Matrix */}
 					<Card>
 						<CardHeader>
-							<CardTitle>{t('products.variants_title')}</CardTitle>
+							<CardTitle>{"Talles, colores y variantes"}</CardTitle>
 						</CardHeader>
 
 
@@ -746,13 +744,13 @@ export default function ProductForm() {
 									name="color_ids"
 									render={({ field }) => (
 										<FormItem>
-											<FormLabel>{t('products.colors')}</FormLabel>
+											<FormLabel>{"Colores"}</FormLabel>
 											<FormControl>
 												<MultiSelect
 													value={field.value || []}
 													onValueChange={field.onChange}
 													options={colors}
-													placeholder={t('products.select_colors')}
+													placeholder={"Seleccionar colores..."}
 												/>
 											</FormControl>
 											<FormMessage />
@@ -765,13 +763,13 @@ export default function ProductForm() {
 									name="size_ids"
 									render={({ field }) => (
 										<FormItem>
-											<FormLabel>{t('products.sizes')}</FormLabel>
+											<FormLabel>{"Talles"}</FormLabel>
 											<FormControl>
 												<MultiSelect
 													value={field.value || []}
 													onValueChange={field.onChange}
 													options={sizes}
-													placeholder={t('products.select_sizes')}
+													placeholder={"Seleccionar talles..."}
 												/>
 											</FormControl>
 											<FormMessage />
@@ -782,7 +780,7 @@ export default function ProductForm() {
 								<div className="flex h-[40px] items-end pb-1.5">
 									<Button type="button" className="w-fit" variant="default" onClick={generateVariants}>
 										<List className="mr-2 h-4 w-4" />
-										{t('products.generate_variants')}
+										{"Generar Variantes"}
 									</Button>
 								</div>
 							</div>
@@ -790,11 +788,11 @@ export default function ProductForm() {
 							{form.watch('variants')?.length > 0 && (
 								<div className="w-fit flex flex-col gap-3 p-4 border rounded-md bg-background shadow-sm">
 									<span className="text-xs font-bold uppercase tracking-wider text-primary/70">
-										{t('products.bulk_actions_title') || 'Acciones para todas las variantes'}
+										{"Acciones para todas las variantes"}
 									</span>
 									<div className="flex flex-wrap items-end gap-4">
 										<div className="flex flex-col gap-2">
-											<span className="text-[10px] font-bold uppercase text-muted-foreground/70">{t('products.stock')}</span>
+											<span className="text-[10px] font-bold uppercase text-muted-foreground/70">{"Stock"}</span>
 											<div className="flex overflow-hidden h-9 border rounded-md bg-muted/20">
 												<Input
 													type="number"
@@ -815,7 +813,7 @@ export default function ProductForm() {
 											</div>
 										</div>
 										<div className="flex flex-col gap-2">
-											<span className="text-[10px] font-bold uppercase text-muted-foreground/70">{t('products.min_stock')}</span>
+											<span className="text-[10px] font-bold uppercase text-muted-foreground/70">{"Stock Mínimo"}</span>
 											<div className="flex overflow-hidden h-9 border rounded-md bg-muted/20">
 												<Input
 													type="number"
@@ -844,10 +842,10 @@ export default function ProductForm() {
 									<Table>
 										<TableHeader>
 											<TableRow>
-												<TableHead>{t('products.variant_combination')}</TableHead>
-												<TableHead>{t('products.sku')}</TableHead>
-												<TableHead>{t('products.stock')}</TableHead>
-												<TableHead>{t('products.min_stock')}</TableHead>
+												<TableHead>{"Combinación"}</TableHead>
+												<TableHead>{"SKU"}</TableHead>
+												<TableHead>{"Stock"}</TableHead>
+												<TableHead>{"Stock Mínimo"}</TableHead>
 												<TableHead className="w-[50px]"></TableHead>
 											</TableRow>
 										</TableHeader>
@@ -866,9 +864,9 @@ export default function ProductForm() {
 																		title={color.name}
 																	/>
 																)}
-																<span>{color?.name || t('common.none')}</span>
+																<span>{color?.name || "Ninguno"}</span>
 																<span>/</span>
-																<span>{size?.name || t('common.none')}</span>
+																<span>{size?.name || "Ninguno"}</span>
 															</div>
 														</TableCell>
 														<TableCell>
@@ -928,14 +926,14 @@ export default function ProductForm() {
 								) : (
 									<div className="flex flex-col items-center justify-center p-8 border-2 border-dashed rounded-md text-muted-foreground">
 										<List className="h-8 w-8 mb-2" />
-										<p>{t('products.no_variants')}</p>
+										<p>{"No hay variantes generadas"}</p>
 									</div>
 								)}
 							</div>
 
 							{form.watch('color_ids')?.length > 0 && (
 								<div className="border-t mt-4 pt-4">
-									<p className="text-sm font-medium mb-3 px-1">{t('products.color_images') || 'Imágenes por Color'}</p>
+									<p className="text-sm font-medium mb-3 px-1">{"Imágetnes por Color"}</p>
 									<div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 px-1">
 										{form.watch('color_ids').map(colorId => {
 											// eslint-disable-next-line eqeqeq
@@ -966,7 +964,7 @@ export default function ProductForm() {
 						<div className="md:col-span-1">
 							<Card className="h-full">
 								<CardHeader>
-									<CardTitle>{t('products.cover')}</CardTitle>
+									<CardTitle>{"Portada"}</CardTitle>
 								</CardHeader>
 								<CardContent className="h-[calc(100%-2rem)]">
 									<ImageUpload
@@ -980,7 +978,7 @@ export default function ProductForm() {
 						<div className="md:col-span-2">
 							<Card className="h-full">
 								<CardHeader>
-									<CardTitle>{t('products.gallery')}</CardTitle>
+									<CardTitle>{"Galería"}</CardTitle>
 								</CardHeader>
 								<CardContent className="h-[calc(100%-2rem)]">
 									<ImageGallery
@@ -999,7 +997,7 @@ export default function ProductForm() {
 						name="description"
 						render={({ field }) => (
 							<FormItem>
-								<FormLabel>{t('products.description')}</FormLabel>
+								<FormLabel>{"Descripción"}</FormLabel>
 								<FormControl>
 									<RichTextEditor value={field.value || ''} onChange={field.onChange} />
 								</FormControl>
@@ -1017,15 +1015,15 @@ export default function ProductForm() {
 									name="status"
 									render={({ field }) => (
 										<FormItem>
-											<FormLabel>{t('products.status')}</FormLabel>
+											<FormLabel>{"Estado"}</FormLabel>
 											<FormControl>
 												<select
 													className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background"
 													{...field}
 												>
-													<option value="draft">{t('products.status_draft')}</option>
-													<option value="published">{t('products.status_published')}</option>
-													<option value="archived">{t('products.status_archived')}</option>
+													<option value="draft">{"Borrador"}</option>
+													<option value="published">{"Publicado"}</option>
+													<option value="archived">{"Archivado"}</option>
 												</select>
 											</FormControl>
 											<FormMessage />
@@ -1038,7 +1036,7 @@ export default function ProductForm() {
 									name="order"
 									render={({ field }) => (
 										<FormItem>
-											<FormLabel>{t('products.order')}</FormLabel>
+											<FormLabel>{"Orden"}</FormLabel>
 											<FormControl>
 												<Input
 													type="number"
@@ -1063,7 +1061,7 @@ export default function ProductForm() {
 												/>
 											</FormControl>
 											<FormLabel className="font-normal">
-												{t('products.featured')}
+												{"Destacado"}
 											</FormLabel>
 										</FormItem>
 									)}
@@ -1086,14 +1084,14 @@ export default function ProductForm() {
 								Cargar imágenes por color
 							</Button>
 						)}
-						<Button variant="outline" onClick={() => navigate("/products")} type="button">
+						<Button variant="outline" onClick={() => navigate('/productos')} type="button">
 							<X className="mr-2 h-4 w-4" />
-							{t('common.cancel')}
+							{"Cancelar"}
 						</Button>
 						<Button onClick={form.handleSubmit(onSubmit)} disabled={loading || fillingFakeData}>
 							{loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
 							<Save className="mr-2 h-4 w-4" />
-							{t('common.save')}
+							{"Guardar"}
 						</Button>
 					</div>
 

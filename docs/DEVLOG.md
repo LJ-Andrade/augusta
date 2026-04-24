@@ -68,3 +68,6 @@ Once SPECS are approved, the actionable checklist will be expanded.
 - [ ] `web/app/globals.css`: Implement `--pb-radius` token and global styles for `img` and `button`.
 - [ ] `web/components/grid/tile.tsx`: Standardize border radius for product tiles.
 - [ ] `web/components/product/gallery.tsx`: Apply border radius to gallery images and thumbnail buttons.
+- [x] `web/app/(store)/checkout`: Implement full checkout page with shipping/payment selection.
+- [x] `web/components/checkout`: Create checkout UI components (Form, Summary, Method Selector).
+- [x] `web/lib/vadmin/methods.ts`: Implement delivery/payment methods fetching.

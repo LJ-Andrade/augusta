@@ -13,13 +13,10 @@ import {
   ArrowLeft,
   Share2,
 } from "lucide-react";
-import { useTranslation } from "react-i18next";
-
 const SITE_NAME = "Vadmin3 Blog";
 const SITE_URL = window.location.origin;
 
 export default function ArticlePublicView() {
-  const { t } = useTranslation();
   const { slug } = useParams();
   const navigate = useNavigate();
   const handleBack = () => {
@@ -68,7 +65,7 @@ export default function ArticlePublicView() {
         url: window.location.href,
       });
     } else {
-      navigator.clipboard.writeText(window.location.href);
+      navigator.clipboard.writeTexwindow.location.href;
     }
   };
 
@@ -101,17 +98,17 @@ export default function ArticlePublicView() {
           <div className="container mx-auto px-4 py-8 max-w-4xl">
             <Button variant="ghost" onClick={handleBack} className="mb-4">
               <ArrowLeft className="mr-2 h-4 w-4" />
-              {t("public_articles.back")}
+              {"Volver"}
             </Button>
             <div className="text-center py-12">
               <h1 className="text-2xl font-bold mb-2">
-                {t("public_articles.not_found")}
+                {"Artículo No Encontrado"}
               </h1>
               <p className="text-muted-foreground mb-4">
-                {t("public_articles.not_found_description")}
+                {"El artículo que buscas no existe o ha sido eliminado."}
               </p>
               <Button asChild>
-                <Link to="/blog">{t("public_articles.go_to_blog")}</Link>
+                <Link to="/blog">{"Ir al Blog"}</Link>
               </Button>
             </div>
           </div>
@@ -141,7 +138,7 @@ export default function ArticlePublicView() {
         <div className="container mx-auto px-4 py-8 max-w-4xl">
           <Button variant="ghost" onClick={handleBack} className="mb-4">
             <ArrowLeft className="mr-2 h-4 w-4" />
-            {t("public_articles.back")}
+            {"Volver"}
           </Button>
 
           <Card className="shadow-xl border-0">
@@ -172,7 +169,7 @@ export default function ArticlePublicView() {
             )}
             <Button variant="ghost" size="sm" onClick={handleShare}>
               <Share2 className="h-4 w-4 mr-2" />
-              {t("public_articles.share")}
+              {"Compartir"}
             </Button>
           </div>
 
@@ -205,7 +202,7 @@ export default function ArticlePublicView() {
           {article.gallery && article.gallery.length > 0 && (
             <div className="mt-12">
               <h2 className="text-2xl font-bold mb-4">
-                {t("public_articles.gallery")}
+                {"Galería"}
               </h2>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                 {article.gallery.map((image) => (
@@ -233,7 +230,7 @@ export default function ArticlePublicView() {
             <Button asChild variant="outline">
               <Link to="/blog">
                 <ArrowLeft className="mr-2 h-4 w-4" />
-                {t("public_articles.back_to_list")}
+                {"Volver a la lista de artículos"}
               </Link>
             </Button>
           </div>

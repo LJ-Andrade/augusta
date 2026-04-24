@@ -114,3 +114,18 @@ export type Page = {
   createdAt: string;
   updatedAt: string;
 };
+
+export type DeliveryMethod = {
+  id: string;
+  name: string;
+  description: string;
+  fee: string;
+};
+
+export type PaymentMethod = {
+  id: string;
+  name: string;
+  description: string;
+  status: 'active' | 'inactive';
+  fee: boolean;
+};

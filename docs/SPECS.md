@@ -93,3 +93,16 @@ It communicates strictly via REST API with the existing VADMIN backend (Laravel)
 1. **Buttons**: All buttons must have a consistent border radius defined by `--pb-radius`.
 2. **Images**: Product images and UI media should use `--pb-radius` for a cohesive look.
 3. **Cards**: Product cards and similar containers should align with the global radius.
+
+---
+
+## 6. Checkout Process
+
+### 6.1 Overview
+A multi-step checkout process implemented in the frontend to collect shipping and payment information before finalizing the order.
+
+### 6.2 Data Flow
+1. **Redirection**: The cart modal "Finalizar Pedido" redirects to `/checkout`.
+2. **Authentication**: Users must be authenticated to access the checkout.
+3. **Methods**: Shipping and payment methods are fetched from VADMIN.
+4. **Completion**: The `completeOrder` action sends collected data to `customer/cart/checkout`.

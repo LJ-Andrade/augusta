@@ -14,17 +14,15 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Loader2, Save, X } from 'lucide-react';
-import { useTranslation } from 'react-i18next';
 import { PageHeader } from '@/components/page-header';
 import { useCrudForm } from '@/hooks/use-crud-form';
 
 export default function CategoryForm() {
-  const { t } = useTranslation();
   const navigate = useNavigate();
   const { id } = useParams();
 
   const formSchema = z.object({
-    name: z.string().min(1, t('validation.name_min')),
+    name: z.string().min(1, "El nombre debe tener al menos 2 caracteres."),
     slug: z.string().nullable(),
   });
 
@@ -36,12 +34,12 @@ export default function CategoryForm() {
       name: '',
       slug: '',
     },
-    onSuccess: () => navigate('/product-categories'),
+    onSuccess: () => navigate('/productos-categorias'),
     messages: {
-      createSuccess: t('product_categories.create_success'),
-      updateSuccess: t('product_categories.update_success'),
-      createError: t('product_categories.create_error'),
-      updateError: t('product_categories.update_error'),
+      createSuccess: "Categoría creada correctamente",
+      updateSuccess: "Categoría actualizada correctamente",
+      createError: "product_Error al crear la categoría",
+      updateError: "product_Error al actualizar la categoría",
     },
   });
 
@@ -58,13 +56,13 @@ export default function CategoryForm() {
       <PageHeader
         title={
           id
-            ? t('product_categories.edit_title', { name: entityName })
-            : t('product_categories.create_title')
+            ? `Editando Categoría ${name}`
+            : "Crear Nueva Categoría"
         }
         breadcrumbs={[
           { label: 'PRODUCTOS' },
-          { label: t('product_categories.title'), href: '/product-categories' },
-          { label: id ? t('common.edit') : t('common.create') },
+          { label: "Categorías", href: '/product-categories' },
+          { label: id ? "Editar" : "Crear" },
         ]}
       />
 
@@ -75,8 +73,8 @@ export default function CategoryForm() {
               <CardHeader>
                 <CardTitle>
                   {id
-                    ? t('product_categories.edit_title', { name: entityName })
-                    : t('product_categories.create_title')}
+                    ? `Editando Categoría ${name}`
+                    : "Crear Nueva Categoría"}
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -85,11 +83,11 @@ export default function CategoryForm() {
                   name="name"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>{t('product_categories.name')}</FormLabel>
+                      <FormLabel>{"Nombre"}</FormLabel>
                       <FormControl>
                         <Input
                           {...field}
-                          placeholder={t('product_categories.name_placeholder')}
+                          placeholder={"Nombre de la categoría..."}
                         />
                       </FormControl>
                       <FormMessage />
@@ -102,11 +100,11 @@ export default function CategoryForm() {
                   name="slug"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>{t('product_categories.slug')}</FormLabel>
+                      <FormLabel>{"Slug"}</FormLabel>
                       <FormControl>
                         <Input
                           {...field}
-                          placeholder={t('product_categories.slug')}
+                          placeholder={"Slug"}
                           value={field.value || ''}
                         />
                       </FormControl>
@@ -119,15 +117,15 @@ export default function CategoryForm() {
                   <Button
                     type="button"
                     variant="outline"
-                    onClick={() => navigate('/product-categories')}
+                    onClick={() => navigate('/productos-categorias')}
                   >
                     <X className="mr-2 h-4 w-4" />
-                    {t('common.cancel')}
+                    {"Cancelar"}
                   </Button>
                   <Button type="submit" disabled={loading}>
                     {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                     <Save className="mr-2 h-4 w-4" />
-                    {id ? t('common.save') : t('common.create')}
+                    {id ? "Guardar" : "Crear"}
                   </Button>
                 </div>
               </CardContent>

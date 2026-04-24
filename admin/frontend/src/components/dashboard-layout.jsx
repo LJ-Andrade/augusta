@@ -1,6 +1,6 @@
 import { SidebarProvider, SidebarTrigger, SidebarInset } from "@/components/ui/sidebar"
 import { AppSidebar } from "@/components/app-sidebar"
-import { LanguageToggle } from "@/components/language-toggle"
+
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -12,7 +12,6 @@ import {
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { useTranslation } from "react-i18next"
 import { useState, useEffect } from "react"
 import { Link } from "react-router-dom"
 import { User, LogOut, Bell, Moon } from "lucide-react"
@@ -31,10 +30,14 @@ import {
 } from "@/components/ui/alert-dialog"
 
 export default function DashboardLayout({ children }) {
-	const { t } = useTranslation()
 	const { theme, setTheme } = useTheme()
 	const [logoutConfirmOpen, setLogoutConfirmOpen] = useState(false)
 	const [user, setUser] = useState(null)
+	const [isMounted, setIsMounted] = useState(false)
+
+	useEffect(() => {
+		setIsMounted(true)
+	}, [])
 
 	useEffect(() => {
 		axiosClient.get("user")
@@ -53,6 +56,9 @@ export default function DashboardLayout({ children }) {
 
 	return (
 		<>
+			<div
+				className={`fixed inset-0 bg-[#020617] z-9999 transition-opacity duration-1000 pointer-events-none ${isMounted ? 'opacity-0' : 'opacity-100'
+					}`} />
 			<SidebarProvider>
 				<AppSidebar className="glass-panel border-r border-white/5" />
 				<SidebarInset className="bg-transparent">
@@ -64,7 +70,6 @@ export default function DashboardLayout({ children }) {
 
 						<div className="flex items-center gap-3">
 
-							<LanguageToggle />
 
 							<Button
 								variant="ghost"
@@ -72,7 +77,7 @@ export default function DashboardLayout({ children }) {
 								className="relative h-10 w-10 rounded-full hover:bg-primary/10 transition-colors"
 							>
 								<Bell className="h-5 w-5" />
-								<span className="sr-only">{t('common.notifications') || 'Notificaciones'}</span>
+								<span className="sr-only">{"Notificaciones"}</span>
 							</Button>
 
 							<DropdownMenu>
@@ -81,7 +86,7 @@ export default function DashboardLayout({ children }) {
 										<Avatar className="h-10 w-10">
 											<AvatarImage src={user?.avatar_url} alt={user?.name} />
 											<AvatarFallback className="bg-primary/10 text-primary">
-												{user?.name?.charAt(0)?.toUpperCase() || "U"}
+												{user?.name?.charA0?.toUpperCase() || "U"}
 											</AvatarFallback>
 										</Avatar>
 									</Button>
@@ -89,22 +94,22 @@ export default function DashboardLayout({ children }) {
 								<DropdownMenuContent align="end" className="w-56 dark:bg-slate-800 dark:border-slate-700">
 									<DropdownMenuLabel className="font-normal">
 										<div className="flex flex-col space-y-1">
-											<p className="text-sm font-medium">{user?.name || t('common.user')}</p>
+											<p className="text-sm font-medium">{user?.name || "common.user"}</p>
 											<p className="text-xs text-muted-foreground">{user?.email}</p>
 										</div>
 									</DropdownMenuLabel>
 									<DropdownMenuSeparator />
 									<DropdownMenuItem asChild>
-										<Link to="/profile" className="cursor-pointer flex items-center">
+										<Link to="/perfil" className="cursor-pointer flex items-center">
 											<User className="mr-2 h-4 w-4" />
-											<span>{t('sidebar.profile')}</span>
+											<span>{"Perfil"}</span>
 										</Link>
 									</DropdownMenuItem>
 									<DropdownMenuSeparator />
 									<div className="flex items-center justify-between px-2 py-1.5">
 										<div className="flex items-center gap-2">
 											<Moon className="h-4 w-4 text-muted-foreground" />
-											<span className="text-sm">{t('skin.dark_mode')}</span>
+											<span className="text-sm">{"Modo Oscuro"}</span>
 										</div>
 										<Switch
 											checked={theme === "dark"}
@@ -117,7 +122,7 @@ export default function DashboardLayout({ children }) {
 										className="text-gray-400 hover:text-gray-200 cursor-pointer flex items-center"
 									>
 										<LogOut className="mr-2 h-4 w-4" />
-										<span>{t('common.logout')}</span>
+										<span>{"Cerrar Sesión"}</span>
 									</DropdownMenuItem>
 								</DropdownMenuContent>
 							</DropdownMenu>
@@ -132,15 +137,15 @@ export default function DashboardLayout({ children }) {
 			<AlertDialog open={logoutConfirmOpen} onOpenChange={setLogoutConfirmOpen}>
 				<AlertDialogContent>
 					<AlertDialogHeader>
-						<AlertDialogTitle>{t('common.confirm_logout') || '¿Cerrar sesión?'}</AlertDialogTitle>
+						<AlertDialogTitle>{"¿Cerrar sesión?"}</AlertDialogTitle>
 						<AlertDialogDescription>
-							{t('common.confirm_logout_desc') || '¿Estás seguro de que quieres cerrar sesión?'}
+							{"¿Estás seguro de que quieres cerrar sesión?"}
 						</AlertDialogDescription>
 					</AlertDialogHeader>
 					<AlertDialogFooter>
-						<AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
+						<AlertDialogCancel>{"Cancelar"}</AlertDialogCancel>
 						<AlertDialogAction onClick={handleLogout} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-							{t('common.logout')}
+							{"Cerrar Sesión"}
 						</AlertDialogAction>
 					</AlertDialogFooter>
 				</AlertDialogContent>
